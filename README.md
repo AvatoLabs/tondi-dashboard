@@ -24,7 +24,7 @@ A modern, feature-rich dashboard for managing Tondi blockchain wallets and accou
 
 ### Prerequisites
 
-- Rust 1.70+ and Cargo
+- Rust 1.80+ and Cargo
 - Node.js 18+ (for web builds)
 - Tondi node running locally or remotely
 
