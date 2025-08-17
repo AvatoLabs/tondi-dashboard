@@ -40,6 +40,7 @@ pub struct Core {
 
     state: State,
     hint: Option<Hint>,
+    #[allow(dead_code)]
     discard_hint: bool,
     exception: Option<Exception>,
     screenshot: Option<Arc<ColorImage>>,

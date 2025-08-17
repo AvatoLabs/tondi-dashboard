@@ -199,8 +199,7 @@ impl Overview {
                                 CollapsingHeader::new(i18n("Resources"))
                                     .default_open(true)
                                     .show(ui, |ui| {
-                                        #[allow(unused_imports)]
-                                        use egui_phosphor::light::{YOUTUBE_LOGO,DISCORD_LOGO,TELEGRAM_LOGO,REDDIT_LOGO,CHART_SCATTER,NEWSPAPER_CLIPPING,DATABASE};
+                                        use egui_phosphor::light::{CHART_SCATTER,DATABASE};
                 
                                         ui.hyperlink_to_tab(
                                             format!("• {DATABASE} {}",i18n("Explorer")),
@@ -270,8 +269,7 @@ impl Overview {
                 CollapsingHeader::new(i18n("Developer Resources"))
                     .default_open(true)
                     .show(ui, |ui| {
-                        #[allow(unused_imports)]
-                        use egui_phosphor::light::{DISCORD_LOGO,GITHUB_LOGO};
+                        use egui_phosphor::light::{GITHUB_LOGO};
 
                         ui.hyperlink_to_tab(
                             format!("• {}",i18n("Tondi NG on GitHub")),

@@ -35,8 +35,6 @@ use qr::*;
 use secret::*;
 use transactions::*;
 use transfer::*;
-#[allow(unused_imports)]
-use utxo::*;
 
 
 #[allow(dead_code)]
