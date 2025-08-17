@@ -2,8 +2,8 @@ use crate::events::ApplicationEventsChannel;
 use crate::interop::Adaptor;
 use crate::result::Result;
 use cfg_if::cfg_if;
-use tondi_ng_core::runtime;
-use tondi_ng_core::settings::Settings;
+use tondi_dashboard_core::runtime;
+use tondi_dashboard_core::settings::Settings;
 use tondi_wallet_core::api::WalletApi;
 use std::sync::Arc;
 use workflow_i18n::*;
@@ -248,7 +248,7 @@ cfg_if! {
                         .try_init()?;
 
                     if disable {
-                        settings.node.node_kind = tondi_ng_core::settings::TondidNodeKind::Disable;
+                        settings.node.node_kind = tondi_dashboard_core::settings::TondidNodeKind::Disable;
                     }
 
                     let runtime: Arc<Mutex<Option<runtime::Runtime>>> = Arc::new(Mutex::new(None));
@@ -287,7 +287,7 @@ cfg_if! {
                             runtime::signals::Signals::bind(&runtime);
                             runtime.start();
 
-                            Ok(Box::new(tondi_ng_core::Core::new(cc, runtime, settings, window_frame)))
+                            Ok(Box::new(tondi_dashboard_core::Core::new(cc, runtime, settings, window_frame)))
                         }),
                     )?;
 
@@ -357,7 +357,7 @@ cfg_if! {
 
                         // wallet_api.ping()
 
-                        // let adaptor = tondi_ng_core::adaptor::Adaptor::new(runtime.clone());
+                        // let adaptor = tondi_dashboard_core::adaptor::Adaptor::new(runtime.clone());
                         // let window = web_sys::window().expect("no global `window` exists");
                         // js_sys::Reflect::set(
                         //     &window,
@@ -370,7 +370,7 @@ cfg_if! {
 
 
 
-                        Ok(Box::new(tondi_ng_core::Core::new(cc, runtime, settings, false)))
+                        Ok(Box::new(tondi_dashboard_core::Core::new(cc, runtime, settings, false)))
                     }),
                 )
                 .await

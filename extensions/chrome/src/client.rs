@@ -1,6 +1,5 @@
 use crate::imports::*;
-// use tondi_ng_core::interop; //::transport;
-use tondi_ng_core::{
+use tondi_dashboard_core::{
     imports::window,
     interop::{Client, Request},
 };
@@ -83,7 +82,7 @@ impl ClientReceiver {
 
                 self.application_events
                     .sender
-                    .try_send(tondi_ng_core::events::Events::Wallet { event })
+                    .try_send(tondi_dashboard_core::events::Events::Wallet { event })
                     .unwrap();
             }
             Target::Runtime => {

@@ -40,7 +40,7 @@ impl Client {
 
                 self.application_events
                     .sender
-                    .try_send(tondi_ng_core::events::Events::Wallet { event })
+                    .try_send(tondi_dashboard_core::events::Events::Wallet { event })
                     .unwrap();
 
                 Ok(None)

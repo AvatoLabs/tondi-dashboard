@@ -1,6 +1,6 @@
 use crate::imports::*;
-use tondi_ng_core::interop;
-use tondi_ng_core::interop::transport::Target;
+use tondi_dashboard_core::interop;
+use tondi_dashboard_core::interop::transport::Target;
 
 pub type ListenerClosure = Closure<dyn FnMut(JsValue, Sender, JsValue) -> JsValue>;
 

@@ -1,6 +1,6 @@
 #![warn(clippy::all, rust_2018_idioms)]
 
-extern crate self as tondi_ng_core;
+extern crate self as tondi_dashboard_core;
 
 mod core;
 pub use core::Core;

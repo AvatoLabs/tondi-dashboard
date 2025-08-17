@@ -1,4 +1,4 @@
-use tondi_ng_core::{
+use tondi_dashboard_core::{
     imports::{TondiRpcClient, MetricsUpdateKind, NetworkId},
     interop::{PendingRequest, Request, ServerAction},
 };
@@ -13,7 +13,7 @@ use tondi_wallet_core::rpc::{
 use crate::imports::*;
 pub type PortListenerClosure = Closure<dyn FnMut(chrome_runtime_port::Port) -> JsValue>;
 pub type PortEventClosure = Closure<dyn FnMut(JsValue) -> JsValue>;
-use tondi_ng_core::interop::Target;
+use tondi_dashboard_core::interop::Target;
 use rand::Rng;
 use std::collections::HashMap;
 use workflow_core::enums::Describe;

@@ -269,7 +269,7 @@ impl Overview {
                 CollapsingHeader::new(i18n("Developer Resources"))
                     .default_open(true)
                     .show(ui, |ui| {
-                        use egui_phosphor::light::{GITHUB_LOGO};
+                        
 
                         ui.hyperlink_to_tab(
                             format!("• {}",i18n("Tondi NG on GitHub")),

@@ -5,7 +5,7 @@ pub mod transport;
 
 use crate::imports::*;
 use client::*;
-use tondi_ng_core::interop::Client;
+use tondi_dashboard_core::interop::Client;
 
 static mut SERVER: Option<Arc<Server>> = None;
 // background script
@@ -33,7 +33,7 @@ pub async fn tondi_ng_background() {
 
     server.start().await;
 
-    log_info!("Tondi NG {} (background)", tondi_ng_core::app::VERSION);
+    log_info!("Tondi NG {} (background)", tondi_dashboard_core::app::VERSION);
 }
 
 #[wasm_bindgen]
