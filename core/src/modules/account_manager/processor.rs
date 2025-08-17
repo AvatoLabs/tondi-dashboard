@@ -59,8 +59,7 @@ impl<'context> Processor<'context> {
                         let actual_request = AccountsEstimateRequest {
                             account_id,
                             destination: payment_output.into(),
-                            priority_fee_sompi: Fees::SenderPays(0),
-                            fee_rate: Some(fee_rate),
+                            priority_fee_sompi: Fees::SenderPays(fee_rate as u64),
                             payload: None,
                         };
 
@@ -119,8 +118,7 @@ impl<'context> Processor<'context> {
                                     destination: payment_output.into(),
                                     wallet_secret,
                                     payment_secret,
-                                    fee_rate: Some(fee_rate),
-                                    priority_fee_sompi: Fees::SenderPays(0),
+                                    priority_fee_sompi: Fees::SenderPays(fee_rate as u64),
                                     payload: None,
                                 };
         
@@ -144,8 +142,7 @@ impl<'context> Processor<'context> {
                                     destination_account_id,
                                     wallet_secret,
                                     payment_secret,
-                                    fee_rate: Some(fee_rate),
-                                    priority_fee_sompi: Some(Fees::SenderPays(0)),
+                                    priority_fee_sompi: Some(Fees::SenderPays(fee_rate as u64)),
                                     transfer_amount_sompi,
                                 };
         
@@ -204,13 +201,12 @@ async fn calculate_fee_rate(network_type : NetworkType, account_id : AccountId, 
         account_id,
         destination: payment_output.clone().into(),
         priority_fee_sompi: Fees::SenderPays(0),
-        fee_rate: Some(0.0),
         payload: None,
     };
 
     let base_result = runtime().wallet().accounts_estimate_call(base_request).await;
 
-    let base_mass = base_result.as_ref().map(|r| r.generator_summary.aggregate_mass).unwrap_or_default();
+    let base_mass = base_result.as_ref().map(|r| r.generator_summary.aggregated_fees).unwrap_or_default();
 
     if base_mass == 0 {
         1.0

@@ -6,7 +6,7 @@
 )]
 
 use cfg_if::cfg_if;
-use tondi_ng_core::app::{tondi_ng_main, ApplicationContext};
+use tondi_dashboard_core::app::{tondi_ng_main, ApplicationContext};
 use workflow_log::*;
 
 cfg_if! {

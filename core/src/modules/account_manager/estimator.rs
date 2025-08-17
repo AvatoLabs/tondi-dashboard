@@ -40,11 +40,25 @@ impl<'context> Estimator<'context> {
             }
             EstimatorStatus::Error(error) => {
                 // ui.label(RichText::new(error.to_string()).color(theme_color().error_color));
-                (false, GeneratorSummary::new(network_id),Some(RichText::new(error.to_string()).color(theme_color().error_color)))
+                (false, GeneratorSummary {
+                    network_id: network_id.into(),
+                    aggregated_utxos: 0,
+                    aggregated_fees: 0,
+                    number_of_generated_transactions: 0,
+                    final_transaction_amount: None,
+                    final_transaction_id: None,
+                },Some(RichText::new(error.to_string()).color(theme_color().error_color)))
             }
             EstimatorStatus::None => {
                 let err = i18n_args("Please enter {suffix} amount to send", &[("suffix", tondi_suffix(&network_type))]);
-                (false, GeneratorSummary::new(network_id),Some(RichText::new(err).color(theme_color().error_color)))
+                (false, GeneratorSummary {
+                    network_id: network_id.into(),
+                    aggregated_utxos: 0,
+                    aggregated_fees: 0,
+                    number_of_generated_transactions: 0,
+                    final_transaction_amount: None,
+                    final_transaction_id: None,
+                },Some(RichText::new(err).color(theme_color().error_color)))
             }
         };
 
@@ -116,8 +130,8 @@ impl<'context> Estimator<'context> {
             })
         } else { None };
 
-        let aggregate_mass = actual_estimate.aggregate_mass;
-        let number_of_generated_stages = actual_estimate.number_of_generated_stages;
+        let aggregate_mass = actual_estimate.aggregated_fees;
+        let number_of_generated_stages = actual_estimate.number_of_generated_transactions;
 
         let buckets = if let Some(fees) = core.feerate.as_ref() {
             if network_below_capacity && core.settings.estimator.mode == EstimatorMode::NetworkPressure {
@@ -171,7 +185,7 @@ impl<'context> Estimator<'context> {
             // let priority_feerate = (bucket.feerate - 1.0).max(0.0);
             // let priority_feerate = bucket.feerate;
             // let total_fees_sompi = (priority_feerate * actual_estimate.aggregate_mass as f64) as u64;
-            let total_fees_sompi = (bucket.feerate * actual_estimate.aggregate_mass as f64) as u64;
+            let total_fees_sompi = (bucket.feerate * actual_estimate.aggregated_fees as f64) as u64;
             // runtime().toast(UserNotification::success(format!("selection: {:?}", self.context.fee_mode)).short());
             let total_fee_tondi = sompi_to_tondi(total_fees_sompi);
             self.context.priority_fees_text = format!("{}", total_fee_tondi);
@@ -185,7 +199,7 @@ impl<'context> Estimator<'context> {
             ui.label(format!("{}  •  {}  •  {}  •  {}",
                 i18n_args("Transactions: {number}",&[("number", actual_estimate.number_of_generated_transactions.to_string())]), 
                 i18n_args("UTXOs: {number}", &[("number", actual_estimate.aggregated_utxos.to_string())]),
-                i18n_args("Mass: {number}g", &[("number", actual_estimate.aggregate_mass.to_string())]),
+                i18n_args("Mass: {number}g", &[("number", actual_estimate.aggregated_fees.to_string())]),
                 i18n_args("Network Pressure: ~{number}%", &[("number", network_pressure.to_string())]),
             ));
 
@@ -194,7 +208,7 @@ impl<'context> Estimator<'context> {
             if let Some(final_transaction_amount) = actual_estimate.final_transaction_amount {
                 ui.heading(RichText::new(
                     i18n_args("Final Amount: {amount}", 
-                        &[("amount",sompi_to_tondi_string_with_suffix(final_transaction_amount + actual_estimate.aggregate_fees, &network_type))]
+                        &[("amount",sompi_to_tondi_string_with_suffix(final_transaction_amount + actual_estimate.aggregated_fees, &network_type))]
                     )).strong());
             }
 

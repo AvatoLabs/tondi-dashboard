@@ -1,5 +1,5 @@
 use crate::imports::*;
-use tondi_wallet_core::{api::{AccountsDiscoveryKind, AccountsDiscoveryRequest}, encryption::EncryptionKind, storage::keydata::PrvKeyDataVariantKind, wallet::{AccountCreateArgs, PrvKeyDataCreateArgs, WalletCreateArgs}};
+use tondi_wallet_core::{api::{AccountsDiscoveryKind, AccountsDiscoveryRequest}, encryption::EncryptionKind, wallet::{AccountCreateArgs, PrvKeyDataCreateArgs, WalletCreateArgs}};
 use slug::slugify;
 use tondi_bip32::{WordCount, Mnemonic, Language};
 use crate::utils::{secret_score, secret_score_to_text};
@@ -1170,7 +1170,6 @@ impl ModuleT for WalletCreate {
                             None,
                             payment_secret.clone(),
                             mnemonic,
-                            PrvKeyDataVariantKind::Mnemonic,
                         );
 
                         let prv_key_data_id = wallet.clone().prv_key_data_create(wallet_secret.clone(), prv_key_data_args).await?;
@@ -1182,7 +1181,7 @@ impl ModuleT for WalletCreate {
                                     prv_key_data_id,
                                     args.account_name.is_not_empty().then_some(args.account_name.clone()),
                                 );
-                                account_descriptors.push(wallet.clone().accounts_import(wallet_secret.clone(), account_create_args).await?);
+                                account_descriptors.push(wallet.clone().accounts_create(wallet_secret.clone(), account_create_args).await?);
                             }
                         }else{
                             for account_index in 0..number_of_accounts {
@@ -1193,7 +1192,7 @@ impl ModuleT for WalletCreate {
                                     Some(account_index as u64),
                                 );
                                 // log_info!("account_create_args: {:?}", account_create_args);
-                                account_descriptors.push(wallet.clone().accounts_import(wallet_secret.clone(), account_create_args).await?);
+                                account_descriptors.push(wallet.clone().accounts_create(wallet_secret.clone(), account_create_args).await?);
                             }
                         }
 
@@ -1273,7 +1272,6 @@ impl ModuleT for WalletCreate {
                             None,
                             payment_secret.clone(),
                             Secret::from(mnemonic_phrase_string.clone()),
-                            PrvKeyDataVariantKind::Mnemonic,
                         );
 
                         let prv_key_data_id = wallet.clone().prv_key_data_create(wallet_secret.clone(), prv_key_data_args).await?;

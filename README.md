@@ -1,107 +1,144 @@
-# `Tondi Dashboard`
+# Tondi Dashboard
 
+A modern, feature-rich dashboard for managing Tondi blockchain wallets and accounts. Built with Rust and WebAssembly for optimal performance and security.
 
-[<img alt="github" src="https://img.shields.io/badge/github-aspectron/tondi--ng-8da0cb?style=for-the-badge&labelColor=555555&color=8da0cb&logo=github" height="20">](https://github.com/aspectron/tondi-ng)
-<img src="https://img.shields.io/badge/platform-native-informational?style=for-the-badge&color=50a0f0" height="20">
-<img src="https://img.shields.io/badge/platform-wasm32-informational?style=for-the-badge&color=50a0f0" height="20">
-<img src="https://img.shields.io/github/actions/workflow/status/aspectron/tondi-ng/ci.yaml?branch=master&style=for-the-badge" height="20">
+## 🚀 Features
 
-<p align="center" style="margin:32px auto 0px auto;text-align:center;font-size:10px;color:#888;">
-<img src="https://aspectron.org/images/projects/tondi-ng-screen-01.png" style="display:block;max-height:320px;max-width:524px;width:524px;height:auto;object-fit:cover;margin: 0px auto 0px auto;"><br/><sup>RUSTY TONDI P2P NODE &bull; TONDI WALLET &bull; BLOCKDAG VISUALIZER</sup></p>
+- **Multi-Platform Support**: Web application, Chrome extension, and native desktop app
+- **Wallet Management**: Create, import, and manage Tondi wallets
+- **Account Management**: Multiple account support with BIP32 derivation
+- **Transaction Tools**: Send, receive, and monitor Tondi transactions
+- **Real-time Updates**: Live blockchain data and wallet synchronization
+- **Security**: Encrypted storage and secure key management
+- **User-Friendly**: Modern UI built with egui framework
 
-## Features
+## 🛠️ Technology Stack
 
-This software incorporates the following functionality:
-- Rusty Tondi p2p Node
-- Tondi wallet based on the Rusty Tondi SDK
-- Rusty Tondi CLI wallet
-- BlockDAG visualizer
-- Remote node connectivity
+- **Backend**: Rust with async/await
+- **Frontend**: WebAssembly (WASM) via egui
+- **Blockchain**: Tondi chain integration
+- **Storage**: Local encrypted storage
+- **Networking**: gRPC client for node communication
 
-This project is built on top of and incorporates the [Rusty Tondi](https://github.com/tondinet/rusty-tondi) core framework.
+## 📦 Installation
 
-This software is ideological in nature with a strong focus on architecture and decentralization. It is a unified codebase tightly coupled with the Rusty Tondi project. Fully written in Rust, it is available as a high-performance desktop application on all major operating systems (Windows, Linux and MacOS) as well as in major web browsers. It does not rely on any JavaScript or Web frameworks, which greatly strengthens its security profile. The Web Browser extension based on this infrastructure is currently under development.
+### Prerequisites
 
-You can find more information about this project at [https://tondinet.org/en/projects/tondi-dashboard.html](https://tondinet.org/en/projects/tondi-dashboard.html).
+- Rust 1.70+ and Cargo
+- Node.js 18+ (for web builds)
+- Tondi node running locally or remotely
 
-## Releases
+### Building from Source
 
-- You can obtain the latest binary redistributables from the [Releases](https://github.com/tondinet/tondi-dashboard/releases) page.
-- You can access the official Web App online at [https://tondi-dashboard.org](https://tondi-dashboard.org).
-
-## Building
-
-To build this project, you need to be able to build Rusty Tondi. If you have not built Rusty Tondi before, please follow the Rusty Tondi [build instructions](https://github.com/tondinet/rusty-tondi/blob/master/README.md).
-
-In addition, on linux, you need to install the following dependencies:
-
-#### Ubuntu/Debian:
 ```bash
-sudo apt-get update
-sudo apt-get install libglib2.0-dev libatk1.0-dev libgtk-3-dev librust-atk-dev
+# Clone the repository
+git clone https://github.com/AvatoLabs/tondi-dashboard.git
+cd tondi-dashboard
+
+# Build the project
+cargo build --release
+
+# Build web application
+cd app
+trunk build
+
+# Build Chrome extension
+cd ../extensions/chrome
+cargo build --target wasm32-unknown-unknown --release
 ```
 
-#### Fedora:
+### Running the Application
+
 ```bash
-sudo dnf install glib2-devel atk-devel gtk3-devel
+# Native desktop app
+cargo run --bin tondi-dashboard
+
+# Web application
+cd app
+trunk serve
+
+# Chrome extension
+# Load the extension from extensions/chrome/dist/ directory
 ```
 
-Once you have Rusty Tondi built, you will be able to build and run this project as follows:
+## 🔧 Configuration
 
-### From GitHub repository:
+The dashboard connects to Tondi nodes via gRPC. Configure your node connection in the settings:
 
-#### Running as Native App
-```bash
-cargo run --release
+- **Network**: Mainnet or Testnet
+- **Node URL**: Your Tondi node RPC endpoint
+- **Connection Type**: Direct or proxy connection
+
+## 📱 Usage
+
+### Creating a Wallet
+
+1. Launch the application
+2. Click "Create New Wallet"
+3. Set wallet name and security options
+4. Generate or import mnemonic phrase
+5. Create initial accounts
+
+### Managing Accounts
+
+- **Create Account**: Generate new BIP32 accounts
+- **Import Account**: Import existing accounts via mnemonic
+- **Account Switching**: Seamlessly switch between accounts
+- **Address Management**: Generate new addresses as needed
+
+### Sending Transactions
+
+1. Select source account
+2. Enter recipient address
+3. Specify amount and priority fee
+4. Review transaction details
+5. Confirm and broadcast
+
+## 🏗️ Architecture
+
+```
+tondi-dashboard/
+├── app/                    # Web application
+├── core/                   # Core framework
+│   ├── modules/           # Feature modules
+│   ├── runtime/           # Runtime services
+│   └── utils/             # Utility functions
+├── extensions/            # Browser extensions
+│   └── chrome/           # Chrome extension
+└── macros/               # Procedural macros
 ```
 
-#### Running as Web App
+## 🔒 Security Features
+
+- **Encrypted Storage**: All sensitive data is encrypted at rest
+- **Secure Key Derivation**: BIP32/BIP39 compliant key generation
+- **Memory Protection**: Secure memory handling and zeroization
+- **Network Security**: Encrypted communication with nodes
+
+## 🌐 Network Support
+
+- **Mainnet**: Production Tondi network
+- **Testnet**: Development and testing network
+- **Custom Networks**: Support for custom node configurations
+
+## 📊 Monitoring & Analytics
+
+- **Real-time Balance**: Live account balance updates
+- **Transaction History**: Complete transaction records
+- **Network Status**: Node connection and sync status
+- **Performance Metrics**: Transaction processing statistics
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+### Development Setup
+
 ```bash
+# Install development dependencies
 cargo install trunk
-trunk serve --release
-```
-Access via [https://localhost:8080](https://localhost:8080)
+cargo install wasm-bindgen-cli
 
-While the application is a static serve, you can not load it from the local file system due to CORS restrictions. Due to this, a web server is required. This application is designed to be built with [Trunk](https://trunkrs.dev/) and is served from the `dist/` folder.  This is a self-contained client-side application - once the application is loaded, the web server is no longer required.
+# Run tests
+cargo test
 
-#### Running Headless
-
-Tondi Dashboard application binary can be started in 3 ways:
-- `tondi-dashboard` - starts Tondi Dashboard in the default desktop mode
-- `tondi-dashboard --daemon [rusty-tondi arguments]` - starts Tondi Dashboard as a Rusty Tondi p2p node daemon
-- `tondi-dashboard --cli` - starts Tondi Dashboard as a Rusty Tondi CLI wallet
-
-If you need access to the wallet in a headless environment, you can start Tondi Dashboard in daemon mode and then use the CLI wallet to access the wallet.
-
-#### Software Rendering for Windows x64 VMs
-
-Tondi Dashboard uses OpenGL.  Due to that, Tondi Dashboard may have problems powering up on the legacy hardware or inside of virtualization platforms that do not support hardware acceleration.
-
-To address this, you can use Mesa 3d Software Emulation library.
-Mesa 3d library build is available for download from the `resources/windows/mesa3d` folder of this repository.  
-Simply extract the archive and place the `opengl32.dll` file in the same folder as the `tondi-dashboard.exe` executable.
-
-This library build was placed in this repository for direct download on 2025-05-14.
-The original build was created by Federico Dossena at [https://fdossena.com/?p=mesa/index.frag](https://fdossena.com/?p=mesa/index.frag).
-
-#### Solo Mining
-
-You can use the following stratum bridge to solo mine with Tondi Dashboard: https://github.com/rdugan/tondi-stratum-bridge/releases
-In order to allow for mining, you need to enable gRPC interface in the Settings panel (*'Local'* if running the stratum bridge on the same machine, *'Any'* if running the stratum bridge on a different machine).
-In the stratum configuration setup tondi_address of the machine running Tondi Dashboard (`127.0.0.1` if local) and use `stratum+tcp://<stratum bridge ipv4 address>:(5555)`.
-
-## License
-
-Licensed under the [ISC License](LICENSE).
-
-## Contribution
-
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you, shall be licensed as above, without any
-additional terms or conditions.
-
-## Donations
-
-If you are a Tondi investor, please consider supporting this project. The funds will be used to cover operational costs and further the project's functionality. 
-
-`tondi:qq2efzv0j7vt9gz9gfq44e6ggemjvvcuewhzqpm4ekf4fs5smruvs3c8ur9rp`

@@ -807,8 +807,8 @@ impl Core {
             Events::Wallet { event } => {
                 // println!("event: {:?}", event);
                 match *event {
-                    CoreWallet::WalletList { .. } => {}
-                    CoreWallet::FeeRate { .. } => {}
+                    CoreWallet::WalletHint { .. } => {}
+                    // CoreWallet::FeeRate { .. } => {} // Removed - not available in Tondi
                     CoreWallet::WalletPing => {
                         // log_info!("received wallet ping event...");
                         // crate::runtime::runtime().notify(UserNotification::info("Wallet ping"));
@@ -908,10 +908,10 @@ impl Core {
                         self.state.url = url;
                         self.state.network_id = Some(network_id);
                     }
-                    CoreWallet::WalletHint { hint } => {
-                        self.hint = hint;
-                        self.discard_hint = false;
-                    }
+                    // CoreWallet::WalletHint { hint } => {
+                    //     self.hint = hint;
+                    //     self.discard_hint = false;
+                    // }
                     CoreWallet::WalletReload {
                         wallet_descriptor,
                         account_descriptors,

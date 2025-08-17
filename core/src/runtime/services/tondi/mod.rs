@@ -765,8 +765,7 @@ impl Service for TondiService {
 
                     self.notify(crate::events::Events::ChangeSection(TypeId::of::<
                         crate::modules::account_manager::AccountManager,
-                    >(
-                    )))
+                    >()))
                     .unwrap();
                 }
 
