@@ -1,6 +1,6 @@
 import {apiBuilder} from "./api.js";
 
-import init from '/kaspa-ng.js';
+import init from '/tondi-dashboard.js';
 (async () => {
 
     function initPageScript(tabId, args){

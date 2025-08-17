@@ -29,14 +29,14 @@
 //     }
 // })
 
-// import init from '/kaspa-ng.js';
-// let kaspa_ng = init('/kaspa-egui_bg.wasm');
-import init from '/kaspa-ng.js';
+// import init from '/tondi-dashboard.js';
+// let tondi_dashboard = init('/tondi-egui_bg.wasm');
+import init from '/tondi-dashboard.js';
 (async () => {
-    let kaspa_ng = await init('/kaspa-ng_bg.wasm');
+    let tondi_dashboard = await init('/tondi-dashboard_bg.wasm');
 
-    // const wasm = await kaspa.default('./kaspa-wallet/kaspa-wallet_bg.wasm');
-    await kaspa_ng.kaspa_ng_main();
+    // const wasm = await tondi.default('./tondi-wallet/tondi-wallet_bg.wasm');
+    await tondi_dashboard.tondi_dashboard_main();
 })();
 
 
