@@ -41,7 +41,7 @@ impl<'context> Estimator<'context> {
             EstimatorStatus::Error(error) => {
                 // ui.label(RichText::new(error.to_string()).color(theme_color().error_color));
                 (false, GeneratorSummary {
-                    network_id: network_id.into(),
+                    network_id,
                     aggregated_utxos: 0,
                     aggregated_fees: 0,
                     number_of_generated_transactions: 0,
@@ -52,7 +52,7 @@ impl<'context> Estimator<'context> {
             EstimatorStatus::None => {
                 let err = i18n_args("Please enter {suffix} amount to send", &[("suffix", tondi_suffix(&network_type))]);
                 (false, GeneratorSummary {
-                    network_id: network_id.into(),
+                    network_id,
                     aggregated_utxos: 0,
                     aggregated_fees: 0,
                     number_of_generated_transactions: 0,
