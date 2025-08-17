@@ -1,4 +1,4 @@
-use kaspa_bip32::{Mnemonic,WordCount};
+use tondi_bip32::{Mnemonic,WordCount};
 use crate::imports::*;
 // use egui_plot::PlotPoint;
 
@@ -436,7 +436,7 @@ impl Testing {
                             }
 
                             if unlock {
-                                let wallet_secret = kaspa_wallet_core::secret::Secret::new(
+                                let wallet_secret = tondi_wallet_core::secret::Secret::new(
                                     ctx.wallet_secret.as_bytes().to_vec(),
                                 );
                                 ctx.wallet_secret.zeroize();

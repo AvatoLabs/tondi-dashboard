@@ -1,5 +1,5 @@
 use crate::imports::*;
-use kaspa_wallet_core::events::SyncState;
+use tondi_wallet_core::events::SyncState;
 
 const SYNC_STAGES: usize = 5;
 

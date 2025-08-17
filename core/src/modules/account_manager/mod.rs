@@ -2,8 +2,8 @@ use crate::imports::*;
 use crate::primitives::account;
 use std::borrow::Cow;
 use egui_phosphor::thin::{CLOUD_ARROW_DOWN, CLOUD_SLASH};
-use kaspa_wallet_core::tx::{GeneratorSummary, PaymentOutput, Fees};
-use kaspa_wallet_core::api::*;
+use tondi_wallet_core::tx::{GeneratorSummary, PaymentOutput, Fees};
+use tondi_wallet_core::api::*;
 use workflow_core::runtime;
 use crate::primitives::descriptor::*;
 
@@ -401,7 +401,7 @@ impl AccountManager {
                                             .color(theme_color().icon_color_default)
                                     );
                                     ui.add_space(8.);                                    
-                                    ui.label(i18n("You are currently not connected to the Kaspa node."));
+                                    ui.label(i18n("You are currently not connected to the Tondi node."));
                                     ui.add_space(16.);                                    
                                 } else if !core.state().is_synced() {
                                     ui.label(
@@ -410,7 +410,7 @@ impl AccountManager {
                                             .color(theme_color().icon_color_default)
                                     );
                                     ui.add_space(8.);
-                                    ui.label(i18n("The node is currently syncing with the Kaspa p2p network. Account balances may be out of date."));
+                                    ui.label(i18n("The node is currently syncing with the Tondi p2p network. Account balances may be out of date."));
                                     ui.add_space(16.);
                                 }
 

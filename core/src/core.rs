@@ -4,17 +4,17 @@ use crate::market::*;
 use crate::mobile::MobileMenu;
 use egui::load::Bytes;
 use egui_notify::Toasts;
-use kaspa_wallet_core::api::TransactionsDataGetResponse;
-use kaspa_wallet_core::events::Events as CoreWallet;
-use kaspa_wallet_core::storage::{Binding, Hint, PrvKeyDataInfo};
+use tondi_wallet_core::api::TransactionsDataGetResponse;
+use tondi_wallet_core::events::Events as CoreWallet;
+use tondi_wallet_core::storage::{Binding, Hint, PrvKeyDataInfo};
 use std::borrow::Cow;
 use std::future::IntoFuture;
 #[allow(unused_imports)]
 use workflow_i18n::*;
 use workflow_wasm::callback::CallbackMap;
 pub const TRANSACTION_PAGE_SIZE: u64 = 20;
-pub const MAINNET_EXPLORER: &str = "https://explorer.kaspa.org";
-pub const TESTNET10_EXPLORER: &str = "https://explorer-tn10.kaspa.org";
+pub const MAINNET_EXPLORER: &str = "https://explorer.tondi.org";
+pub const TESTNET10_EXPLORER: &str = "https://explorer-tn10.tondi.org";
 
 pub enum Exception {
     #[allow(dead_code)]
@@ -181,8 +181,8 @@ impl Core {
 
         let storage = Storage::default();
         #[cfg(not(target_arch = "wasm32"))]
-        if settings.node.kaspad_daemon_storage_folder_enable {
-            storage.track_storage_root(Some(settings.node.kaspad_daemon_storage_folder.as_str()));
+        if settings.node.tondid_daemon_storage_folder_enable {
+            storage.track_storage_root(Some(settings.node.tondid_daemon_storage_folder.as_str()));
         }
 
         let mut this = Self {
@@ -270,7 +270,7 @@ impl Core {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let type_id = self.module.type_id();
-                crate::runtime::services::kaspa::update_logs_flag()
+                crate::runtime::services::tondi::update_logs_flag()
                     .store(type_id == TypeId::of::<modules::Logs>(), Ordering::Relaxed);
             }
         }
@@ -393,7 +393,7 @@ impl Core {
                 .change_current_network(network);
             self.store_settings();
             self.runtime
-                .kaspa_service()
+                .tondi_service()
                 .update_services(&self.settings.node, None);
         }
     }
@@ -479,7 +479,7 @@ impl eframe::App for Core {
 
 impl Core {
     fn render_frame(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
-        window_frame(self.window_frame, ctx, "Kaspa NG", |ui| {
+        window_frame(self.window_frame, ctx, "Tondi NG", |ui| {
             if !self.settings.initialized {
                 egui::CentralPanel::default().show_inside(ui, |ui| {
                     self.modules
@@ -655,7 +655,7 @@ impl Core {
         let logo_size = logo_rect.size();
         Image::new(ImageSource::Bytes {
             uri: Cow::Borrowed("bytes://logo.svg"),
-            bytes: Bytes::Static(crate::app::KASPA_NG_LOGO_SVG),
+            bytes: Bytes::Static(crate::app::TONDI_NG_LOGO_SVG),
         })
         .maintain_aspect_ratio(true)
         // .max_size(logo_size)
@@ -817,7 +817,7 @@ impl Core {
                         network_id: _,
                         metrics,
                     } => {
-                        // log_info!("Kaspa NG - received metrics event {metrics:?}");
+                        // log_info!("Tondi NG - received metrics event {metrics:?}");
 
                         match metrics {
                             MetricsUpdate::WalletMetrics {

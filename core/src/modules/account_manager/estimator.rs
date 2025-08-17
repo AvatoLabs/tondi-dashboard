@@ -43,7 +43,7 @@ impl<'context> Estimator<'context> {
                 (false, GeneratorSummary::new(network_id),Some(RichText::new(error.to_string()).color(theme_color().error_color)))
             }
             EstimatorStatus::None => {
-                let err = i18n_args("Please enter {suffix} amount to send", &[("suffix", kaspa_suffix(&network_type))]);
+                let err = i18n_args("Please enter {suffix} amount to send", &[("suffix", tondi_suffix(&network_type))]);
                 (false, GeneratorSummary::new(network_id),Some(RichText::new(err).color(theme_color().error_color)))
             }
         };
@@ -55,7 +55,7 @@ impl<'context> Estimator<'context> {
             Focus::Amount,
             |ui, text| {
                 ui.add_space(8.);
-                ui.label(RichText::new(i18n_args("Enter {suffix} amount to send", &[("suffix", kaspa_suffix(&network_type))])).size(12.).raised());
+                ui.label(RichText::new(i18n_args("Enter {suffix} amount to send", &[("suffix", tondi_suffix(&network_type))])).size(12.).raised());
                 ui.add_sized(Overview::editor_size(ui), TextEdit::singleline(text)
                     .vertical_align(Align::Center))
             },
@@ -102,7 +102,7 @@ impl<'context> Estimator<'context> {
         //         (false, GeneratorSummary::new(network_id))
         //     }
         //     EstimatorStatus::None => {
-        //         ui.label(i18n_args("Please enter {suffix} amount to send", &[("suffix", kaspa_suffix(&network_type))]));
+        //         ui.label(i18n_args("Please enter {suffix} amount to send", &[("suffix", tondi_suffix(&network_type))]));
         //         (false, GeneratorSummary::new(network_id))
         //     }
         // };
@@ -157,7 +157,7 @@ impl<'context> Estimator<'context> {
                 };
                 ui.label(icon);
                 
-                ui.label(RichText::new(sompi_to_kaspa_string_with_suffix(total_sompi, &network_type)).strong());
+                ui.label(RichText::new(sompi_to_tondi_string_with_suffix(total_sompi, &network_type)).strong());
                 if let Some(usd) = total_usd {
                     let usd = format_currency(usd, 6);
                     ui.label(RichText::new(format!("~{} USD", usd)).strong());
@@ -173,8 +173,8 @@ impl<'context> Estimator<'context> {
             // let total_fees_sompi = (priority_feerate * actual_estimate.aggregate_mass as f64) as u64;
             let total_fees_sompi = (bucket.feerate * actual_estimate.aggregate_mass as f64) as u64;
             // runtime().toast(UserNotification::success(format!("selection: {:?}", self.context.fee_mode)).short());
-            let total_fee_kaspa = sompi_to_kaspa(total_fees_sompi);
-            self.context.priority_fees_text = format!("{}", total_fee_kaspa);
+            let total_fee_tondi = sompi_to_tondi(total_fees_sompi);
+            self.context.priority_fees_text = format!("{}", total_fee_tondi);
             self.context.fee_mode = FeeMode::None;
             request_estimate = true;
         }
@@ -194,7 +194,7 @@ impl<'context> Estimator<'context> {
             if let Some(final_transaction_amount) = actual_estimate.final_transaction_amount {
                 ui.heading(RichText::new(
                     i18n_args("Final Amount: {amount}", 
-                        &[("amount",sompi_to_kaspa_string_with_suffix(final_transaction_amount + actual_estimate.aggregate_fees, &network_type))]
+                        &[("amount",sompi_to_tondi_string_with_suffix(final_transaction_amount + actual_estimate.aggregate_fees, &network_type))]
                     )).strong());
             }
 
@@ -253,7 +253,7 @@ impl<'context> Estimator<'context> {
     fn update_user_args(&mut self) -> bool {
         let mut valid = true;
 
-        match try_kaspa_str_to_sompi(self.context.send_amount_text.as_str()) {
+        match try_tondi_str_to_sompi(self.context.send_amount_text.as_str()) {
             Ok(Some(sompi)) => {
                 self.context.send_amount_sompi = sompi;
             }
@@ -267,7 +267,7 @@ impl<'context> Estimator<'context> {
             }
         }
 
-        match try_kaspa_str_to_sompi(self.context.priority_fees_text.as_str()) {
+        match try_tondi_str_to_sompi(self.context.priority_fees_text.as_str()) {
             Ok(Some(sompi)) => {
                 self.context.priority_fees_sompi = sompi;
             }

@@ -1,7 +1,7 @@
 use crate::imports::*;
-use kaspa_addresses::Prefix as AddressPrefix;
-use kaspa_consensus_core::config::params::Params;
-use kaspa_wallet_core::utxo::NetworkParams;
+use tondi_addresses::Prefix as AddressPrefix;
+use tondi_consensus_core::config::params::Params;
+use tondi_wallet_core::utxo::NetworkParams;
 
 pub const BASIC_TRANSACTION_MASS: u64 = 2036;
 
@@ -140,7 +140,7 @@ impl Network {
 
     pub fn describe(&self) -> &str {
         match self {
-            Network::Mainnet => i18n("Main Kaspa network"),
+            Network::Mainnet => i18n("Main Tondi network"),
             Network::Testnet10 => i18n("10 BPS test network"),
         }
     }

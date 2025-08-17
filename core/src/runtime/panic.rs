@@ -9,10 +9,10 @@ pub fn init_graceful_panic_handler() {
         let backtrace = Backtrace::capture();
         // println!("panic! \n{:#?}\n{:#?}", panic_info, backtrace);
         let _ = fs::write(
-            dirs::home_dir().unwrap_or_default().join("kaspa-ng.log"),
+            dirs::home_dir().unwrap_or_default().join("tondi-ng.log"),
             format!("{:#?}\n{:#?}", panic_info, backtrace),
         );
-        println!("An unexpected condition (panic) has occurred. Additional information has been written to `~/kaspa-ng.log`");
+        println!("An unexpected condition (panic) has occurred. Additional information has been written to `~/tondi-ng.log`");
         default_hook(panic_info);
         crate::runtime::abort();
     }));
@@ -25,11 +25,11 @@ pub fn init_ungraceful_panic_handler() {
         let _ = fs::write(
             dirs::home_dir()
                 .unwrap_or_default()
-                .join("kaspa-ng-service.log"),
+                .join("tondi-ng-service.log"),
             format!("{:#?}\n{:#?}", panic_info, backtrace),
         );
         default_hook(panic_info);
-        println!("An unexpected condition (panic) has occurred. Additional information has been written to `~/kaspa-ng-service.log`");
+        println!("An unexpected condition (panic) has occurred. Additional information has been written to `~/tondi-ng-service.log`");
         println!("Exiting...");
         std::process::exit(1);
     }));

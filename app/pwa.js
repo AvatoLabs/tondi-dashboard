@@ -1,9 +1,9 @@
-var cacheName = 'kaspa-ng';
+var cacheName = 'tondi-ng';
 var filesToCache = [
   './',
   './index.html',
-  './kaspa-ng.js',
-  './kaspa-ng_bg.wasm',
+  './tondi-ng.js',
+  './tondi-ng_bg.wasm',
 ];
 
 /* Start the service worker and cache all of the app's content */

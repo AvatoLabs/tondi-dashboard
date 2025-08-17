@@ -1,9 +1,9 @@
-use kaspa_wallet_core::storage::keydata::PrvKeyDataVariantKind;
+use tondi_wallet_core::storage::keydata::PrvKeyDataVariantKind;
 use modules::wallet_create::WalletCreate;
 
 use crate::imports::*;
-use kaspa_wallet_core::storage::AssocPrvKeyDataIds;
-use kaspa_wallet_core::deterministic::bip32::BIP32_ACCOUNT_KIND;
+use tondi_wallet_core::storage::AssocPrvKeyDataIds;
+use tondi_wallet_core::deterministic::bip32::BIP32_ACCOUNT_KIND;
 
 #[derive(Clone)]
 pub enum CreateAccountKind {
@@ -210,7 +210,7 @@ impl ModuleT for AccountCreate {
                                 ui.label(format!("Private Key: {}", prv_key_data_info.name_or_id()));
                                 ui.add_space(16.);
                                 if ui.add(CompositeButton::new(
-                                    "Kaspa Core HD account",
+                                    "Tondi Core HD account",
                                     "BIP-44 "
                                 ))
                                 .clicked() {

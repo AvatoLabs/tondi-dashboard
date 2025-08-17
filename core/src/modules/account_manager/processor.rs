@@ -36,8 +36,8 @@ impl<'context> Processor<'context> {
                 if request_estimate {
 
                     let address = match network_type {
-                        NetworkType::Testnet => Address::try_from("kaspatest:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhqrxplya").unwrap(),
-                        NetworkType::Mainnet => Address::try_from("kaspa:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqkx9awp4e").unwrap(),
+                        NetworkType::Testnet => Address::try_from("tonditest:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhqrxplya").unwrap(),
+                        NetworkType::Mainnet => Address::try_from("tondi:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqkx9awp4e").unwrap(),
                         _ => panic!("Unsupported network"),
                     };
 
@@ -189,8 +189,8 @@ impl<'context> Processor<'context> {
 async fn calculate_fee_rate(network_type : NetworkType, account_id : AccountId, send_amount_sompi : u64, priority_fee_sompi : u64) -> f64 {
 
     let address = match network_type {
-        NetworkType::Testnet => Address::try_from("kaspatest:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhqrxplya").unwrap(),
-        NetworkType::Mainnet => Address::try_from("kaspa:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqkx9awp4e").unwrap(),
+        NetworkType::Testnet => Address::try_from("tonditest:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhqrxplya").unwrap(),
+        NetworkType::Mainnet => Address::try_from("tondi:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqkx9awp4e").unwrap(),
         _ => panic!("Unsupported network"),
     };
 

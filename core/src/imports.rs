@@ -1,21 +1,21 @@
 pub use cfg_if::cfg_if;
 pub use downcast_rs::{impl_downcast, Downcast, DowncastSync};
-pub use kaspa_consensus_core::constants::SOMPI_PER_KASPA;
-pub use kaspa_consensus_core::network::{NetworkId, NetworkType};
-pub use kaspa_consensus_core::Hash as KaspaHash;
-pub use kaspa_metrics_core::MetricsSnapshot;
-pub use kaspa_rpc_core::api::rpc::RpcApi;
-pub use kaspa_rpc_core::{RpcFeeEstimate, RpcFeerateBucket};
-pub use kaspa_utils::hex::{FromHex, ToHex};
-pub use kaspa_utils::{hashmap::GroupExtension, networking::ContextualNetAddress};
-pub use kaspa_wallet_core::prelude::{
+pub use tondi_consensus_core::constants::SOMPI_PER_TONDI;
+pub use tondi_consensus_core::network::{NetworkId, NetworkType};
+pub use tondi_consensus_core::Hash as TondiHash;
+pub use tondi_metrics_core::MetricsSnapshot;
+pub use tondi_rpc_core::api::rpc::RpcApi;
+pub use tondi_rpc_core::{RpcFeeEstimate, RpcFeerateBucket};
+pub use tondi_utils::hex::{FromHex, ToHex};
+pub use tondi_utils::{hashmap::GroupExtension, networking::ContextualNetAddress};
+pub use tondi_wallet_core::prelude::{
     Account as CoreAccount, AccountCreateArgs, AccountCreateArgsBip32, AccountDescriptor,
-    AccountId, AccountKind, Address, Balance, DynRpcApi, IdT, KaspaRpcClient, Language,
+    AccountId, AccountKind, Address, Balance, DynRpcApi, IdT, TondiRpcClient, Language,
     MetricsUpdate, MetricsUpdateKind, Mnemonic, PrvKeyDataArgs, PrvKeyDataCreateArgs, PrvKeyDataId,
     PrvKeyDataInfo, Secret, SyncState, TransactionId, TransactionRecord, Wallet as CoreWallet,
     WalletApi, WalletCreateArgs, WalletDescriptor, WordCount, WrpcEncoding,
 };
-pub use kaspa_wallet_core::utils::*;
+pub use tondi_wallet_core::utils::*;
 
 pub use async_trait::async_trait;
 pub use borsh::{BorshDeserialize, BorshSerialize};
@@ -88,7 +88,7 @@ pub use crate::primitives::{
 pub use crate::result::Result;
 pub use crate::runtime::{runtime, spawn, spawn_with_result, Payload, Runtime, Service};
 pub use crate::settings::{
-    EstimatorMode, EstimatorSettings, KaspadNodeKind, NetworkInterfaceConfig, NetworkInterfaceKind,
+    EstimatorMode, EstimatorSettings, TondidNodeKind, NetworkInterfaceConfig, NetworkInterfaceKind,
     NodeConnectionConfigKind, NodeMemoryScale, NodeSettings, RpcConfig, RpcOptions, Settings,
     UserInterfaceSettings,
 };

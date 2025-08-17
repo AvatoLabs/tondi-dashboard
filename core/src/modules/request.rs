@@ -1,6 +1,6 @@
 use crate::imports::*;
 use egui_phosphor::light::CLIPBOARD_TEXT;
-// use kaspa_rpc_core::hash;
+// use tondi_rpc_core::hash;
 use std::{borrow::Cow, collections::hash_map::Entry};
 pub use xxhash_rust::xxh3::xxh3_64;
 
@@ -14,7 +14,7 @@ impl std::fmt::Display for RequestUri {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut uri = self.address.clone();
         if let Some(amount_sompi) = self.amount_sompi {
-            uri = format!("{}?amount={}", uri, sompi_to_kaspa(amount_sompi));
+            uri = format!("{}?amount={}", uri, sompi_to_tondi(amount_sompi));
         }
         if let Some(label) = self.label.as_ref() {
             uri = format!("{}?label={}", uri, label);
@@ -188,7 +188,7 @@ impl ModuleT for Request {
                 );
 
                 if amount != this.amount {
-                    match try_kaspa_str_to_sompi(this.amount.as_str()) {
+                    match try_tondi_str_to_sompi(this.amount.as_str()) {
                         Ok(Some(amount_sompi)) => {
                             this.amount_sompi = Some(amount_sompi);
                             this.error = None;

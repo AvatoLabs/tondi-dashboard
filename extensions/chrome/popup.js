@@ -5,8 +5,8 @@
 //     });
 // }
 
-// import init from '/kaspa-egui-57c7a8dd13e092be.js';
-// init('/kaspa-egui-57c7a8dd13e092be_bg.wasm');
+// import init from '/tondi-egui-57c7a8dd13e092be.js';
+// init('/tondi-egui-57c7a8dd13e092be_bg.wasm');
 
 // -----------
 
@@ -40,4 +40,4 @@ import init from '/tondi-dashboard.js';
 })();
 
 
-// wasm_bindgen('/kaspa-ng_bg.wasm');
+// wasm_bindgen('/tondi-ng_bg.wasm');

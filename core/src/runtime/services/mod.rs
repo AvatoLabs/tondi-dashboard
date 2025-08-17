@@ -3,8 +3,8 @@ use crate::imports::*;
 pub mod repaint_service;
 pub use repaint_service::RepaintService;
 
-pub mod kaspa;
-pub use kaspa::KaspaService;
+pub mod tondi;
+pub use tondi::TondiService;
 
 pub mod peer_monitor;
 pub use peer_monitor::PeerMonitorService;
@@ -28,7 +28,7 @@ cfg_if! {
     }
 }
 
-/// Service is a core component of the Kaspa NG application responsible for
+/// Service is a core component of the Tondi NG application responsible for
 /// running application services and communication between these services.
 #[async_trait]
 pub trait Service: Sync + Send {
@@ -43,23 +43,23 @@ pub trait Service: Sync + Send {
     /// Block until the service is terminated
     async fn join(self: Arc<Self>) -> Result<()>;
 
-    /// Called when Kaspa RPC API has been created (but node is not
+    /// Called when Tondi RPC API has been created (but node is not
     /// connected yet, see [`connect_rpc`](Service::connect_rpc))
     /// for connectivity signalling.
     async fn attach_rpc(self: Arc<Self>, _rpc_api: &Arc<dyn RpcApi>) -> Result<()> {
         Ok(())
     }
-    /// Called when Kaspa RPC API is no longer available
+    /// Called when Tondi RPC API is no longer available
     async fn detach_rpc(self: Arc<Self>) -> Result<()> {
         Ok(())
     }
 
-    /// Called when Kaspa RPC API has successfully connected
+    /// Called when Tondi RPC API has successfully connected
     async fn connect_rpc(self: Arc<Self>) -> Result<()> {
         Ok(())
     }
 
-    /// Called when Kaspa RPC API has disconnected
+    /// Called when Tondi RPC API has disconnected
     async fn disconnect_rpc(self: Arc<Self>) -> Result<()> {
         Ok(())
     }

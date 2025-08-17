@@ -1,10 +1,10 @@
 use crate::imports::*;
 use crate::runtime::Service;
 pub use futures::{future::FutureExt, select, Future};
-use kaspa_metrics_core::{Metric, Metrics, MetricsSnapshot};
-use kaspa_rpc_core::GetSystemInfoResponse;
+use tondi_metrics_core::{Metric, Metrics, MetricsSnapshot};
+use tondi_rpc_core::GetSystemInfoResponse;
 #[allow(unused_imports)]
-use kaspa_wallet_core::rpc::{NotificationMode, Rpc, RpcCtl, WrpcEncoding};
+use tondi_wallet_core::rpc::{NotificationMode, Rpc, RpcCtl, WrpcEncoding};
 
 #[allow(clippy::identity_op)]
 pub const MAX_METRICS_SAMPLES: usize = 60 * 60 * 24 * 1; // 1 day

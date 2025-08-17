@@ -1,4 +1,4 @@
-use kaspa_wrpc_client::Resolver;
+use tondi_wrpc_client::Resolver;
 
 use crate::imports::*;
 

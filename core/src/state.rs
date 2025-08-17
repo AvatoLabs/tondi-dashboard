@@ -1,6 +1,6 @@
-use kaspa_consensus_core::network::NetworkId;
-use kaspa_metrics_core::MetricsSnapshot;
-use kaspa_wallet_core::events::SyncState;
+use tondi_consensus_core::network::NetworkId;
+use tondi_metrics_core::MetricsSnapshot;
+use tondi_wallet_core::events::SyncState;
 
 #[derive(Default)]
 pub struct State {

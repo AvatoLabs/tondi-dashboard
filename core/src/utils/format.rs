@@ -59,7 +59,7 @@ pub fn format_partial_string(text: impl Into<String>, range: Option<usize>) -> S
     }
 }
 
-/// SOMPI (u64) to KASPA (string) with suffix layout job generator
+/// SOMPI (u64) to TONDI (string) with suffix layout job generator
 pub fn s2kws_layout_job(
     enable: bool,
     sompi: u64,
@@ -67,12 +67,12 @@ pub fn s2kws_layout_job(
     color: Color32,
     font: FontId,
 ) -> LayoutJob {
-    let suffix = kaspa_suffix(network_type);
+    let suffix = tondi_suffix(network_type);
     let style = Style::default();
 
     let mut layout_job = LayoutJob::default();
     if !enable {
-        let kas = sompi_to_kaspa_string_with_suffix(sompi, network_type);
+        let kas = sompi_to_tondi_string_with_suffix(sompi, network_type);
         let text = RichText::new(kas).color(color).font(font.clone());
         text.append_to(
             &mut layout_job,
@@ -109,7 +109,7 @@ pub fn s2kws_layout_job(
         layout_job
     } else {
         let transparent = color.gamma_multiply(0.05);
-        let kas = sompi_to_kaspa_string_with_trailing_zeroes(sompi);
+        let kas = sompi_to_tondi_string_with_trailing_zeroes(sompi);
         let mut digits = kas.chars().rev().take_while(|c| *c == '0').count();
         if digits == 8 {
             digits = 7;

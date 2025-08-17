@@ -1,6 +1,6 @@
 use crate::imports::*;
 use crate::sync::SyncStatus;
-// use kaspa_metrics_core::MetricsSnapshot;
+// use tondi_metrics_core::MetricsSnapshot;
 
 enum ConnectionStatus {
     Connected {
@@ -122,7 +122,7 @@ impl<'core> Status<'core> {
 
         if !connection_selector {
             ui.label(i18n("CONNECTED")).on_hover_ui(|ui| {
-                if let Some(wrpc_url) = runtime().kaspa_service().rpc_url() {
+                if let Some(wrpc_url) = runtime().tondi_service().rpc_url() {
                     ui.horizontal(|ui| {
                         ui.label(wrpc_url);
                     });
@@ -136,7 +136,7 @@ impl<'core> Status<'core> {
 
             if !PopupPanel::is_open(ui, popup_id) {
                 response.on_hover_ui(|ui| {
-                    if let Some(wrpc_url) = runtime().kaspa_service().rpc_url() {
+                    if let Some(wrpc_url) = runtime().tondi_service().rpc_url() {
                         ui.horizontal(|ui| {
                             ui.label(wrpc_url);
                         });
@@ -203,7 +203,7 @@ impl<'core> Status<'core> {
                 ui.add_space(left_padding);
 
                 match self.settings().node.node_kind {
-                    KaspadNodeKind::Disable => {
+                    TondidNodeKind::Disable => {
                         ui.label(
                             RichText::new(egui_phosphor::light::PLUGS)
                                 .size(status_icon_size)
@@ -212,7 +212,7 @@ impl<'core> Status<'core> {
                         ui.separator();
                         ui.label(i18n("Not Connected"));
                     }
-                    KaspadNodeKind::Remote => {
+                    TondidNodeKind::Remote => {
                         ui.label(
                             RichText::new(egui_phosphor::light::CLOUD_X)
                                 .size(status_icon_size)
@@ -222,9 +222,9 @@ impl<'core> Status<'core> {
 
                         let settings = self.settings();
                         match settings.node.node_kind {
-                            KaspadNodeKind::Remote => match settings.node.connection_config_kind {
+                            TondidNodeKind::Remote => match settings.node.connection_config_kind {
                                 NodeConnectionConfigKind::Custom => {
-                                    match KaspaRpcClient::parse_url(
+                                    match TondiRpcClient::parse_url(
                                         settings.node.wrpc_url.clone(),
                                         settings.node.wrpc_encoding,
                                         settings.node.network.into(),
@@ -249,7 +249,7 @@ impl<'core> Status<'core> {
                                     }
                                 }
                                 NodeConnectionConfigKind::PublicServerCustom => {
-                                    if let Some(rpc_url) = runtime().kaspa_service().rpc_url() {
+                                    if let Some(rpc_url) = runtime().tondi_service().rpc_url() {
                                         ui.label(format!(
                                             "{} {} ...",
                                             i18n("Connecting to"),
@@ -259,7 +259,7 @@ impl<'core> Status<'core> {
                                 }
                                 NodeConnectionConfigKind::PublicServerRandom => {
                                     if let Some(instant) = runtime()
-                                        .kaspa_service()
+                                        .tondi_service()
                                         .services_start_instant
                                         .lock()
                                         .unwrap()
@@ -277,13 +277,13 @@ impl<'core> Status<'core> {
                                                 .clicked()
                                             {
                                                 let options = runtime()
-                                                    .kaspa_service()
+                                                    .tondi_service()
                                                     .rpc_url()
                                                     .map(|rpc_url| {
                                                         RpcOptions::new().blacklist(rpc_url)
                                                     });
 
-                                                runtime().kaspa_service().update_services(
+                                                runtime().tondi_service().update_services(
                                                     &self.core.settings.node,
                                                     options,
                                                 );
@@ -293,7 +293,7 @@ impl<'core> Status<'core> {
                                         }
                                     }
 
-                                    if let Some(rpc_url) = runtime().kaspa_service().rpc_url() {
+                                    if let Some(rpc_url) = runtime().tondi_service().rpc_url() {
                                         ui.label(format!(
                                             "{} {} ...",
                                             i18n("Connecting to"),

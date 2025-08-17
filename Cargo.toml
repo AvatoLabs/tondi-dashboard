@@ -14,6 +14,7 @@ version = "1.0.0"
 authors = ["Tondi Developers"]
 license = "ISC"
 edition = "2021"
+repository = "https://github.com/AvatoLabs/tondi-dashboard"
 
 
 [workspace.dependencies]

@@ -1,8 +1,8 @@
 use crate::imports::*;
-use kaspa_notify::{listener::ListenerId, scope::*};
-use kaspa_rpc_core::api::notifications::Notification;
-use kaspa_rpc_core::notify::connection::{ChannelConnection, ChannelType};
-use kaspa_rpc_core::{RpcBlock, VirtualChainChangedNotification};
+use tondi_notify::{listener::ListenerId, scope::*};
+use tondi_rpc_core::api::notifications::Notification;
+use tondi_rpc_core::notify::connection::{ChannelConnection, ChannelType};
+use tondi_rpc_core::{RpcBlock, VirtualChainChangedNotification};
 
 pub enum BlockDagMonitorEvents {
     Enable,
@@ -24,7 +24,7 @@ pub struct BlockDagMonitorService {
     is_connected: Arc<AtomicBool>,
     pub chain: Mutex<AHashMap<u64, DaaBucket>>,
     pub separators: Mutex<Vec<u64>>,
-    pub new_blocks: Arc<Mutex<AHashSet<kaspa_consensus_core::Hash>>>,
+    pub new_blocks: Arc<Mutex<AHashSet<tondi_consensus_core::Hash>>>,
     pub settings: Mutex<Arc<BlockDagGraphSettings>>,
 }
 
@@ -142,7 +142,7 @@ impl BlockDagMonitorService {
             .unwrap();
     }
 
-    pub fn new_blocks(&self) -> MutexGuard<'_, AHashSet<kaspa_consensus_core::Hash>> {
+    pub fn new_blocks(&self) -> MutexGuard<'_, AHashSet<tondi_consensus_core::Hash>> {
         self.new_blocks.lock().unwrap()
     }
 
@@ -204,7 +204,7 @@ impl Service for BlockDagMonitorService {
     async fn spawn(self: Arc<Self>) -> Result<()> {
         let _application_events_sender = self.application_events.sender.clone();
 
-        let mut blocks_by_hash: AHashMap<kaspa_consensus_core::Hash, Arc<RpcBlock>> =
+        let mut blocks_by_hash: AHashMap<tondi_consensus_core::Hash, Arc<RpcBlock>> =
             AHashMap::default();
 
         let mut settings = (*self.settings.lock().unwrap()).clone();

@@ -2,7 +2,7 @@ use std::any::type_name;
 
 use crate::imports::*;
 
-kaspa_ng_macros::register_modules!(
+tondi_ng_macros::register_modules!(
     register_generic_modules,
     [
         account_create,
@@ -24,10 +24,10 @@ kaspa_ng_macros::register_modules!(
 );
 
 #[cfg(not(target_arch = "wasm32"))]
-kaspa_ng_macros::register_modules!(register_native_modules, [changelog, logs, node,]);
+tondi_ng_macros::register_modules!(register_native_modules, [changelog, logs, node,]);
 
 #[cfg(not(feature = "lean"))]
-kaspa_ng_macros::register_modules!(register_advanced_modules, [block_dag, metrics,]);
+tondi_ng_macros::register_modules!(register_advanced_modules, [block_dag, metrics,]);
 
 pub enum ModuleStyle {
     Mobile,

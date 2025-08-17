@@ -1,8 +1,8 @@
 use crate::imports::*;
-use kaspa_metrics_core::Metric;
-use kaspa_utils::networking::ContextualNetAddress;
-use kaspa_wallet_core::storage::local::storage::Storage;
-use kaspa_wrpc_client::WrpcEncoding;
+use tondi_metrics_core::Metric;
+use tondi_utils::networking::ContextualNetAddress;
+use tondi_wallet_core::storage::local::storage::Storage;
+use tondi_wrpc_client::WrpcEncoding;
 use workflow_core::{runtime, task::spawn};
 
 const SETTINGS_REVISION: &str = "0.0.0";
@@ -11,7 +11,7 @@ cfg_if! {
     if #[cfg(not(target_arch = "wasm32"))] {
         #[derive(Default, Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
         #[serde(rename_all = "kebab-case")]
-        pub enum KaspadNodeKind {
+        pub enum TondidNodeKind {
             Disable,
             Remote,
             IntegratedInProc,
@@ -21,24 +21,24 @@ cfg_if! {
             ExternalAsDaemon,
         }
 
-        const KASPAD_NODE_KINDS: [KaspadNodeKind; 6] = [
-            KaspadNodeKind::Disable,
-            KaspadNodeKind::Remote,
-            KaspadNodeKind::IntegratedInProc,
-            KaspadNodeKind::IntegratedAsDaemon,
-            KaspadNodeKind::IntegratedAsPassiveSync,
-            KaspadNodeKind::ExternalAsDaemon,
+        const TONDID_NODE_KINDS: [TondidNodeKind; 6] = [
+            TondidNodeKind::Disable,
+            TondidNodeKind::Remote,
+            TondidNodeKind::IntegratedInProc,
+            TondidNodeKind::IntegratedAsDaemon,
+            TondidNodeKind::IntegratedAsPassiveSync,
+            TondidNodeKind::ExternalAsDaemon,
         ];
 
-        impl std::fmt::Display for KaspadNodeKind {
+        impl std::fmt::Display for TondidNodeKind {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 match self {
-                    KaspadNodeKind::Disable => write!(f, "{}", i18n("Disabled")),
-                    KaspadNodeKind::Remote => write!(f, "{}", i18n("Remote")),
-                    KaspadNodeKind::IntegratedInProc => write!(f, "{}", i18n("Integrated Node")),
-                    KaspadNodeKind::IntegratedAsDaemon => write!(f, "{}", i18n("Integrated Daemon")),
-                    KaspadNodeKind::IntegratedAsPassiveSync => write!(f, "{}", i18n("Passive Sync")),
-                    KaspadNodeKind::ExternalAsDaemon => write!(f, "{}", i18n("External Daemon")),
+                    TondidNodeKind::Disable => write!(f, "{}", i18n("Disabled")),
+                    TondidNodeKind::Remote => write!(f, "{}", i18n("Remote")),
+                    TondidNodeKind::IntegratedInProc => write!(f, "{}", i18n("Integrated Node")),
+                    TondidNodeKind::IntegratedAsDaemon => write!(f, "{}", i18n("Integrated Daemon")),
+                    TondidNodeKind::IntegratedAsPassiveSync => write!(f, "{}", i18n("Passive Sync")),
+                    TondidNodeKind::ExternalAsDaemon => write!(f, "{}", i18n("External Daemon")),
                 }
             }
         }
@@ -46,74 +46,74 @@ cfg_if! {
     } else {
         #[derive(Default, Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
         #[serde(rename_all = "kebab-case")]
-        pub enum KaspadNodeKind {
+        pub enum TondidNodeKind {
             #[default]
             Disable,
             Remote,
         }
 
-        const KASPAD_NODE_KINDS: [KaspadNodeKind; 1] = [
-            KaspadNodeKind::Remote,
+        const TONDID_NODE_KINDS: [TondidNodeKind; 1] = [
+            TondidNodeKind::Remote,
         ];
 
-        impl std::fmt::Display for KaspadNodeKind {
+        impl std::fmt::Display for TondidNodeKind {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 match self {
-                    KaspadNodeKind::Disable => write!(f, "Disable"),
-                    KaspadNodeKind::Remote => write!(f, "Remote"),
+                    TondidNodeKind::Disable => write!(f, "Disable"),
+                    TondidNodeKind::Remote => write!(f, "Remote"),
                 }
             }
         }
     }
 }
 
-impl KaspadNodeKind {
-    pub fn iter() -> impl Iterator<Item = &'static KaspadNodeKind> {
-        KASPAD_NODE_KINDS.iter()
+impl TondidNodeKind {
+    pub fn iter() -> impl Iterator<Item = &'static TondidNodeKind> {
+        TONDID_NODE_KINDS.iter()
     }
 
     pub fn describe(&self) -> &str {
         match self {
-            KaspadNodeKind::Disable => i18n("Disables node connectivity (Offline Mode)."),
-            KaspadNodeKind::Remote => i18n("Connects to a Remote Rusty Kaspa Node via wRPC."),
+            TondidNodeKind::Disable => i18n("Disables node connectivity (Offline Mode)."),
+            TondidNodeKind::Remote => i18n("Connects to a Remote Rusty Tondi Node via wRPC."),
             #[cfg(not(target_arch = "wasm32"))]
-            KaspadNodeKind::IntegratedInProc => i18n("The node runs as a part of the Kaspa-NG application process. This reduces communication overhead (experimental)."),
+            TondidNodeKind::IntegratedInProc => i18n("The node runs as a part of the Tondi-NG application process. This reduces communication overhead (experimental)."),
             #[cfg(not(target_arch = "wasm32"))]
-            KaspadNodeKind::IntegratedAsDaemon => i18n("The node is spawned as a child daemon process (recommended)."),
+            TondidNodeKind::IntegratedAsDaemon => i18n("The node is spawned as a child daemon process (recommended)."),
             #[cfg(not(target_arch = "wasm32"))]
-            KaspadNodeKind::IntegratedAsPassiveSync => i18n("The node synchronizes in the background while Kaspa-NG is connected to a public node. Once the node is synchronized, you can switch to the 'Integrated Daemon' mode."),
+            TondidNodeKind::IntegratedAsPassiveSync => i18n("The node synchronizes in the background while Tondi-NG is connected to a public node. Once the node is synchronized, you can switch to the 'Integrated Daemon' mode."),
             #[cfg(not(target_arch = "wasm32"))]
-            KaspadNodeKind::ExternalAsDaemon => i18n("A binary at another location is spawned a child process (experimental, for development purposes only)."),
+            TondidNodeKind::ExternalAsDaemon => i18n("A binary at another location is spawned a child process (experimental, for development purposes only)."),
         }
     }
 
     pub fn is_config_capable(&self) -> bool {
         match self {
-            KaspadNodeKind::Disable => false,
-            KaspadNodeKind::Remote => false,
+            TondidNodeKind::Disable => false,
+            TondidNodeKind::Remote => false,
             #[cfg(not(target_arch = "wasm32"))]
-            KaspadNodeKind::IntegratedInProc => true,
+            TondidNodeKind::IntegratedInProc => true,
             #[cfg(not(target_arch = "wasm32"))]
-            KaspadNodeKind::IntegratedAsDaemon => true,
+            TondidNodeKind::IntegratedAsDaemon => true,
             #[cfg(not(target_arch = "wasm32"))]
-            KaspadNodeKind::IntegratedAsPassiveSync => true,
+            TondidNodeKind::IntegratedAsPassiveSync => true,
             #[cfg(not(target_arch = "wasm32"))]
-            KaspadNodeKind::ExternalAsDaemon => true,
+            TondidNodeKind::ExternalAsDaemon => true,
         }
     }
 
     pub fn is_local(&self) -> bool {
         match self {
-            KaspadNodeKind::Disable => false,
-            KaspadNodeKind::Remote => false,
+            TondidNodeKind::Disable => false,
+            TondidNodeKind::Remote => false,
             #[cfg(not(target_arch = "wasm32"))]
-            KaspadNodeKind::IntegratedInProc => true,
+            TondidNodeKind::IntegratedInProc => true,
             #[cfg(not(target_arch = "wasm32"))]
-            KaspadNodeKind::IntegratedAsDaemon => true,
+            TondidNodeKind::IntegratedAsDaemon => true,
             #[cfg(not(target_arch = "wasm32"))]
-            KaspadNodeKind::IntegratedAsPassiveSync => true,
+            TondidNodeKind::IntegratedAsPassiveSync => true,
             #[cfg(not(target_arch = "wasm32"))]
-            KaspadNodeKind::ExternalAsDaemon => true,
+            TondidNodeKind::ExternalAsDaemon => true,
         }
     }
 }
@@ -161,7 +161,7 @@ impl Default for RpcConfig {
                 let url = "127.0.0.1";
             } else {
                 use workflow_dom::utils::*;
-                let url = window().location().hostname().expect("KaspadNodeKind: Unable to get hostname");
+                let url = window().location().hostname().expect("TondidNodeKind: Unable to get hostname");
             }
         }
         RpcConfig::Wrpc {
@@ -292,7 +292,7 @@ impl std::fmt::Display for NodeMemoryScale {
 impl NodeMemoryScale {
     pub fn describe(&self) -> &str {
         match self {
-            NodeMemoryScale::Default => i18n("Managed by the Rusty Kaspa daemon"),
+            NodeMemoryScale::Default => i18n("Managed by the Rusty Tondi daemon"),
             NodeMemoryScale::Conservative => i18n("Use 50%-75% of available system memory"),
             NodeMemoryScale::Performance => i18n("Use all available system memory"),
         }
@@ -375,14 +375,14 @@ pub struct NodeSettings {
     pub memory_scale: NodeMemoryScale,
 
     pub network: Network,
-    pub node_kind: KaspadNodeKind,
-    pub kaspad_daemon_binary: String,
-    pub kaspad_daemon_args: String,
-    pub kaspad_daemon_args_enable: bool,
+    pub node_kind: TondidNodeKind,
+    pub tondid_daemon_binary: String,
+    pub tondid_daemon_args: String,
+    pub tondid_daemon_args_enable: bool,
     #[serde(default)]
-    pub kaspad_daemon_storage_folder_enable: bool,
+    pub tondid_daemon_storage_folder_enable: bool,
     #[serde(default)]
-    pub kaspad_daemon_storage_folder: String,
+    pub tondid_daemon_storage_folder: String,
 }
 
 impl Default for NodeSettings {
@@ -401,12 +401,12 @@ impl Default for NodeSettings {
             enable_upnp: true,
             memory_scale: NodeMemoryScale::default(),
             network: Network::default(),
-            node_kind: KaspadNodeKind::default(),
-            kaspad_daemon_binary: String::default(),
-            kaspad_daemon_args: String::default(),
-            kaspad_daemon_args_enable: false,
-            kaspad_daemon_storage_folder_enable: false,
-            kaspad_daemon_storage_folder: String::default(),
+            node_kind: TondidNodeKind::default(),
+            tondid_daemon_binary: String::default(),
+            tondid_daemon_args: String::default(),
+            tondid_daemon_args_enable: false,
+            tondid_daemon_storage_folder_enable: false,
+            tondid_daemon_storage_folder: String::default(),
         }
     }
 }
@@ -425,8 +425,8 @@ impl NodeSettings {
                 } else if self.connection_config_kind != other.connection_config_kind
                 {
                     Some(true)
-                } else if self.kaspad_daemon_storage_folder_enable != other.kaspad_daemon_storage_folder_enable
-                    || other.kaspad_daemon_storage_folder_enable && (self.kaspad_daemon_storage_folder != other.kaspad_daemon_storage_folder)
+                } else if self.tondid_daemon_storage_folder_enable != other.tondid_daemon_storage_folder_enable
+                    || other.tondid_daemon_storage_folder_enable && (self.tondid_daemon_storage_folder != other.tondid_daemon_storage_folder)
                 {
                     Some(true)
                 } else if self.enable_grpc != other.enable_grpc
@@ -437,13 +437,13 @@ impl NodeSettings {
                     || self.wrpc_json_network_interface != other.wrpc_json_network_interface
                     || self.enable_upnp != other.enable_upnp
                 {
-                    Some(self.node_kind != KaspadNodeKind::IntegratedInProc)
-                } else if self.kaspad_daemon_args != other.kaspad_daemon_args
-                    || self.kaspad_daemon_args_enable != other.kaspad_daemon_args_enable
+                    Some(self.node_kind != TondidNodeKind::IntegratedInProc)
+                } else if self.tondid_daemon_args != other.tondid_daemon_args
+                    || self.tondid_daemon_args_enable != other.tondid_daemon_args_enable
                 {
                     Some(self.node_kind.is_config_capable())
-                } else if self.kaspad_daemon_binary != other.kaspad_daemon_binary {
-                    Some(self.node_kind == KaspadNodeKind::ExternalAsDaemon)
+                } else if self.tondid_daemon_binary != other.tondid_daemon_binary {
+                    Some(self.node_kind == TondidNodeKind::ExternalAsDaemon)
                 } else {
                     None
                 }
@@ -665,7 +665,7 @@ impl Default for Settings {
 impl Settings {}
 
 fn storage() -> Result<Storage> {
-    Ok(Storage::try_new("kaspa-ng.settings")?)
+    Ok(Storage::try_new("tondi-ng.settings")?)
 }
 
 impl Settings {

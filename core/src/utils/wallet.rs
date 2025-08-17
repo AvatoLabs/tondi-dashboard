@@ -1,5 +1,5 @@
 use crate::imports::*;
-use kaspa_wallet_core::wallet::EncryptedMnemonic;
+use tondi_wallet_core::wallet::EncryptedMnemonic;
 use std::fmt::Display;
 
 #[derive(Debug, Deserialize)]
@@ -48,9 +48,9 @@ pub enum WalletType {
 
 #[derive(Debug, Default, Deserialize)]
 struct EncryptedMnemonicIntermediate {
-    #[serde(with = "kaspa_utils::serde_bytes")]
+    #[serde(with = "tondi_utils::serde_bytes")]
     cipher: Vec<u8>,
-    #[serde(with = "kaspa_utils::serde_bytes")]
+    #[serde(with = "tondi_utils::serde_bytes")]
     salt: Vec<u8>,
 }
 impl From<EncryptedMnemonicIntermediate> for EncryptedMnemonic<Vec<u8>> {

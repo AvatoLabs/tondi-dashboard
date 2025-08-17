@@ -65,8 +65,8 @@ impl WalletMenu {
 
                         let title = if let Some(title) = wallet_descriptor.title.clone() {
                             title
-                        } else if wallet_descriptor.filename.as_str() == "kaspa" {
-                            "Kaspa Wallet".to_string()
+                        } else if wallet_descriptor.filename.as_str() == "tondi" {
+                            "Tondi Wallet".to_string()
                         } else {
                             "NO NAME".to_string()
                         };
