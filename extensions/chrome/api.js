@@ -1,13 +1,13 @@
 async function apiBuilder(uuid, eventKey) {
 
-    const EVENT_NAME = "kaspa-wallet-message-" + eventKey;
-    const EVENT_REPLY = "kaspa-wallet-message-reply-" + eventKey;
+    const EVENT_NAME = "tondi-wallet-message-" + eventKey;
+    const EVENT_REPLY = "tondi-wallet-message-reply-" + eventKey;
 
-    const EVENT_WALLET_DISCOVERY = "kaspa-wallet-discovery";
-    const EVENT_WALLET_ANNOUNCE = "kaspa-wallet-announce";
+    const EVENT_WALLET_DISCOVERY = "tondi-wallet-discovery";
+    const EVENT_WALLET_ANNOUNCE = "tondi-wallet-announce";
 
     function log(...args) {
-        console.log("📘[kaspa-api]:", ...args);
+        console.log("📘[tondi-api]:", ...args);
     }
 
     log("event key", eventKey);
@@ -45,7 +45,7 @@ async function apiBuilder(uuid, eventKey) {
         }
     })
 
-    class KaspaApi {
+    class TondiApi {
 
         connect() {
             // Communicate a message back to the extension
@@ -62,7 +62,7 @@ async function apiBuilder(uuid, eventKey) {
         }
     }
 
-    const kaspa = new KaspaApi();
+    const tondi = new TondiApi();
 
     function annouceWallet() {
         let detail = Object.freeze({

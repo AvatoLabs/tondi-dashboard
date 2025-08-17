@@ -1,12 +1,12 @@
 (() => {
     function log(...args) {
-        console.log("%c📘[kng-content-script]:", "color:green", ...args);
+        console.log("%c📘[td-content-script]:", "color:green", ...args);
     }
 
     // const EVENT_KEY = (Math.random()*1e10).toString(16).substring(0, 12);
     const EVENT_KEY = (Math.random() * 1e10).toString().substring(0, 10);
-    const EVENT_NAME = "kaspa-wallet-message-" + EVENT_KEY;
-    const EVENT_REPLY = "kaspa-wallet-message-reply-" + EVENT_KEY;
+    const EVENT_NAME = "tondi-wallet-message-" + EVENT_KEY;
+    const EVENT_REPLY = "tondi-wallet-message-reply-" + EVENT_KEY;
 
     log("EVENT_KEY", EVENT_KEY);
 

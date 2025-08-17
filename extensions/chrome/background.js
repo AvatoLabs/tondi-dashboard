@@ -32,10 +32,10 @@ import init from '/tondi-dashboard.js';
     globalThis.initPageScript = initPageScript;
     globalThis.openPopup = openPopup;
 
-    let kaspa_ng = await init('/kaspa-ng_bg.wasm');
+    let tondi_dashboard = await init('/tondi-dashboard_bg.wasm');
 
     // console.log("init", init);
-    // console.log("kaspa_ng", kaspa_ng);
+    // console.log("tondi_dashboard", tondi_dashboard);
 
-    await kaspa_ng.kaspa_ng_background();
+    await tondi_dashboard.tondi_dashboard_background();
 })();
