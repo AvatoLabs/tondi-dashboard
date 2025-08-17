@@ -1,0 +1,24 @@
+[package]
+name = "tondi-dashboard"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+edition.workspace = true
+repository.workspace = true
+description = "Tondi Dashboard - Desktop p2p node based on Rusty Tondi"
+readme = "../README.md"
+
+[features]
+console = ["tondi-dashboard-core/console"]
+
+[dependencies]
+tondi-dashboard-core.workspace = true
+workflow-log.workspace = true
+cfg-if.workspace = true
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tondi-alloc.workspace = true
+tokio.workspace = true
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen-futures.workspace = true
