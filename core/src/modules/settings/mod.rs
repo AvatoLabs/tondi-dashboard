@@ -8,6 +8,7 @@ pub struct Settings {
     wrpc_json_network_interface : NetworkInterfaceEditor,
     grpc_network_interface : NetworkInterfaceEditor,
     reset_settings : bool,
+    temp_devnet_url_input: String, // Temporary storage for devnet URL input
 }
 
 impl Settings {
@@ -19,6 +20,7 @@ impl Settings {
             wrpc_json_network_interface : NetworkInterfaceEditor::default(),
             grpc_network_interface : NetworkInterfaceEditor::default(),
             reset_settings : false,
+            temp_devnet_url_input: String::new(),
         }
     }
 
@@ -31,6 +33,12 @@ impl Settings {
     }
 
     pub fn change_current_network(&mut self, network : Network) {
+        // Clear devnet custom URL when switching away from devnet
+        if self.settings.node.network == Network::Devnet && network != Network::Devnet {
+            self.settings.node.devnet_custom_url = None;
+            self.temp_devnet_url_input.clear();
+        }
+        
         self.settings.node.network = network;
     }
 
@@ -175,9 +183,10 @@ impl Settings {
                         ui.horizontal_wrapped(|ui|{
                             Network::iter().for_each(|network| {
                                 if ui.radio_value(&mut self.settings.node.network, *network, network.name()).changed() {
-                                    // Update core settings when network changes
-                                    core.settings.node.network = *network;
-                                    core.store_settings();
+                                    // Use core's change_current_network method to ensure proper synchronization
+                                    core.change_current_network(*network);
+                                    // Reload settings to sync with core
+                                    self.load(core.settings.clone());
                                 }
                             });
                         });
@@ -186,15 +195,20 @@ impl Settings {
                         if self.settings.node.network == Network::Devnet {
                             ui.add_space(8.0);
                             
-                            // URL input field
-                            ui.horizontal(|ui| {
-                                ui.label(i18n("Custom Devnet URL:"));
-                                let mut url_input = self.settings.node.devnet_custom_url.clone().unwrap_or_default();
-                                if ui.add(TextEdit::singleline(&mut url_input)).changed() {
-                                    // Store temporary input but don't save yet
-                                    self.settings.node.devnet_custom_url = if url_input.is_empty() { None } else { Some(url_input) };
+                            // Show current URL from settings
+                            if let Some(url) = &self.settings.node.devnet_custom_url {
+                                if !url.is_empty() {
+                                    let url_clone = url.clone(); // Clone to avoid borrowing issues
+                                    ui.horizontal(|ui| {
+                                        ui.label(format!("{}: {}", i18n("Current URL"), url_clone));
+                                        if ui.button(i18n("Clear URL")).clicked() {
+                                            self.settings.node.devnet_custom_url = None;
+                                            core.settings.node.devnet_custom_url = None;
+                                            core.store_settings();
+                                        }
+                                    });
                                 }
-                            });
+                            }
                             
                             // Format hint
                             ui.colored_label(
@@ -202,30 +216,24 @@ impl Settings {
                                 i18n("Format: http://hostname:port or just hostname:port (e.g., 127.0.0.1:17110)")
                             );
                             
-                            // Confirmation button
-                            if let Some(url) = &self.settings.node.devnet_custom_url {
-                                if !url.is_empty() {
-                                    ui.horizontal(|ui| {
-                                        if ui.button(i18n("Confirm URL")).clicked() {
-                                            // Save the confirmed URL
-                                            core.settings.node.devnet_custom_url = self.settings.node.devnet_custom_url.clone();
-                                            core.store_settings();
-                                        }
-                                        ui.label(format!("{}: {}", i18n("Current URL"), url));
-                                    });
+                            // Input field for new URL
+                            ui.horizontal(|ui| {
+                                ui.label(i18n("New URL:"));
+                                if ui.add(TextEdit::singleline(&mut self.temp_devnet_url_input)).changed() {
+                                    // Input is automatically stored in the persistent field
                                 }
-                            }
-                            
-                            // Clear button for existing URL
-                            if let Some(url) = &self.settings.node.devnet_custom_url {
-                                if !url.is_empty() {
-                                    if ui.button(i18n("Clear URL")).clicked() {
-                                        self.settings.node.devnet_custom_url = None;
-                                        core.settings.node.devnet_custom_url = None;
+                                
+                                // Apply button
+                                if !self.temp_devnet_url_input.is_empty() {
+                                    if ui.button(i18n("Apply")).clicked() {
+                                        self.settings.node.devnet_custom_url = Some(self.temp_devnet_url_input.clone());
+                                        core.settings.node.devnet_custom_url = Some(self.temp_devnet_url_input.clone());
                                         core.store_settings();
+                                        // Clear the input field after applying
+                                        self.temp_devnet_url_input.clear();
                                     }
                                 }
-                            }
+                            });
                             
                             ui.label(i18n("Leave empty to use default devnet configuration"));
                         }
