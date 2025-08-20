@@ -62,6 +62,9 @@ tondi-wrpc-server = { path = "../Tondi/rpc/wrpc/server" }
 tondi-txscript = { path = "../Tondi/crypto/txscript" }
 tondid = { path = "../Tondi/tondid" }
 
+# bp-tondi-client dependency for gRPC support
+bp-tondi = { path = "/home/arthur/AvatoLabs/bp-tondi" }
+
 # workflow dependencies
 workflow-core = "0.18.0"
 workflow-i18n = "0.18.0"

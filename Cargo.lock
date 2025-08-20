@@ -1010,6 +1010,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "bp-tondi"
+version = "0.12.0-rc.3"
+dependencies = [
+ "hex-literal",
+ "log",
+ "nill",
+ "thiserror 2.0.12",
+ "tokio",
+ "tondi-grpc-client 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+]
+
+[[package]]
 name = "bs58"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2850,6 +2862,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "hex-literal"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bcaaec4551594c969335c98c903c1397853d4198408ea609190f420500f6be71"
+
+[[package]]
 name = "hex_lit"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4115,6 +4133,12 @@ dependencies = [
  "serde",
  "syn 1.0.109",
 ]
+
+[[package]]
+name = "nill"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e3f812d8079eaf22bf04140165a0af9b4ad98af51328623a2056e07c83e0266"
 
 [[package]]
 name = "nix"
@@ -6679,6 +6703,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "tondi-addresses"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "borsh",
+ "js-sys",
+ "serde",
+ "smallvec",
+ "thiserror 1.0.69",
+ "wasm-bindgen",
+ "workflow-log",
+ "workflow-wasm",
+]
+
+[[package]]
 name = "tondi-addressmanager"
 version = "0.17.0"
 dependencies = [
@@ -6693,10 +6732,10 @@ dependencies = [
  "serde",
  "thiserror 1.0.69",
  "tokio",
- "tondi-consensus-core",
- "tondi-core",
+ "tondi-consensus-core 0.17.0",
+ "tondi-core 0.17.0",
  "tondi-database",
- "tondi-utils",
+ "tondi-utils 0.17.0",
 ]
 
 [[package]]
@@ -6725,8 +6764,8 @@ dependencies = [
  "sha2",
  "subtle",
  "thiserror 1.0.69",
- "tondi-consensus-core",
- "tondi-utils",
+ "tondi-consensus-core 0.17.0",
+ "tondi-utils 0.17.0",
  "wasm-bindgen",
  "workflow-wasm",
  "zeroize",
@@ -6755,14 +6794,14 @@ dependencies = [
  "textwrap 0.16.2",
  "thiserror 1.0.69",
  "tokio",
- "tondi-addresses",
+ "tondi-addresses 0.17.0",
  "tondi-bip32",
- "tondi-consensus-core",
- "tondi-core",
+ "tondi-consensus-core 0.17.0",
+ "tondi-core 0.17.0",
  "tondi-daemon",
  "tondi-metrics-core",
- "tondi-rpc-core",
- "tondi-utils",
+ "tondi-rpc-core 0.17.0",
+ "tondi-utils 0.17.0",
  "tondi-wallet-core",
  "tondi-wallet-keys",
  "tondi-wallet-pskt",
@@ -6791,9 +6830,9 @@ dependencies = [
  "rand 0.8.5",
  "tokio",
  "tondi-addressmanager",
- "tondi-core",
+ "tondi-core 0.17.0",
  "tondi-p2p-lib",
- "tondi-utils",
+ "tondi-utils 0.17.0",
 ]
 
 [[package]]
@@ -6822,21 +6861,21 @@ dependencies = [
  "thiserror 1.0.69",
  "time",
  "tokio",
- "tondi-addresses",
- "tondi-consensus-core",
- "tondi-consensus-notify",
+ "tondi-addresses 0.17.0",
+ "tondi-consensus-core 0.17.0",
+ "tondi-consensus-notify 0.17.0",
  "tondi-consensusmanager",
- "tondi-core",
+ "tondi-core 0.17.0",
  "tondi-database",
- "tondi-hashes",
- "tondi-math",
- "tondi-merkle",
- "tondi-muhash",
- "tondi-notify",
+ "tondi-hashes 0.17.0",
+ "tondi-math 0.17.0",
+ "tondi-merkle 0.17.0",
+ "tondi-muhash 0.17.0",
+ "tondi-notify 0.17.0",
  "tondi-pow",
- "tondi-txscript",
- "tondi-txscript-errors",
- "tondi-utils",
+ "tondi-txscript 0.17.0",
+ "tondi-txscript-errors 0.17.0",
+ "tondi-utils 0.17.0",
 ]
 
 [[package]]
@@ -6855,13 +6894,42 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "thiserror 1.0.69",
- "tondi-addresses",
- "tondi-consensus-core",
- "tondi-hashes",
- "tondi-math",
- "tondi-txscript",
- "tondi-utils",
- "tondi-wasm-core",
+ "tondi-addresses 0.17.0",
+ "tondi-consensus-core 0.17.0",
+ "tondi-hashes 0.17.0",
+ "tondi-math 0.17.0",
+ "tondi-txscript 0.17.0",
+ "tondi-utils 0.17.0",
+ "tondi-wasm-core 0.17.0",
+ "wasm-bindgen",
+ "workflow-log",
+ "workflow-wasm",
+]
+
+[[package]]
+name = "tondi-consensus-client"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "ahash",
+ "cfg-if 1.0.0",
+ "faster-hex",
+ "hex",
+ "itertools 0.13.0",
+ "js-sys",
+ "rand 0.8.5",
+ "secp256k1",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tondi-addresses 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-consensus-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-hashes 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-math 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-txscript 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-utils 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-wasm-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
  "wasm-bindgen",
  "workflow-log",
  "workflow-wasm",
@@ -6891,15 +6959,54 @@ dependencies = [
  "serde_json",
  "smallvec",
  "thiserror 1.0.69",
- "tondi-addresses",
- "tondi-core",
+ "tondi-addresses 0.17.0",
+ "tondi-core 0.17.0",
  "tondi-database",
- "tondi-hashes",
- "tondi-math",
- "tondi-merkle",
- "tondi-muhash",
- "tondi-txscript-errors",
- "tondi-utils",
+ "tondi-hashes 0.17.0",
+ "tondi-math 0.17.0",
+ "tondi-merkle 0.17.0",
+ "tondi-muhash 0.17.0",
+ "tondi-txscript-errors 0.17.0",
+ "tondi-utils 0.17.0",
+ "wasm-bindgen",
+ "workflow-core",
+ "workflow-log",
+ "workflow-serializer",
+ "workflow-wasm",
+]
+
+[[package]]
+name = "tondi-consensus-core"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "arc-swap",
+ "async-trait",
+ "borsh",
+ "cfg-if 1.0.0",
+ "faster-hex",
+ "futures-util",
+ "getrandom 0.2.15",
+ "hex",
+ "itertools 0.13.0",
+ "js-sys",
+ "log",
+ "rand 0.8.5",
+ "secp256k1",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_bytes",
+ "serde_json",
+ "smallvec",
+ "thiserror 1.0.69",
+ "tondi-addresses 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-hashes 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-math 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-merkle 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-muhash 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-txscript-errors 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-utils 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
  "wasm-bindgen",
  "workflow-core",
  "workflow-log",
@@ -6918,11 +7025,31 @@ dependencies = [
  "log",
  "paste",
  "thiserror 1.0.69",
- "tondi-consensus-core",
- "tondi-core",
- "tondi-hashes",
- "tondi-notify",
- "tondi-utils",
+ "tondi-consensus-core 0.17.0",
+ "tondi-core 0.17.0",
+ "tondi-hashes 0.17.0",
+ "tondi-notify 0.17.0",
+ "tondi-utils 0.17.0",
+ "triggered",
+]
+
+[[package]]
+name = "tondi-consensus-notify"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "async-channel 2.3.1",
+ "cfg-if 1.0.0",
+ "derive_more",
+ "futures",
+ "log",
+ "paste",
+ "thiserror 1.0.69",
+ "tondi-consensus-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-hashes 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-notify 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-utils 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
  "triggered",
 ]
 
@@ -6939,12 +7066,37 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "thiserror 1.0.69",
- "tondi-addresses",
- "tondi-consensus-client",
- "tondi-consensus-core",
- "tondi-hashes",
- "tondi-txscript",
- "tondi-utils",
+ "tondi-addresses 0.17.0",
+ "tondi-consensus-client 0.17.0",
+ "tondi-consensus-core 0.17.0",
+ "tondi-hashes 0.17.0",
+ "tondi-txscript 0.17.0",
+ "tondi-utils 0.17.0",
+ "wasm-bindgen",
+ "workflow-log",
+ "workflow-wasm",
+]
+
+[[package]]
+name = "tondi-consensus-wasm"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "cfg-if 1.0.0",
+ "faster-hex",
+ "js-sys",
+ "rand 0.8.5",
+ "secp256k1",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tondi-addresses 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-consensus-client 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-consensus-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-hashes 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-txscript 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-utils 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
  "wasm-bindgen",
  "workflow-log",
  "workflow-wasm",
@@ -6962,16 +7114,36 @@ dependencies = [
  "parking_lot",
  "rand 0.8.5",
  "tokio",
- "tondi-addresses",
- "tondi-consensus-core",
- "tondi-consensus-notify",
- "tondi-core",
- "tondi-utils",
+ "tondi-addresses 0.17.0",
+ "tondi-consensus-core 0.17.0",
+ "tondi-consensus-notify 0.17.0",
+ "tondi-core 0.17.0",
+ "tondi-utils 0.17.0",
 ]
 
 [[package]]
 name = "tondi-core"
 version = "0.17.0"
+dependencies = [
+ "anyhow",
+ "cfg-if 1.0.0",
+ "ctrlc",
+ "futures-util",
+ "intertrait",
+ "log",
+ "log4rs",
+ "num_cpus",
+ "thiserror 1.0.69",
+ "tokio",
+ "triggered",
+ "wasm-bindgen",
+ "workflow-log",
+]
+
+[[package]]
+name = "tondi-core"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
 dependencies = [
  "anyhow",
  "cfg-if 1.0.0",
@@ -7000,8 +7172,8 @@ dependencies = [
  "nw-sys",
  "serde",
  "thiserror 1.0.69",
- "tondi-addresses",
- "tondi-consensus-core",
+ "tondi-addresses 0.17.0",
+ "tondi-consensus-core 0.17.0",
  "tondi-wallet-core",
  "workflow-core",
  "workflow-log",
@@ -7034,7 +7206,7 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "tondi-dashboard-core",
- "tondi-utils",
+ "tondi-utils 0.17.0",
  "tondi-wallet-core",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -7052,6 +7224,7 @@ dependencies = [
  "ahash",
  "async-trait",
  "borsh",
+ "bp-tondi",
  "cfg-if 1.0.0",
  "chrome-sys",
  "chrono",
@@ -7093,18 +7266,18 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "toml",
- "tondi-addresses",
+ "tondi-addresses 0.17.0",
  "tondi-bip32",
  "tondi-cli",
- "tondi-consensus-core",
- "tondi-core",
+ "tondi-consensus-core 0.17.0",
+ "tondi-core 0.17.0",
  "tondi-dashboard-macros",
  "tondi-metrics-core",
- "tondi-notify",
- "tondi-rpc-core",
+ "tondi-notify 0.17.0",
+ "tondi-rpc-core 0.17.0",
  "tondi-rpc-service",
- "tondi-txscript",
- "tondi-utils",
+ "tondi-txscript 0.17.0",
+ "tondi-utils 0.17.0",
  "tondi-wallet-core",
  "tondi-wallet-keys",
  "tondi-wrpc-client",
@@ -7158,8 +7331,8 @@ dependencies = [
  "smallvec",
  "tempfile",
  "thiserror 1.0.69",
- "tondi-hashes",
- "tondi-utils",
+ "tondi-hashes 0.17.0",
+ "tondi-utils 0.17.0",
 ]
 
 [[package]]
@@ -7184,12 +7357,45 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "tokio-stream",
- "tondi-core",
- "tondi-grpc-core",
- "tondi-notify",
- "tondi-rpc-core",
- "tondi-utils",
- "tondi-utils-tower",
+ "tondi-core 0.17.0",
+ "tondi-grpc-core 0.17.0",
+ "tondi-notify 0.17.0",
+ "tondi-rpc-core 0.17.0",
+ "tondi-utils 0.17.0",
+ "tondi-utils-tower 0.17.0",
+ "tonic",
+ "triggered",
+]
+
+[[package]]
+name = "tondi-grpc-client"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "async-channel 2.3.1",
+ "async-stream",
+ "async-trait",
+ "faster-hex",
+ "futures",
+ "futures-util",
+ "h2 0.4.9",
+ "itertools 0.13.0",
+ "log",
+ "parking_lot",
+ "paste",
+ "prost",
+ "rand 0.8.5",
+ "regex",
+ "rustls",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-stream",
+ "tondi-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-grpc-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-notify 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-rpc-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-utils 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-utils-tower 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
  "tonic",
  "triggered",
 ]
@@ -7212,12 +7418,43 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "tokio-stream",
- "tondi-addresses",
- "tondi-consensus-core",
- "tondi-core",
- "tondi-notify",
- "tondi-rpc-core",
- "tondi-utils",
+ "tondi-addresses 0.17.0",
+ "tondi-consensus-core 0.17.0",
+ "tondi-core 0.17.0",
+ "tondi-notify 0.17.0",
+ "tondi-rpc-core 0.17.0",
+ "tondi-utils 0.17.0",
+ "tonic",
+ "tonic-build",
+ "triggered",
+ "workflow-core",
+]
+
+[[package]]
+name = "tondi-grpc-core"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "async-channel 2.3.1",
+ "async-stream",
+ "async-trait",
+ "faster-hex",
+ "futures",
+ "h2 0.4.9",
+ "log",
+ "paste",
+ "prost",
+ "rand 0.8.5",
+ "regex",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-stream",
+ "tondi-addresses 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-consensus-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-notify 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-rpc-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-utils 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
  "tonic",
  "tonic-build",
  "triggered",
@@ -7245,15 +7482,15 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "tokio-stream",
- "tondi-consensus-core",
- "tondi-core",
- "tondi-grpc-core",
- "tondi-notify",
- "tondi-rpc-core",
- "tondi-rpc-macros",
+ "tondi-consensus-core 0.17.0",
+ "tondi-core 0.17.0",
+ "tondi-grpc-core 0.17.0",
+ "tondi-notify 0.17.0",
+ "tondi-rpc-core 0.17.0",
+ "tondi-rpc-macros 0.17.0",
  "tondi-rpc-service",
- "tondi-utils",
- "tondi-utils-tower",
+ "tondi-utils 0.17.0",
+ "tondi-utils-tower 0.17.0",
  "tonic",
  "triggered",
  "uuid 1.16.0",
@@ -7270,7 +7507,24 @@ dependencies = [
  "keccak",
  "serde",
  "sha2",
- "tondi-utils",
+ "tondi-utils 0.17.0",
+ "wasm-bindgen",
+ "workflow-wasm",
+]
+
+[[package]]
+name = "tondi-hashes"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "blake3",
+ "borsh",
+ "cc",
+ "faster-hex",
+ "keccak",
+ "serde",
+ "sha2",
+ "tondi-utils 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
  "wasm-bindgen",
  "workflow-wasm",
 ]
@@ -7287,10 +7541,30 @@ dependencies = [
  "paste",
  "serde",
  "thiserror 1.0.69",
- "tondi-consensus-core",
- "tondi-hashes",
- "tondi-notify",
- "tondi-utils",
+ "tondi-consensus-core 0.17.0",
+ "tondi-hashes 0.17.0",
+ "tondi-notify 0.17.0",
+ "tondi-utils 0.17.0",
+ "triggered",
+]
+
+[[package]]
+name = "tondi-index-core"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "async-channel 2.3.1",
+ "async-trait",
+ "derive_more",
+ "futures",
+ "log",
+ "paste",
+ "serde",
+ "thiserror 1.0.69",
+ "tondi-consensus-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-hashes 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-notify 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-utils 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
  "triggered",
 ]
 
@@ -7306,15 +7580,15 @@ dependencies = [
  "paste",
  "thiserror 1.0.69",
  "tokio",
- "tondi-consensus-core",
- "tondi-consensus-notify",
+ "tondi-consensus-core 0.17.0",
+ "tondi-consensus-notify 0.17.0",
  "tondi-consensusmanager",
- "tondi-core",
+ "tondi-core 0.17.0",
  "tondi-database",
- "tondi-hashes",
- "tondi-index-core",
- "tondi-notify",
- "tondi-utils",
+ "tondi-hashes 0.17.0",
+ "tondi-index-core 0.17.0",
+ "tondi-notify 0.17.0",
+ "tondi-utils 0.17.0",
  "tondi-utxoindex",
  "triggered",
 ]
@@ -7331,7 +7605,27 @@ dependencies = [
  "serde",
  "serde-wasm-bindgen",
  "thiserror 1.0.69",
- "tondi-utils",
+ "tondi-utils 0.17.0",
+ "wasm-bindgen",
+ "workflow-core",
+ "workflow-log",
+ "workflow-wasm",
+]
+
+[[package]]
+name = "tondi-math"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "borsh",
+ "faster-hex",
+ "js-sys",
+ "malachite-base",
+ "malachite-nz",
+ "serde",
+ "serde-wasm-bindgen",
+ "thiserror 1.0.69",
+ "tondi-utils 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
  "wasm-bindgen",
  "workflow-core",
  "workflow-log",
@@ -7342,7 +7636,15 @@ dependencies = [
 name = "tondi-merkle"
 version = "0.17.0"
 dependencies = [
- "tondi-hashes",
+ "tondi-hashes 0.17.0",
+]
+
+[[package]]
+name = "tondi-merkle"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "tondi-hashes 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
 ]
 
 [[package]]
@@ -7355,8 +7657,8 @@ dependencies = [
  "separator",
  "serde",
  "thiserror 1.0.69",
- "tondi-core",
- "tondi-rpc-core",
+ "tondi-core 0.17.0",
+ "tondi-rpc-core 0.17.0",
  "workflow-core",
  "workflow-log",
 ]
@@ -7375,15 +7677,15 @@ dependencies = [
  "sweep-bptree",
  "thiserror 1.0.69",
  "tokio",
- "tondi-addresses",
- "tondi-consensus-core",
+ "tondi-addresses 0.17.0",
+ "tondi-consensus-core 0.17.0",
  "tondi-consensusmanager",
- "tondi-core",
- "tondi-hashes",
- "tondi-mining-errors",
- "tondi-muhash",
- "tondi-txscript",
- "tondi-utils",
+ "tondi-core 0.17.0",
+ "tondi-hashes 0.17.0",
+ "tondi-mining-errors 0.17.0",
+ "tondi-muhash 0.17.0",
+ "tondi-txscript 0.17.0",
+ "tondi-utils 0.17.0",
 ]
 
 [[package]]
@@ -7391,7 +7693,16 @@ name = "tondi-mining-errors"
 version = "0.17.0"
 dependencies = [
  "thiserror 1.0.69",
- "tondi-consensus-core",
+ "tondi-consensus-core 0.17.0",
+]
+
+[[package]]
+name = "tondi-mining-errors"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "thiserror 1.0.69",
+ "tondi-consensus-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
 ]
 
 [[package]]
@@ -7400,8 +7711,19 @@ version = "0.17.0"
 dependencies = [
  "rand_chacha 0.3.1",
  "serde",
- "tondi-hashes",
- "tondi-math",
+ "tondi-hashes 0.17.0",
+ "tondi-math 0.17.0",
+]
+
+[[package]]
+name = "tondi-muhash"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "rand_chacha 0.3.1",
+ "serde",
+ "tondi-hashes 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-math 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
 ]
 
 [[package]]
@@ -7422,13 +7744,45 @@ dependencies = [
  "rand 0.8.5",
  "serde",
  "thiserror 1.0.69",
- "tondi-addresses",
- "tondi-consensus-core",
- "tondi-core",
- "tondi-hashes",
- "tondi-txscript",
- "tondi-txscript-errors",
- "tondi-utils",
+ "tondi-addresses 0.17.0",
+ "tondi-consensus-core 0.17.0",
+ "tondi-core 0.17.0",
+ "tondi-hashes 0.17.0",
+ "tondi-txscript 0.17.0",
+ "tondi-txscript-errors 0.17.0",
+ "tondi-utils 0.17.0",
+ "triggered",
+ "workflow-core",
+ "workflow-log",
+ "workflow-serializer",
+]
+
+[[package]]
+name = "tondi-notify"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "async-channel 2.3.1",
+ "async-trait",
+ "borsh",
+ "derive_more",
+ "futures",
+ "futures-util",
+ "indexmap 2.9.0",
+ "itertools 0.13.0",
+ "log",
+ "parking_lot",
+ "paste",
+ "rand 0.8.5",
+ "serde",
+ "thiserror 1.0.69",
+ "tondi-addresses 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-consensus-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-hashes 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-txscript 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-txscript-errors 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-utils 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
  "triggered",
  "workflow-core",
  "workflow-log",
@@ -7453,18 +7807,18 @@ dependencies = [
  "tokio-stream",
  "tondi-addressmanager",
  "tondi-connectionmanager",
- "tondi-consensus-core",
- "tondi-consensus-notify",
+ "tondi-consensus-core 0.17.0",
+ "tondi-consensus-notify 0.17.0",
  "tondi-consensusmanager",
- "tondi-core",
- "tondi-hashes",
+ "tondi-core 0.17.0",
+ "tondi-hashes 0.17.0",
  "tondi-mining",
- "tondi-muhash",
- "tondi-notify",
+ "tondi-muhash 0.17.0",
+ "tondi-notify 0.17.0",
  "tondi-p2p-lib",
  "tondi-p2p-mining",
- "tondi-utils",
- "tondi-utils-tower",
+ "tondi-utils 0.17.0",
+ "tondi-utils-tower 0.17.0",
  "uuid 1.16.0",
 ]
 
@@ -7486,13 +7840,13 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "tokio-stream",
- "tondi-consensus-core",
- "tondi-core",
- "tondi-hashes",
- "tondi-math",
- "tondi-mining-errors",
- "tondi-utils",
- "tondi-utils-tower",
+ "tondi-consensus-core 0.17.0",
+ "tondi-core 0.17.0",
+ "tondi-hashes 0.17.0",
+ "tondi-math 0.17.0",
+ "tondi-mining-errors 0.17.0",
+ "tondi-utils 0.17.0",
+ "tondi-utils-tower 0.17.0",
  "tonic",
  "tonic-build",
  "uuid 1.16.0",
@@ -7504,15 +7858,15 @@ version = "0.17.0"
 dependencies = [
  "log",
  "tokio",
- "tondi-consensus-core",
+ "tondi-consensus-core 0.17.0",
  "tondi-consensusmanager",
- "tondi-core",
- "tondi-hashes",
- "tondi-math",
- "tondi-mining-errors",
+ "tondi-core 0.17.0",
+ "tondi-hashes 0.17.0",
+ "tondi-math 0.17.0",
+ "tondi-mining-errors 0.17.0",
  "tondi-p2p-lib",
- "tondi-utils",
- "tondi-utils-tower",
+ "tondi-utils 0.17.0",
+ "tondi-utils-tower 0.17.0",
 ]
 
 [[package]]
@@ -7523,7 +7877,7 @@ dependencies = [
  "portable-atomic",
  "thiserror 1.0.69",
  "tokio",
- "tondi-core",
+ "tondi-core 0.17.0",
  "workflow-perf-monitor",
 ]
 
@@ -7533,11 +7887,11 @@ version = "0.17.0"
 dependencies = [
  "js-sys",
  "num",
- "tondi-consensus-client",
- "tondi-consensus-core",
- "tondi-hashes",
- "tondi-math",
- "tondi-utils",
+ "tondi-consensus-client 0.17.0",
+ "tondi-consensus-core 0.17.0",
+ "tondi-hashes 0.17.0",
+ "tondi-math 0.17.0",
+ "tondi-utils 0.17.0",
  "wasm-bindgen",
  "workflow-wasm",
 ]
@@ -7562,20 +7916,62 @@ dependencies = [
  "serde-wasm-bindgen",
  "smallvec",
  "thiserror 1.0.69",
- "tondi-addresses",
- "tondi-consensus-client",
- "tondi-consensus-core",
- "tondi-consensus-notify",
- "tondi-consensus-wasm",
- "tondi-core",
- "tondi-hashes",
- "tondi-index-core",
- "tondi-math",
- "tondi-mining-errors",
- "tondi-notify",
- "tondi-rpc-macros",
- "tondi-txscript",
- "tondi-utils",
+ "tondi-addresses 0.17.0",
+ "tondi-consensus-client 0.17.0",
+ "tondi-consensus-core 0.17.0",
+ "tondi-consensus-notify 0.17.0",
+ "tondi-consensus-wasm 0.17.0",
+ "tondi-core 0.17.0",
+ "tondi-hashes 0.17.0",
+ "tondi-index-core 0.17.0",
+ "tondi-math 0.17.0",
+ "tondi-mining-errors 0.17.0",
+ "tondi-notify 0.17.0",
+ "tondi-rpc-macros 0.17.0",
+ "tondi-txscript 0.17.0",
+ "tondi-utils 0.17.0",
+ "uuid 1.16.0",
+ "wasm-bindgen",
+ "workflow-core",
+ "workflow-serializer",
+ "workflow-wasm",
+]
+
+[[package]]
+name = "tondi-rpc-core"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "async-channel 2.3.1",
+ "async-trait",
+ "borsh",
+ "cfg-if 1.0.0",
+ "derive_more",
+ "downcast",
+ "faster-hex",
+ "hex",
+ "js-sys",
+ "log",
+ "paste",
+ "rand 0.8.5",
+ "serde",
+ "serde-wasm-bindgen",
+ "smallvec",
+ "thiserror 1.0.69",
+ "tondi-addresses 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-consensus-client 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-consensus-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-consensus-notify 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-consensus-wasm 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-hashes 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-index-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-math 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-mining-errors 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-notify 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-rpc-macros 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-txscript 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-utils 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
  "uuid 1.16.0",
  "wasm-bindgen",
  "workflow-core",
@@ -7596,30 +7992,43 @@ dependencies = [
 ]
 
 [[package]]
+name = "tondi-rpc-macros"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "convert_case 0.6.0",
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "regex",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "tondi-rpc-service"
 version = "0.17.0"
 dependencies = [
  "async-trait",
  "log",
  "tokio",
- "tondi-addresses",
- "tondi-consensus-core",
- "tondi-consensus-notify",
+ "tondi-addresses 0.17.0",
+ "tondi-consensus-core 0.17.0",
+ "tondi-consensus-notify 0.17.0",
  "tondi-consensusmanager",
- "tondi-core",
- "tondi-hashes",
- "tondi-index-core",
- "tondi-math",
+ "tondi-core 0.17.0",
+ "tondi-hashes 0.17.0",
+ "tondi-index-core 0.17.0",
+ "tondi-math 0.17.0",
  "tondi-mining",
- "tondi-notify",
+ "tondi-notify 0.17.0",
  "tondi-p2p-flows",
  "tondi-p2p-lib",
  "tondi-p2p-mining",
  "tondi-perf-monitor",
- "tondi-rpc-core",
- "tondi-txscript",
- "tondi-utils",
- "tondi-utils-tower",
+ "tondi-rpc-core 0.17.0",
+ "tondi-txscript 0.17.0",
+ "tondi-utils 0.17.0",
+ "tondi-utils-tower 0.17.0",
  "tondi-utxoindex",
  "triggered",
  "workflow-rpc",
@@ -7647,12 +8056,44 @@ dependencies = [
  "sha2",
  "smallvec",
  "thiserror 1.0.69",
- "tondi-addresses",
- "tondi-consensus-core",
- "tondi-hashes",
- "tondi-txscript-errors",
- "tondi-utils",
- "tondi-wasm-core",
+ "tondi-addresses 0.17.0",
+ "tondi-consensus-core 0.17.0",
+ "tondi-hashes 0.17.0",
+ "tondi-txscript-errors 0.17.0",
+ "tondi-utils 0.17.0",
+ "tondi-wasm-core 0.17.0",
+ "wasm-bindgen",
+ "workflow-wasm",
+]
+
+[[package]]
+name = "tondi-txscript"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "blake2b_simd",
+ "blake3",
+ "borsh",
+ "cfg-if 1.0.0",
+ "hexplay",
+ "indexmap 2.9.0",
+ "itertools 0.13.0",
+ "log",
+ "parking_lot",
+ "rand 0.8.5",
+ "secp256k1",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "sha2",
+ "smallvec",
+ "thiserror 1.0.69",
+ "tondi-addresses 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-consensus-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-hashes 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-txscript-errors 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-utils 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
+ "tondi-wasm-core 0.17.0 (git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev)",
  "wasm-bindgen",
  "workflow-wasm",
 ]
@@ -7666,8 +8107,49 @@ dependencies = [
 ]
 
 [[package]]
+name = "tondi-txscript-errors"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "secp256k1",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "tondi-utils"
 version = "0.17.0"
+dependencies = [
+ "arc-swap",
+ "async-channel 2.3.1",
+ "blake3",
+ "borsh",
+ "cfg-if 1.0.0",
+ "duct",
+ "event-listener 2.5.3",
+ "faster-hex",
+ "hex",
+ "ipnet",
+ "itertools 0.13.0",
+ "log",
+ "mac_address",
+ "num_cpus",
+ "once_cell",
+ "parking_lot",
+ "rlimit",
+ "serde",
+ "sha2",
+ "smallvec",
+ "sysinfo 0.31.4",
+ "thiserror 1.0.69",
+ "triggered",
+ "uuid 1.16.0",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "tondi-utils"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
 dependencies = [
  "arc-swap",
  "async-channel 2.3.1",
@@ -7713,6 +8195,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "tondi-utils-tower"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
+dependencies = [
+ "bytes",
+ "cfg-if 1.0.0",
+ "futures",
+ "http-body 1.0.1",
+ "http-body-util",
+ "log",
+ "pin-project-lite",
+ "tokio",
+ "tower 0.5.2",
+ "tower-http",
+]
+
+[[package]]
 name = "tondi-utxoindex"
 version = "0.17.0"
 dependencies = [
@@ -7722,13 +8221,13 @@ dependencies = [
  "rocksdb",
  "serde",
  "thiserror 1.0.69",
- "tondi-consensus-core",
+ "tondi-consensus-core 0.17.0",
  "tondi-consensusmanager",
- "tondi-core",
+ "tondi-core 0.17.0",
  "tondi-database",
- "tondi-hashes",
- "tondi-index-core",
- "tondi-utils",
+ "tondi-hashes 0.17.0",
+ "tondi-index-core 0.17.0",
+ "tondi-utils 0.17.0",
 ]
 
 [[package]]
@@ -7778,23 +8277,23 @@ dependencies = [
  "slugify-rs",
  "sorted-insert",
  "thiserror 1.0.69",
- "tondi-addresses",
+ "tondi-addresses 0.17.0",
  "tondi-bip32",
- "tondi-consensus-client",
- "tondi-consensus-core",
- "tondi-consensus-wasm",
- "tondi-core",
- "tondi-hashes",
+ "tondi-consensus-client 0.17.0",
+ "tondi-consensus-core 0.17.0",
+ "tondi-consensus-wasm 0.17.0",
+ "tondi-core 0.17.0",
+ "tondi-hashes 0.17.0",
  "tondi-metrics-core",
- "tondi-notify",
- "tondi-rpc-core",
- "tondi-txscript",
- "tondi-txscript-errors",
- "tondi-utils",
+ "tondi-notify 0.17.0",
+ "tondi-rpc-core 0.17.0",
+ "tondi-txscript 0.17.0",
+ "tondi-txscript-errors 0.17.0",
+ "tondi-utils 0.17.0",
  "tondi-wallet-keys",
  "tondi-wallet-macros",
  "tondi-wallet-pskt",
- "tondi-wasm-core",
+ "tondi-wasm-core 0.17.0",
  "tondi-wrpc-client",
  "tondi-wrpc-wasm",
  "wasm-bindgen",
@@ -7829,13 +8328,13 @@ dependencies = [
  "serde_json",
  "sha2",
  "thiserror 1.0.69",
- "tondi-addresses",
+ "tondi-addresses 0.17.0",
  "tondi-bip32",
- "tondi-consensus-core",
- "tondi-txscript",
- "tondi-txscript-errors",
- "tondi-utils",
- "tondi-wasm-core",
+ "tondi-consensus-core 0.17.0",
+ "tondi-txscript 0.17.0",
+ "tondi-txscript-errors 0.17.0",
+ "tondi-utils 0.17.0",
+ "tondi-wasm-core 0.17.0",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "workflow-core",
@@ -7872,13 +8371,13 @@ dependencies = [
  "serde_json",
  "serde_repr",
  "thiserror 1.0.69",
- "tondi-addresses",
+ "tondi-addresses 0.17.0",
  "tondi-bip32",
- "tondi-consensus-client",
- "tondi-consensus-core",
- "tondi-txscript",
- "tondi-txscript-errors",
- "tondi-utils",
+ "tondi-consensus-client 0.17.0",
+ "tondi-consensus-core 0.17.0",
+ "tondi-txscript 0.17.0",
+ "tondi-txscript-errors 0.17.0",
+ "tondi-utils 0.17.0",
  "wasm-bindgen",
  "workflow-wasm",
 ]
@@ -7886,6 +8385,18 @@ dependencies = [
 [[package]]
 name = "tondi-wasm-core"
 version = "0.17.0"
+dependencies = [
+ "faster-hex",
+ "hexplay",
+ "js-sys",
+ "wasm-bindgen",
+ "workflow-wasm",
+]
+
+[[package]]
+name = "tondi-wasm-core"
+version = "0.17.0"
+source = "git+ssh://git@github.com/AvatoLabs/Tondi.git?branch=blake3-hasher-dev#bad5cd097cfb696d906d6fd43a3213b745ea4cac"
 dependencies = [
  "faster-hex",
  "hexplay",
@@ -7913,12 +8424,12 @@ dependencies = [
  "serde_json",
  "thiserror 1.0.69",
  "toml",
- "tondi-addresses",
- "tondi-consensus-core",
- "tondi-consensus-wasm",
- "tondi-notify",
- "tondi-rpc-core",
- "tondi-rpc-macros",
+ "tondi-addresses 0.17.0",
+ "tondi-consensus-core 0.17.0",
+ "tondi-consensus-wasm 0.17.0",
+ "tondi-notify 0.17.0",
+ "tondi-rpc-core 0.17.0",
+ "tondi-rpc-macros 0.17.0",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "workflow-core",
@@ -7944,14 +8455,14 @@ dependencies = [
  "serde",
  "thiserror 1.0.69",
  "tokio",
- "tondi-consensus-core",
- "tondi-core",
- "tondi-grpc-client",
- "tondi-notify",
- "tondi-rpc-core",
- "tondi-rpc-macros",
+ "tondi-consensus-core 0.17.0",
+ "tondi-core 0.17.0",
+ "tondi-grpc-client 0.17.0",
+ "tondi-notify 0.17.0",
+ "tondi-rpc-core 0.17.0",
+ "tondi-rpc-macros 0.17.0",
  "tondi-rpc-service",
- "tondi-utils",
+ "tondi-utils 0.17.0",
  "workflow-core",
  "workflow-log",
  "workflow-rpc",
@@ -7971,14 +8482,14 @@ dependencies = [
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
- "tondi-addresses",
- "tondi-consensus-client",
- "tondi-consensus-core",
- "tondi-consensus-wasm",
- "tondi-notify",
- "tondi-rpc-core",
- "tondi-rpc-macros",
- "tondi-wasm-core",
+ "tondi-addresses 0.17.0",
+ "tondi-consensus-client 0.17.0",
+ "tondi-consensus-core 0.17.0",
+ "tondi-consensus-wasm 0.17.0",
+ "tondi-notify 0.17.0",
+ "tondi-rpc-core 0.17.0",
+ "tondi-rpc-macros 0.17.0",
+ "tondi-wasm-core 0.17.0",
  "tondi-wrpc-client",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -8009,29 +8520,29 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "toml",
- "tondi-addresses",
+ "tondi-addresses 0.17.0",
  "tondi-addressmanager",
  "tondi-alloc",
  "tondi-consensus",
- "tondi-consensus-core",
- "tondi-consensus-notify",
+ "tondi-consensus-core 0.17.0",
+ "tondi-consensus-notify 0.17.0",
  "tondi-consensusmanager",
- "tondi-core",
+ "tondi-core 0.17.0",
  "tondi-database",
  "tondi-grpc-server",
- "tondi-hashes",
+ "tondi-hashes 0.17.0",
  "tondi-index-processor",
  "tondi-mining",
- "tondi-notify",
+ "tondi-notify 0.17.0",
  "tondi-p2p-flows",
  "tondi-p2p-lib",
  "tondi-p2p-mining",
  "tondi-perf-monitor",
- "tondi-rpc-core",
+ "tondi-rpc-core 0.17.0",
  "tondi-rpc-service",
- "tondi-txscript",
- "tondi-utils",
- "tondi-utils-tower",
+ "tondi-txscript 0.17.0",
+ "tondi-utils 0.17.0",
+ "tondi-utils-tower 0.17.0",
  "tondi-utxoindex",
  "tondi-wrpc-server",
  "workflow-log",

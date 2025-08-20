@@ -22,6 +22,10 @@ cfg_if! {
     }
 }
 
+// 添加gRPC客户端模块
+pub mod grpc_client;
+pub use grpc_client::{TondiGrpcClient, GrpcRpcCtl};
+
 cfg_if! {
     if #[cfg(not(target_arch = "wasm32"))] {
         use std::path::PathBuf;
@@ -157,7 +161,7 @@ impl TondiService {
         self.tondid.lock().unwrap().replace(tondid);
     }
 
-    pub fn create_rpc_client(config: &RpcConfig, network: Network) -> Result<Rpc> {
+    pub async fn create_rpc_client(config: &RpcConfig, network: Network) -> Result<Rpc> {
         match config {
             RpcConfig::Wrpc {
                 url,
@@ -194,8 +198,28 @@ impl TondiService {
                 let rpc_api: Arc<DynRpcApi> = wrpc_client;
                 Ok(Rpc::new(rpc_api, rpc_ctl))
             }
-            RpcConfig::Grpc { url: _ } => {
-                unimplemented!("GPRC is not currently supported")
+            RpcConfig::Grpc { url } => {
+                cfg_if! {
+                    if #[cfg(not(target_arch = "wasm32"))] {
+                        // 桌面版：支持gRPC
+                        if let Some(network_interface) = url {
+                            let grpc_client = TondiGrpcClient::connect(network_interface.clone()).await?;
+                            let rpc_api: Arc<DynRpcApi> = Arc::new(grpc_client);
+                            let rpc_ctl = RpcCtl::new();
+                            Ok(Rpc::new(rpc_api, rpc_ctl))
+                        } else {
+                            // 如果没有配置URL，使用默认配置
+                            let default_interface = NetworkInterfaceConfig::default();
+                            let grpc_client = TondiGrpcClient::connect(default_interface).await?;
+                            let rpc_api: Arc<DynRpcApi> = Arc::new(grpc_client);
+                            let rpc_ctl = RpcCtl::new();
+                            Ok(Rpc::new(rpc_api, rpc_ctl))
+                        }
+                    } else {
+                        // Web版：不支持gRPC，提示使用wRPC
+                        Err(Error::custom("gRPC is not supported in Web/WASM version. Please use wRPC instead."))
+                    }
+                }
             }
         }
     }
@@ -506,7 +530,7 @@ impl TondiService {
                     resolver_urls: None,
                 };
 
-                let rpc = Self::create_rpc_client(&rpc_config, network)
+                let rpc = Self::create_rpc_client(&rpc_config, network).await
                     .expect("Tondid Service - unable to create wRPC client");
                 self.start_all_services(Some(rpc), network).await?;
                 self.connect_rpc_client().await?;
@@ -529,7 +553,7 @@ impl TondiService {
                     resolver_urls: None,
                 };
 
-                let rpc = Self::create_rpc_client(&rpc_config, network)
+                let rpc = Self::create_rpc_client(&rpc_config, network).await
                     .expect("Tondid Service - unable to create wRPC client");
                 self.start_all_services(Some(rpc), network).await?;
                 self.connect_rpc_client().await?;
@@ -557,7 +581,7 @@ impl TondiService {
                     resolver_urls: None,
                 };
 
-                let rpc = Self::create_rpc_client(&rpc_config, network)
+                let rpc = Self::create_rpc_client(&rpc_config, network).await
                     .expect("Tondid Service - unable to create wRPC client");
                 self.start_all_services(Some(rpc), network).await?;
                 self.connect_rpc_client().await?;
@@ -581,7 +605,7 @@ impl TondiService {
 
                     self.handle_network_change(network).await?;
 
-                    let rpc = Self::create_rpc_client(&rpc_config, network)
+                    let rpc = Self::create_rpc_client(&rpc_config, network).await
                         .expect("Tondid Service - unable to create wRPC client");
                     self.start_all_services(Some(rpc), network).await?;
                     self.connect_rpc_client().await?;
