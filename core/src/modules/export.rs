@@ -31,7 +31,7 @@ impl ExportKind {
     pub fn info(&self) -> (&'static str,&'static str) {
         match self {
             Self::Mnemonic => (i18n("Private Key Mnemonic"),i18n("Private key mnemonic stored in this wallet")),
-            Self::Transportable => (i18n("Transportable"), i18n("Encrypted hex encoded data easily importable into another instance of Tondi-NG")),
+            Self::Transportable => (i18n("Transportable"), i18n("Encrypted hex encoded data easily importable into another instance of Tondi Dashboard")),
         }
     }
 }

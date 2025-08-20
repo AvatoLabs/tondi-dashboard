@@ -77,11 +77,11 @@ impl TondidNodeKind {
             TondidNodeKind::Disable => i18n("Disables node connectivity (Offline Mode)."),
             TondidNodeKind::Remote => i18n("Connects to a Remote Rusty Tondi Node via wRPC."),
             #[cfg(not(target_arch = "wasm32"))]
-            TondidNodeKind::IntegratedInProc => i18n("The node runs as a part of the Tondi-NG application process. This reduces communication overhead (experimental)."),
+            TondidNodeKind::IntegratedInProc => i18n("The node runs as a part of the Tondi Dashboard application process. This reduces communication overhead (experimental)."),
             #[cfg(not(target_arch = "wasm32"))]
             TondidNodeKind::IntegratedAsDaemon => i18n("The node is spawned as a child daemon process (recommended)."),
             #[cfg(not(target_arch = "wasm32"))]
-            TondidNodeKind::IntegratedAsPassiveSync => i18n("The node synchronizes in the background while Tondi-NG is connected to a public node. Once the node is synchronized, you can switch to the 'Integrated Daemon' mode."),
+            TondidNodeKind::IntegratedAsPassiveSync => i18n("The node synchronizes in the background while Tondi Dashboard is connected to a public node. Once the node is synchronized, you can switch to the 'Integrated Daemon' mode."),
             #[cfg(not(target_arch = "wasm32"))]
             TondidNodeKind::ExternalAsDaemon => i18n("A binary at another location is spawned a child process (experimental, for development purposes only)."),
         }

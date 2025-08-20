@@ -258,7 +258,7 @@ cfg_if! {
 
                     let mut viewport = egui::ViewportBuilder::default()
                         .with_resizable(true)
-                        .with_title(i18n("Tondi NG"))
+                        .with_title(i18n("Tondi Dashboard"))
                         .with_min_inner_size([400.0,320.0])
                         .with_inner_size([1000.0,600.0])
                         .with_icon(svg_to_icon_data(TONDI_NG_ICON_SVG, Some(SizeHint::Size(256,256))));
@@ -279,7 +279,7 @@ cfg_if! {
                     // let application_events = ApplicationEventsChannel::unbounded();
 
                     eframe::run_native(
-                        "Tondi NG",
+                        "Tondi Dashboard",
                         native_options,
                         Box::new(move |cc| {
                             let runtime = runtime::Runtime::new(&cc.egui_ctx, &settings, wallet_api, application_events, None);
@@ -343,7 +343,7 @@ cfg_if! {
                 .try_init()?;
 
             use workflow_log::*;
-            log_info!("Welcome to Tondi NG! Have a great day!");
+            log_info!("Welcome to Tondi Dashboard! Have a great day!");
 
             if let Some(element) = document().get_element_by_id("loading") {
                 element.remove();

@@ -285,7 +285,7 @@ impl<'core> Menu<'core> {
                         }
 
                         if self.core.device().single_pane() {
-                            ui.menu_button("Tondi NG", |ui| {
+                            ui.menu_button("Tondi Dashboard", |ui| {
                                 self.render_desktop_menu(ui);
                             });
                         } else {

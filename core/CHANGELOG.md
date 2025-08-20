@@ -18,7 +18,7 @@
 - A new priority fee estimation algorithm based on the network load (Send panel).
 - Add support for legacy wallets created with [KDX](https://kdx.app) and Web Wallet at [https://wallet.tondinet.io](https://wallet.tondinet.io).
 - The ability to choose from a list of available public nodes is no longer available (public nodes are load-balanced).
-- Tondi NG has been updated to EGUI 0.28.0, which includes various improvements and bug fixes.
+- Tondi Dashboard has been updated to EGUI 0.28.0, which includes various improvements and bug fixes.
 - Display addresses in the transaction history panel.
 - Transaction history elements are now clickable leading to the Tondi Explorer.
 - Add experimental `Passive Sync` mode that allows connecting to a public node while synchronizing the local node in the background.
@@ -40,7 +40,7 @@ NOTE: This release includes the underlying changes to the wRPC Borsh protocol th
 
 # 0.2.5
 - Update Rusty Tondi p2p client (tondid) to `0.14.1`.
-- WASM SDK is now available that allows developers using TypeScript and JavaScript to access and interface with wallets created using Tondi NG and Rusty Tondi CLI - [https://aspectron.org/en/projects/tondi-wasm.html](https://aspectron.org/en/projects/tondi-wasm.html)
+- WASM SDK is now available that allows developers using TypeScript and JavaScript to access and interface with wallets created using Tondi Dashboard and Rusty Tondi CLI - [https://aspectron.org/en/projects/tondi-wasm.html](https://aspectron.org/en/projects/tondi-wasm.html)
 
 # 0.2.4
 - Add `Settings > Node > Custom Data Folder` option

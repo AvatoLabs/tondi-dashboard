@@ -30,9 +30,9 @@ impl Welcome {
 
         let mut error = None;
 
-        ui.heading(i18n("Welcome to Tondi NG"));
+        ui.heading(i18n("Welcome to Tondi Dashboard"));
         ui.add_space(16.0);
-        ui.label(i18n("Please configure your Tondi NG settings"));
+        ui.label(i18n("Please configure your Tondi Dashboard settings"));
         ui.add_space(16.0);
 
         CollapsingHeader::new(i18n("Settings"))
@@ -178,9 +178,9 @@ impl Welcome {
         
         ui.vertical_centered(|ui| {
             ui.add_space(32.0);
-            // ui.colored_label(theme_color().alert_color, "Please note - this is a beta release - Tondi NG is still in early development and is not yet ready for production use.");
+            // ui.colored_label(theme_color().alert_color, "Please note - this is a beta release - Tondi Dashboard is still in early development and is not yet ready for production use.");
             // ui.add_space(32.0);
-            ui.label(format!("Tondi NG v{}  •  Rusty Tondi v{}", env!("CARGO_PKG_VERSION"), tondi_wallet_core::version()));
+            ui.label(format!("Tondi Dashboard v{}  •  Rusty Tondi v{}", env!("CARGO_PKG_VERSION"), tondi_wallet_core::version()));
             ui.hyperlink_to(
                 "https://tondi.org",
                 "https://tondi.org",
@@ -197,7 +197,7 @@ impl Welcome {
         let mut proceed = false;
 
         Panel::new(self)
-            .with_caption(i18n("Welcome to Tondi NG"))
+            .with_caption(i18n("Welcome to Tondi Dashboard"))
             .with_header(|_this, ui| {
                 ui.label(i18n("Please select Tondi network"));
             })
@@ -223,7 +223,7 @@ impl Welcome {
                 // ui.add_space(32.0);
                 // ui.colored_label(theme_color().alert_color, RichText::new("β").size(64.0));
                 // ui.add_space(8.0);
-                // ui.colored_label(theme_color().alert_color, "Please note - this is a beta release - Tondi NG is still in early development and is not yet ready for production use.");
+                // ui.colored_label(theme_color().alert_color, "Please note - this is a beta release - Tondi Dashboard is still in early development and is not yet ready for production use.");
             })
             .render(ui);        
 

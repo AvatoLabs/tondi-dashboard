@@ -480,7 +480,7 @@ impl eframe::App for Core {
 
 impl Core {
     fn render_frame(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
-        window_frame(self.window_frame, ctx, "Tondi NG", |ui| {
+        window_frame(self.window_frame, ctx, "Tondi Dashboard", |ui| {
             if !self.settings.initialized {
                 egui::CentralPanel::default().show_inside(ui, |ui| {
                     self.modules
@@ -818,7 +818,7 @@ impl Core {
                         network_id: _,
                         metrics,
                     } => {
-                        // log_info!("Tondi NG - received metrics event {metrics:?}");
+                        // log_info!("Tondi Dashboard - received metrics event {metrics:?}");
 
                         match metrics {
                             MetricsUpdate::WalletMetrics {

@@ -45,7 +45,7 @@ pub struct Inner {
     block_dag_monitor_service: Arc<BlockDagMonitorService>,
 }
 
-/// Runtime is a core component of the Tondi NG application responsible for
+/// Runtime is a core component of the Tondi Dashboard application responsible for
 /// running application services and communication between these services
 /// and the application UI.
 #[derive(Clone)]

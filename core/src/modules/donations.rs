@@ -74,7 +74,7 @@ impl ModuleT for Donations {
         let back = Rc::new(RefCell::new(false));
 
         Panel::new(self)
-            .with_caption("Supporting Tondi NG")
+            .with_caption("Supporting Tondi Dashboard")
             .with_back_enabled(core.has_stack(), |_|{
                 *back.borrow_mut() = true;
             })
@@ -84,7 +84,7 @@ impl ModuleT for Donations {
                 
                 ui.add_space(8.);                                    
 
-                ui.label(i18n("The Tondi NG software represents an ongoing effort focused on building a state-of-the-art software platform dedicated to the Tondi BlockDAG cryptocurrency network. Ideological at its core, this software prioritizes security, privacy, performance, and decentralization."));
+                ui.label(i18n("The Tondi Dashboard software represents an ongoing effort focused on building a state-of-the-art software platform dedicated to the Tondi BlockDAG cryptocurrency network. Ideological at its core, this software prioritizes security, privacy, performance, and decentralization."));
                 ui.label(" ");
                 ui.label(i18n("Because of its focus on security and performance, this software is entirely developed in Rust, demanding significantly more time and effort compared to other traditional modern web-driven software."));
                 ui.label(" ");

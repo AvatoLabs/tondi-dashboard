@@ -28,7 +28,7 @@ cfg_if! {
     }
 }
 
-/// Service is a core component of the Tondi NG application responsible for
+/// Service is a core component of the Tondi Dashboard application responsible for
 /// running application services and communication between these services.
 #[async_trait]
 pub trait Service: Sync + Send {

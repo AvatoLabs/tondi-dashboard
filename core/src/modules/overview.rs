@@ -180,13 +180,13 @@ impl Overview {
                     }
 
                 #[cfg(not(target_arch = "wasm32"))]
-                CollapsingHeader::new(i18n("Tondi NG"))
+                CollapsingHeader::new(i18n("Tondi Dashboard"))
                     .default_open(true)
                     .show(ui, |ui| {
                         use egui_phosphor::light::CLOUD;
 
                         ui.hyperlink_to_tab(
-                            format!("• {CLOUD} {}",i18n("Tondi NG online")),
+                            format!("• {CLOUD} {}",i18n("Tondi Dashboard online")),
                             "https://tondi-ng.org"
                         );
                     });
@@ -272,7 +272,7 @@ impl Overview {
                         
 
                         ui.hyperlink_to_tab(
-                            format!("• {}",i18n("Tondi NG on GitHub")),
+                            format!("• {}",i18n("Tondi Dashboard on GitHub")),
                             "https://github.com/aspectron/tondi-ng"
                         );
                         ui.hyperlink_to_tab(
@@ -343,8 +343,8 @@ impl Overview {
                 CollapsingHeader::new(i18n("Build"))
                     .default_open(true)
                     .show(ui, |ui| {
-                        ui.add(Label::new(format!("Tondi NG v{}-{} + Rusty Tondi {}", env!("CARGO_PKG_VERSION"),crate::app::GIT_DESCRIBE, tondi_version())));
-                        // if ui.add(Label::new(format!("Tondi NG v{}-{} + Rusty Tondi v{}", env!("CARGO_PKG_VERSION"),crate::app::GIT_DESCRIBE, tondi_wallet_core::version())).sense(Sense::click())).clicked() {
+                        ui.add(Label::new(format!("Tondi Dashboard v{}-{} + Rusty Tondi {}", env!("CARGO_PKG_VERSION"),crate::app::GIT_DESCRIBE, tondi_version())));
+                        // if ui.add(Label::new(format!("Tondi Dashboard v{}-{} + Rusty Tondi v{}", env!("CARGO_PKG_VERSION"),crate::app::GIT_DESCRIBE, tondi_wallet_core::version())).sense(Sense::click())).clicked() {
                         //     core.select::<modules::Changelog>();
                         // }
                         // ui.label(format!("Timestamp: {}", crate::app::BUILD_TIMESTAMP));
@@ -374,7 +374,7 @@ impl Overview {
                             ui.label("License: ISC");
                             ui.hyperlink_url_to_tab("https://github.com/tondinet/rusty-tondi");
                             ui.label("");
-                            ui.label("Tondi NG");
+                            ui.label("Tondi Dashboard");
                             ui.label("Copyright (c) 2024 ASPECTRON");
                             ui.label("License: MIT (RESTRICTED)");
                             ui.hyperlink_url_to_tab("https://github.com/aspectron/tondi-ng");
@@ -405,7 +405,7 @@ impl Overview {
                     CollapsingHeader::new(i18n("Donations"))
                         .default_open(true)
                         .show(ui, |ui| {
-                            if ui.link(i18n("Please support Tondi NG development")).clicked() {
+                            if ui.link(i18n("Please support Tondi Dashboard development")).clicked() {
                                 core.select::<modules::Donations>();
                             }
                         });
