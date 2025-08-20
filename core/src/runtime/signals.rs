@@ -21,21 +21,30 @@ impl Signals {
             match v {
                 0 => {
                     // post a graceful exit event to the main event loop
-                    println!("^SIGTERM - shutting down...");
+                    println!("^C - initiating graceful shutdown...");
                     signals.runtime.try_send(Events::Exit).unwrap_or_else(|e| {
                         println!("Error sending exit event: {:?}", e);
+                    });
+                    
+                    // 如果主事件循环没有及时响应，强制退出
+                    let signals_clone = signals.clone();
+                    std::thread::spawn(move || {
+                        std::thread::sleep(std::time::Duration::from_secs(8));
+                        println!("^C - graceful shutdown timeout, forcing exit...");
+                        signals_clone.runtime.try_send(Events::Exit).ok();
+                        std::process::exit(1);
                     });
                 }
                 1 => {
                     // start runtime abort sequence
                     // (attempt to gracefully shutdown tondid if running)
                     // this will execute process::exit(1) after 5 seconds
-                    println!("^SIGTERM - aborting...");
+                    println!("^C - forcing shutdown...");
                     crate::runtime::abort();
                 }
                 _ => {
                     // exit the process immediately
-                    println!("^SIGTERM - halting");
+                    println!("^C - immediate exit");
                     std::process::exit(1);
                 }
             }

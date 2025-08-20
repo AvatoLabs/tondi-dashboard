@@ -205,7 +205,7 @@ impl TondiService {
                         if let Some(network_interface) = url {
                             let grpc_client = TondiGrpcClient::connect(network_interface.clone(), network).await?;
                             let rpc_api: Arc<DynRpcApi> = Arc::new(grpc_client);
-                            let mut rpc_ctl = RpcCtl::new();
+                            let rpc_ctl = RpcCtl::new();
                             // 设置gRPC URL描述符
                             let address: ContextualNetAddress = network_interface.clone().into();
                             rpc_ctl.set_descriptor(Some(format!("grpc://{}", address)));
@@ -215,7 +215,7 @@ impl TondiService {
                             let default_interface = NetworkInterfaceConfig::default();
                             let grpc_client = TondiGrpcClient::connect(default_interface.clone(), network).await?;
                             let rpc_api: Arc<DynRpcApi> = Arc::new(grpc_client);
-                            let mut rpc_ctl = RpcCtl::new();
+                            let rpc_ctl = RpcCtl::new();
                             // 设置默认gRPC URL描述符
                             let address: ContextualNetAddress = default_interface.into();
                             rpc_ctl.set_descriptor(Some(format!("grpc://{}", address)));
@@ -348,13 +348,30 @@ impl TondiService {
 
             for service in crate::runtime::runtime().services().into_iter() {
                 let instant = Instant::now();
-                service.clone().detach_rpc().await?;
-                if instant.elapsed().as_millis() > 1_000 {
-                    log_warn!(
-                        "WARNING: detach_rpc() for '{}' took {} msec",
-                        service.name(),
-                        instant.elapsed().as_millis()
-                    );
+                let service_name = service.name().to_string();
+                
+                // 添加超时机制，防止单个服务卡住
+                let detach_result = tokio::time::timeout(
+                    tokio::time::Duration::from_secs(5),
+                    service.clone().detach_rpc()
+                ).await;
+                
+                match detach_result {
+                    Ok(Ok(_)) => {
+                        if instant.elapsed().as_millis() > 1_000 {
+                            log_warn!(
+                                "WARNING: detach_rpc() for '{}' took {} msec",
+                                service_name,
+                                instant.elapsed().as_millis()
+                            );
+                        }
+                    }
+                    Ok(Err(e)) => {
+                        log_warn!("Warning: detach_rpc() for '{}' failed: {}", service_name, e);
+                    }
+                    Err(_) => {
+                        log_warn!("Warning: detach_rpc() for '{}' timed out after 5 seconds", service_name);
+                    }
                 }
             }
 

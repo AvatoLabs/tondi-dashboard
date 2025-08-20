@@ -400,6 +400,10 @@ impl Core {
             
             self.settings.node.network = network;
             
+            // 自动更新端口配置以匹配新的网络类型
+            self.settings.node.update_ports_for_network();
+            log::info!("Updated port configuration for network: {:?}", network);
+            
             // Store settings first
             self.store_settings();
             
@@ -417,8 +421,12 @@ impl eframe::App for Core {
     #[cfg(not(target_arch = "wasm32"))]
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
         self.is_shutdown_pending = true;
-        crate::runtime::halt();
         println!("{}", i18n("bye!"));
+        
+        // 在后台线程中执行halt，避免阻塞UI线程
+        std::thread::spawn(move || {
+            crate::runtime::halt();
+        });
     }
 
     fn clear_color(&self, _visuals: &egui::Visuals) -> [f32; 4] {

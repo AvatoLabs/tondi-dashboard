@@ -389,6 +389,12 @@ pub struct NodeSettings {
 
 impl Default for NodeSettings {
     fn default() -> Self {
+        // 使用带端口的默认配置，便于连接本地或远程节点
+        let default_grpc_interface = NetworkInterfaceConfig {
+            kind: NetworkInterfaceKind::Custom,
+            custom: "127.0.0.1:16110".parse().unwrap(), // 默认 Tondi mainnet gRPC 端口
+        };
+
         Self {
             connection_config_kind: NodeConnectionConfigKind::Custom,  // 改为Custom以启用自定义RPC配置
             rpc_kind: RpcKind::Grpc,  // 默认使用gRPC而不是Wrpc
@@ -399,7 +405,7 @@ impl Default for NodeSettings {
             enable_wrpc_json: false,
             wrpc_json_network_interface: NetworkInterfaceConfig::default(),
             enable_grpc: true,  // 默认启用gRPC
-            grpc_network_interface: NetworkInterfaceConfig::default(),
+            grpc_network_interface: default_grpc_interface,
             enable_upnp: true,
             memory_scale: NodeMemoryScale::default(),
             network: Network::default(),
@@ -415,6 +421,58 @@ impl Default for NodeSettings {
 }
 
 impl NodeSettings {
+    /// 根据网络类型自动更新端口配置
+    pub fn update_ports_for_network(&mut self) {
+        match self.network {
+            Network::Mainnet => {
+                // Mainnet: gRPC 16110, wRPC 17110
+                if self.enable_grpc {
+                    self.grpc_network_interface.kind = NetworkInterfaceKind::Custom;
+                    self.grpc_network_interface.custom = "127.0.0.1:16110".parse().unwrap();
+                }
+                if self.enable_wrpc_borsh {
+                    self.wrpc_borsh_network_interface.kind = NetworkInterfaceKind::Custom;
+                    self.wrpc_borsh_network_interface.custom = "127.0.0.1:17110".parse().unwrap();
+                }
+                if self.enable_wrpc_json {
+                    self.wrpc_json_network_interface.kind = NetworkInterfaceKind::Custom;
+                    self.wrpc_json_network_interface.custom = "127.0.0.1:18110".parse().unwrap();
+                }
+            }
+            Network::Testnet => {
+                // Testnet: gRPC 16210, wRPC 17210
+                if self.enable_grpc {
+                    self.grpc_network_interface.kind = NetworkInterfaceKind::Custom;
+                    self.grpc_network_interface.custom = "127.0.0.1:16210".parse().unwrap();
+                }
+                if self.enable_wrpc_borsh {
+                    self.wrpc_borsh_network_interface.kind = NetworkInterfaceKind::Custom;
+                    self.wrpc_borsh_network_interface.custom = "127.0.0.1:17210".parse().unwrap();
+                }
+                if self.enable_wrpc_json {
+                    self.wrpc_json_network_interface.kind = NetworkInterfaceKind::Custom;
+                    self.wrpc_json_network_interface.custom = "127.0.0.1:18210".parse().unwrap();
+                }
+            }
+            Network::Devnet => {
+                // Devnet: gRPC 16610, wRPC 17610
+                if self.enable_grpc {
+                    self.grpc_network_interface.kind = NetworkInterfaceKind::Custom;
+                    self.grpc_network_interface.custom = "127.0.0.1:16610".parse().unwrap();
+                }
+                if self.enable_wrpc_borsh {
+                    self.wrpc_borsh_network_interface.kind = NetworkInterfaceKind::Custom;
+                    self.wrpc_borsh_network_interface.custom = "127.0.0.1:17610".parse().unwrap();
+                }
+                if self.enable_wrpc_json {
+                    self.wrpc_json_network_interface.kind = NetworkInterfaceKind::Custom;
+                    self.wrpc_json_network_interface.custom = "127.0.0.1:18610".parse().unwrap();
+                }
+            }
+
+        }
+    }
+
     cfg_if! {
         if #[cfg(not(target_arch = "wasm32"))] {
             #[allow(clippy::if_same_then_else)]
@@ -735,5 +793,41 @@ impl Settings {
         } else {
             Ok(Self::default())
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_update_ports_for_network() {
+        let mut settings = NodeSettings::default();
+        
+        // 启用所有 RPC 类型以便测试
+        settings.enable_grpc = true;
+        settings.enable_wrpc_borsh = true;
+        settings.enable_wrpc_json = true;
+        
+        // 测试 Mainnet 端口
+        settings.network = Network::Mainnet;
+        settings.update_ports_for_network();
+        assert_eq!(settings.grpc_network_interface.custom.to_string(), "127.0.0.1:16110");
+        assert_eq!(settings.wrpc_borsh_network_interface.custom.to_string(), "127.0.0.1:17110");
+        assert_eq!(settings.wrpc_json_network_interface.custom.to_string(), "127.0.0.1:18110");
+        
+        // 测试 Testnet 端口
+        settings.network = Network::Testnet;
+        settings.update_ports_for_network();
+        assert_eq!(settings.grpc_network_interface.custom.to_string(), "127.0.0.1:16210");
+        assert_eq!(settings.wrpc_borsh_network_interface.custom.to_string(), "127.0.0.1:17210");
+        assert_eq!(settings.wrpc_json_network_interface.custom.to_string(), "127.0.0.1:18210");
+        
+        // 测试 Devnet 端口
+        settings.network = Network::Devnet;
+        settings.update_ports_for_network();
+        assert_eq!(settings.grpc_network_interface.custom.to_string(), "127.0.0.1:16610");
+        assert_eq!(settings.wrpc_borsh_network_interface.custom.to_string(), "127.0.0.1:17610");
+        assert_eq!(settings.wrpc_json_network_interface.custom.to_string(), "127.0.0.1:18610");
     }
 }

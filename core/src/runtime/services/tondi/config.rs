@@ -71,8 +71,9 @@ cfg_if! {
                         args.testnet_suffix = 10;
                     }
                     Network::Devnet => {
-                        args.testnet = true;
-                        args.testnet_suffix = 11;
+                        // Devnet 是独立的网络类型，不需要 testnet 参数
+                        // 使用 --devnet 参数来明确指定网络类型
+                        args.devnet = true;
                     }
                 }
 
@@ -114,8 +115,8 @@ cfg_if! {
                         args.push("--netsuffix=10");
                     }
                     Network::Devnet => {
-                        // Devnet is a separate network type, not testnet with suffix
-                        // No additional arguments needed
+                        // Devnet 是独立的网络类型
+                        args.push("--devnet");
                     }
                 }
 

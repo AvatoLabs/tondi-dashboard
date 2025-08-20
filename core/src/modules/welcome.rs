@@ -229,6 +229,8 @@ impl Welcome {
                         .clicked()
                     {
                         this.settings.node.network = *network;
+                        // 自动更新端口配置
+                        this.settings.node.update_ports_for_network();
                         proceed = true;
                     }
 

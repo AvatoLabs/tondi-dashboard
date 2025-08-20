@@ -215,7 +215,14 @@ impl Runtime {
         if self.inner.is_running.load(Ordering::SeqCst) {
             self.inner.is_running.store(false, Ordering::SeqCst);
             self.stop_services();
-            self.join_services().await;
+            
+            // 添加超时机制，防止服务关闭时卡住
+            let timeout = tokio::time::Duration::from_secs(10);
+            match tokio::time::timeout(timeout, self.join_services()).await {
+                Ok(_) => println!("All services shut down successfully"),
+                Err(_) => println!("Warning: Some services took too long to shut down, forcing shutdown"),
+            }
+            
             register_global(None);
         }
     }
@@ -434,10 +441,35 @@ pub fn halt() {
         runtime.try_send(Events::Exit).ok();
         runtime.tondi_service().clone().terminate();
 
-        let handle = tokio::spawn(async move { runtime.shutdown().await });
+        // 使用超时机制，防止halt操作卡住
+        // 注意：这里不能使用 tokio::spawn，因为可能不在 Tokio runtime 上下文中
+        let runtime_clone = runtime.clone();
+        let handle = std::thread::spawn(move || {
+            // 在新线程中创建临时的 Tokio runtime 来执行异步操作
+            let rt = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .unwrap();
+            
+            rt.block_on(async {
+                let timeout = tokio::time::Duration::from_secs(15);
+                match tokio::time::timeout(timeout, runtime_clone.shutdown()).await {
+                    Ok(_) => println!("Runtime shutdown completed"),
+                    Err(_) => println!("Warning: Runtime shutdown timed out"),
+                }
+            });
+        });
 
-        while !handle.is_finished() {
+        // 添加超时等待，防止无限等待
+        let start = std::time::Instant::now();
+        let max_wait = std::time::Duration::from_secs(20);
+        
+        while !handle.is_finished() && start.elapsed() < max_wait {
             std::thread::sleep(std::time::Duration::from_millis(50));
+        }
+        
+        if !handle.is_finished() {
+            println!("Warning: Runtime shutdown is taking too long, continuing with exit");
         }
     }
 }

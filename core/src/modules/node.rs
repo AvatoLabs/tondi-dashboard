@@ -49,7 +49,9 @@ impl ModuleT for Node {
                         ui.vertical(|ui| {
 
                             if let Some(peers) = self.runtime.peer_monitor_service().peer_info() {
+                                println!("[Node] Rendering {} peers", peers.len());
                                 let (outbound, inbound) : (Vec<_>,Vec<_>) = peers.iter().partition(|peer| peer.is_outbound);
+                                println!("[Node] Inbound: {}, Outbound: {}", inbound.len(), outbound.len());
 
                                 CollapsingHeader::new(i18n("Inbound"))
                                     .default_open(true)
@@ -68,13 +70,19 @@ impl ModuleT for Node {
                                             render_peer(ui, peer);
                                         });
                                     });
-                            } else if core.state().metrics().as_ref().map(|m| m.data.node_active_peers).unwrap_or_default() > 0 {
-                                ui.horizontal(|ui| {
-                                    ui.spinner();
-                                    ui.label(i18n("Updating..."));
-                                });
                             } else {
-                                ui.colored_label(theme_color().warning_color, i18n("No peers"));
+                                let metrics = core.state().metrics();
+                                let active_peers = metrics.as_ref().map(|m| m.data.node_active_peers).unwrap_or_default();
+                                println!("[Node] No peer info available, active_peers from metrics: {}", active_peers);
+                                
+                                if active_peers > 0 {
+                                    ui.horizontal(|ui| {
+                                        ui.spinner();
+                                        ui.label(i18n("Updating..."));
+                                    });
+                                } else {
+                                    ui.colored_label(theme_color().warning_color, i18n("No peers"));
+                                }
                             }
 
                         });

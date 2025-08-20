@@ -85,10 +85,27 @@ impl Service for PeerMonitorService {
                         continue;
                     }
 
+                    println!("[PeerMonitor] Polling for peer information...");
+                    
                     if let Some(rpc_api) = this.rpc_api() {
-                        if let Ok(resp) = rpc_api.get_connected_peer_info().await {
-                            this.peer_info.lock().unwrap().replace(Arc::new(resp.peer_info));
+                        println!("[PeerMonitor] RPC API available, requesting peer info...");
+                        
+                        match rpc_api.get_connected_peer_info().await {
+                            Ok(resp) => {
+                                println!("[PeerMonitor] Successfully received peer info: {} peers", resp.peer_info.len());
+                                this.peer_info.lock().unwrap().replace(Arc::new(resp.peer_info));
+                                
+                                // 发送事件通知UI更新
+                                if let Err(e) = _application_events_sender.try_send(crate::events::Events::UpdateLogs) {
+                                    println!("[PeerMonitor] Failed to send update logs event: {}", e);
+                                }
+                            }
+                            Err(e) => {
+                                println!("[PeerMonitor] Failed to get peer info: {}", e);
+                            }
                         }
+                    } else {
+                        println!("[PeerMonitor] No RPC API available");
                     }
                 },
                 msg = this.as_ref().service_events.receiver.recv().fuse() => {

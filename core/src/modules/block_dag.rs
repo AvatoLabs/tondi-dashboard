@@ -396,10 +396,19 @@ impl ModuleT for BlockDag {
         let daa_max = (self.plot_bounds.max()[0] + daa_margin).max(0.0) as u64;
         
         let blocks = if let Ok(mut daa_buckets) = self.runtime.block_dag_monitor_service().chain.lock() {
-            daa_buckets.iter_mut().filter_map(|(daa_score,bucket)| {
+            let total_buckets = daa_buckets.len();
+            let filtered_buckets: Vec<_> = daa_buckets.iter_mut().filter_map(|(daa_score,bucket)| {
                 (*daa_score > daa_min && *daa_score < daa_max).then_some(bucket)
-            }).flat_map(DaaBucket::render).collect::<Vec<_>>()
+            }).collect();
+            
+            println!("[BlockDag] Total DAA buckets: {}, filtered buckets: {} (DAA range: {} - {})", 
+                    total_buckets, filtered_buckets.len(), daa_min, daa_max);
+            
+            let blocks: Vec<_> = filtered_buckets.into_iter().flat_map(DaaBucket::render).collect();
+            println!("[BlockDag] Rendered {} blocks", blocks.len());
+            blocks
         } else {
+            println!("[BlockDag] Failed to lock chain data");
             return;
         };
 

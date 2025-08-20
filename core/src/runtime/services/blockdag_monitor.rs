@@ -49,15 +49,21 @@ impl BlockDagMonitorService {
 
     pub async fn register_notification_listener(&self) -> Result<()> {
         if let Some(rpc_api) = self.rpc_api() {
+            println!("[BlockDagMonitor] Registering notification listener...");
+            
             let listener_id = rpc_api.register_new_listener(ChannelConnection::new(
                 "blockdag-monitor",
                 self.notification_channel.sender.clone(),
                 ChannelType::Persistent,
             ));
             *self.listener_id.lock().unwrap() = Some(listener_id);
+            
+            println!("[BlockDagMonitor] Starting BlockAdded notifications...");
             rpc_api
                 .start_notify(listener_id, Scope::BlockAdded(BlockAddedScope {}))
                 .await?;
+                
+            println!("[BlockDagMonitor] Starting VirtualChainChanged notifications...");
             rpc_api
                 .start_notify(
                     listener_id,
@@ -66,6 +72,10 @@ impl BlockDagMonitorService {
                     }),
                 )
                 .await?;
+                
+            println!("[BlockDagMonitor] Notification listener registered successfully");
+        } else {
+            println!("[BlockDagMonitor] No RPC API available for notification registration");
         }
 
         Ok(())
@@ -179,20 +189,27 @@ impl Service for BlockDagMonitorService {
     }
 
     async fn connect_rpc(self: Arc<Self>) -> Result<()> {
+        println!("[BlockDagMonitor] RPC connected");
         self.is_connected.store(true, Ordering::Relaxed);
         if self.is_enabled.load(Ordering::Relaxed) {
+            println!("[BlockDagMonitor] Service is enabled, registering notifications...");
             self.register_notification_listener().await?;
+        } else {
+            println!("[BlockDagMonitor] Service is disabled, skipping notification registration");
         }
 
         Ok(())
     }
 
     async fn disconnect_rpc(self: Arc<Self>) -> Result<()> {
+        println!("[BlockDagMonitor] RPC disconnected");
         self.is_connected.store(false, Ordering::Relaxed);
         if self.listener_id.lock().unwrap().is_some() {
+            println!("[BlockDagMonitor] Unregistering notifications...");
             self.unregister_notification_listener().await?;
         }
 
+        println!("[BlockDagMonitor] Resetting chain data...");
         self.service_events
             .sender
             .try_send(BlockDagMonitorEvents::Reset)
@@ -202,12 +219,15 @@ impl Service for BlockDagMonitorService {
     }
 
     async fn spawn(self: Arc<Self>) -> Result<()> {
+        println!("[BlockDagMonitor] Service started");
         let _application_events_sender = self.application_events.sender.clone();
 
         let mut blocks_by_hash: AHashMap<tondi_consensus_core::Hash, Arc<RpcBlock>> =
             AHashMap::default();
 
         let mut settings = (*self.settings.lock().unwrap()).clone();
+        println!("[BlockDagMonitor] Initial settings loaded: graph_length_daa={}", settings.graph_length_daa);
+        
         loop {
             select! {
 
@@ -216,6 +236,8 @@ impl Service for BlockDagMonitorService {
                         match notification {
                             Notification::BlockAdded(block_added_notification) => {
                                 let block = block_added_notification.block.clone();
+                                println!("[BlockDagMonitor] Block added: hash={}, daa_score={}", 
+                                        block.header.hash, block.header.daa_score);
 
                                 self.update_new_blocks(&block);
 
@@ -225,10 +247,12 @@ impl Service for BlockDagMonitorService {
                                 let mut chain = self.chain.lock().unwrap();
                                 if let Some(bucket) = chain.get_mut(&daa_score) {
                                     bucket.push(DagBlock::new(block, &settings), &settings);
+                                    println!("[BlockDagMonitor] Added block to existing bucket at DAA {}", daa_score);
                                 } else {
                                     let mut bucket = DaaBucket::new(daa_score as f64, DagBlock::new(block, &settings));
                                     bucket.update(&settings);
                                     chain.insert(daa_score, bucket);
+                                    println!("[BlockDagMonitor] Created new bucket at DAA {}", daa_score);
                                 }
 
                                 let last_daa = daa_score - settings.graph_length_daa as u64;
@@ -286,16 +310,26 @@ impl Service for BlockDagMonitorService {
                         match event {
                             BlockDagMonitorEvents::Enable => {
                                 if !self.is_enabled.load(Ordering::Relaxed) {
+                                    println!("[BlockDagMonitor] Enabling service...");
                                     self.is_enabled.store(true, Ordering::Relaxed);
                                     if self.rpc_api().is_some() && self.is_connected.load(Ordering::SeqCst) {
+                                        println!("[BlockDagMonitor] RPC API available and connected, registering notifications...");
                                         self.register_notification_listener().await.unwrap();
+                                    } else {
+                                        println!("[BlockDagMonitor] RPC API not available or not connected");
                                     }
+                                } else {
+                                    println!("[BlockDagMonitor] Service already enabled");
                                 }
                             }
                             BlockDagMonitorEvents::Disable => {
                                 if self.is_enabled.load(Ordering::Relaxed) {
+                                    println!("[BlockDagMonitor] Disabling service...");
                                     self.is_enabled.store(false, Ordering::Relaxed);
                                     self.unregister_notification_listener().await.unwrap();
+                                    println!("[BlockDagMonitor] Service disabled");
+                                } else {
+                                    println!("[BlockDagMonitor] Service already disabled");
                                 }
                             }
                             BlockDagMonitorEvents::Exit => {

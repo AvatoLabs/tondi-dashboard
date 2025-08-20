@@ -191,6 +191,18 @@ impl Settings {
                             });
                         });
                         
+                        // 显示当前网络的端口信息
+                        ui.add_space(8.0);
+                        ui.horizontal(|ui| {
+                            ui.label(i18n("Current ports:"));
+                            if self.settings.node.enable_grpc {
+                                ui.label(format!("gRPC: {}", self.settings.node.grpc_network_interface.custom));
+                            }
+                            if self.settings.node.enable_wrpc_borsh {
+                                ui.label(format!("wRPC: {}", self.settings.node.wrpc_borsh_network_interface.custom));
+                            }
+                        });
+                        
                         // Devnet custom URL configuration
                         if self.settings.node.network == Network::Devnet {
                             ui.add_space(8.0);
@@ -213,7 +225,7 @@ impl Settings {
                             // Format hint
                             ui.colored_label(
                                 theme_color().warning_color,
-                                i18n("Format: http://hostname:port or just hostname:port (e.g., 127.0.0.1:17110)")
+                                i18n("Format: hostname:port (e.g., 127.0.0.1:16610 for gRPC, 127.0.0.1:17610 for wRPC)")
                             );
                             
                             // Input field for new URL

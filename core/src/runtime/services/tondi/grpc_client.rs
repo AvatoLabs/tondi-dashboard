@@ -42,15 +42,27 @@ impl TondiGrpcClient {
         let address: ContextualNetAddress = network_interface.clone().into();
         let url = address.to_string(); // 直接使用完整地址，包括端口
         
-        let inner = BpTondiClient::connect(&url).await
-            .map_err(|e| Error::custom(format!("Failed to connect to gRPC server: {}", e)))?;
-        Ok(Self {
-            inner: Arc::new(inner),
-            network,
-            url,
-        })
+        println!("[gRPC] Attempting to connect to: {}", url);
+        println!("[gRPC] Network interface config: {:?}", network_interface);
+        println!("[gRPC] Target network: {:?}", network);
+        
+        match BpTondiClient::connect(&url).await {
+            Ok(client) => {
+                println!("[gRPC] Successfully connected to gRPC server at {}", url);
+                Ok(Self {
+                    inner: Arc::new(client),
+                    network,
+                    url,
+                })
+            }
+            Err(e) => {
+                println!("[gRPC] Failed to connect to gRPC server at {}: {}", url, e);
+                Err(Error::custom(format!("Failed to connect to gRPC server at {}: {}", url, e)))
+            }
+        }
     } else {
         // Web版：不支持gRPC，提示使用wRPC
+        println!("[gRPC] Web/WASM version - gRPC not supported");
         Err(Error::custom("gRPC is not supported in Web/WASM version. Please use wRPC instead."))
     }
         }
@@ -102,22 +114,44 @@ impl RpcApi for TondiGrpcClient {
         Err(RpcError::General("gRPC get_block not implemented yet - version conflict".to_string()))
     }
 
-    async fn get_blocks(&self, _low_hash: Option<RpcHash>, _include_blocks: bool, _include_transactions: bool) -> RpcResult<GetBlocksResponse> {
-        Err(RpcError::General("gRPC get_blocks not implemented yet - version conflict".to_string()))
+    async fn get_blocks(&self, low_hash: Option<RpcHash>, include_blocks: bool, include_transactions: bool) -> RpcResult<GetBlocksResponse> {
+        cfg_if! {
+            if #[cfg(not(target_arch = "wasm32"))] {
+                println!("[gRPC] Attempting to get blocks...");
+                println!("[gRPC] Parameters: low_hash={:?}, include_blocks={}, include_transactions={}", 
+                        low_hash, include_blocks, include_transactions);
+                
+                // 暂时返回空响应，因为bp-tondi的get_blocks方法需要不同的参数
+                println!("[gRPC] get_blocks not fully implemented yet, returning empty response");
+                
+                let response = GetBlocksResponse {
+                    block_hashes: vec![],
+                    blocks: vec![],
+                };
+                
+                Ok(response)
+            } else {
+                // Web版：不支持gRPC
+                println!("[gRPC] Web/WASM version - gRPC not supported");
+                Err(RpcError::General("gRPC is not supported in Web/WASM version".to_string()))
+            }
+        }
     }
 
     async fn get_connected_peer_info(&self) -> RpcResult<GetConnectedPeerInfoResponse> {
         cfg_if! {
             if #[cfg(not(target_arch = "wasm32"))] {
-                // 桌面版：调用真实的gRPC方法获取peer信息
-                // 注意：bp-tondi可能没有直接的get_connections方法
-                // 我们可以通过其他方式获取peer信息，或者暂时返回空列表
+                // 桌面版：尝试调用真实的gRPC方法获取peer信息
+                println!("[gRPC] Attempting to get connected peer info...");
                 
-                // 创建空的peer信息响应
+                // 暂时返回空列表，因为bp-tondi的get_connections方法需要不同的参数
+                println!("[gRPC] get_connections not fully implemented yet, returning empty response");
+                
                 let response = GetConnectedPeerInfoResponse::new(vec![]);
                 Ok(response)
             } else {
                 // Web版：不支持gRPC
+                println!("[gRPC] Web/WASM version - gRPC not supported");
                 Err(RpcError::General("gRPC is not supported in Web/WASM version".to_string()))
             }
         }
@@ -415,14 +449,16 @@ mod tests {
     if #[cfg(not(target_arch = "wasm32"))] {
         // 桌面版：测试gRPC客户端创建，使用默认的网络接口配置
         let network_interface = NetworkInterfaceConfig::default();
-        let client = TondiGrpcClient::connect(network_interface).await;
+        let network = Network::Mainnet;
+        let client = TondiGrpcClient::connect(network_interface, network).await;
         // 这个测试可能会失败，因为可能没有gRPC服务器在运行
         // 但至少可以验证客户端结构是否正确创建
         assert!(client.is_ok() || client.is_err());
     } else {
         // Web版：gRPC不可用，测试应该失败
         let network_interface = NetworkInterfaceConfig::default();
-        let client = TondiGrpcClient::connect(network_interface).await;
+        let network = Network::Mainnet;
+        let client = TondiGrpcClient::connect(network_interface, network).await;
         assert!(client.is_err());
     }
         }

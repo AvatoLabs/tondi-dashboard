@@ -22,7 +22,7 @@ pub struct Release {
 pub async fn check_version() -> Result<()> {
     let current_version = crate::app::VERSION;
 
-    let url = "https://api.github.com/repos/aspectron/tondi-ng/releases/latest";
+    let url = "https://github.com/Tondi-Foundation/tondi-dashboard/releases/latest";
     let response = Request::new(url)
         .with_user_agent(format!("tondi-ng {current_version} software update check"))
         .get_json::<serde_json::Value>()
