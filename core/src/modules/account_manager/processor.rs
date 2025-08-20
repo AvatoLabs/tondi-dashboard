@@ -38,6 +38,7 @@ impl<'context> Processor<'context> {
                     let address = match network_type {
                         NetworkType::Testnet => Address::try_from("tonditest:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhqrxplya").unwrap(),
                         NetworkType::Mainnet => Address::try_from("tondi:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqkx9awp4e").unwrap(),
+                        NetworkType::Devnet => Address::try_from("tondidev:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhqrxplya").unwrap(),
                         _ => panic!("Unsupported network"),
                     };
 
@@ -188,6 +189,7 @@ async fn calculate_fee_rate(network_type : NetworkType, account_id : AccountId, 
     let address = match network_type {
         NetworkType::Testnet => Address::try_from("tonditest:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhqrxplya").unwrap(),
         NetworkType::Mainnet => Address::try_from("tondi:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqkx9awp4e").unwrap(),
+        NetworkType::Devnet => Address::try_from("tondidev:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhqrxplya").unwrap(),
         _ => panic!("Unsupported network"),
     };
 

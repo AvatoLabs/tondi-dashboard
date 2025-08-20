@@ -50,6 +50,14 @@ const PRESETS: &[Preset] = &[
         noise : 1.0,
         block_scale : 1.4,
     },
+    Preset {
+        name : "Devnet",
+        daa_range : 120.0,
+        daa_offset : 20.0,
+        spread : 30.0,
+        noise : 0.5,
+        block_scale : 1.3,
+    },
 ];
 
 impl From<Network> for Preset {
@@ -57,6 +65,7 @@ impl From<Network> for Preset {
         match network {
             Network::Mainnet => PRESETS[0].clone(),
             Network::Testnet => PRESETS[3].clone(),
+            Network::Devnet => PRESETS[4].clone(),
         }
     }
 }

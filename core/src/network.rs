@@ -14,6 +14,7 @@ pub enum Network {
     Mainnet,
     #[serde(alias = "testnet")]
     Testnet,
+    Devnet,
 }
 
 impl std::fmt::Display for Network {
@@ -21,6 +22,7 @@ impl std::fmt::Display for Network {
         match self {
             Network::Mainnet => write!(f, "mainnet"),
             Network::Testnet => write!(f, "testnet"),
+            Network::Devnet => write!(f, "devnet"),
         }
     }
 }
@@ -32,6 +34,7 @@ impl FromStr for Network {
         match s {
             "mainnet" => Ok(Network::Mainnet),
             "testnet" => Ok(Network::Testnet),
+            "devnet" => Ok(Network::Devnet),
             _ => Err(Error::InvalidNetwork(s.to_string())),
         }
     }
@@ -42,6 +45,7 @@ impl From<Network> for NetworkType {
         match network {
             Network::Mainnet => NetworkType::Mainnet,
             Network::Testnet => NetworkType::Testnet,
+            Network::Devnet => NetworkType::Devnet,
         }
     }
 }
@@ -51,6 +55,7 @@ impl From<&Network> for NetworkType {
         match network {
             Network::Mainnet => NetworkType::Mainnet,
             Network::Testnet => NetworkType::Testnet,
+            Network::Devnet => NetworkType::Devnet,
         }
     }
 }
@@ -60,6 +65,7 @@ impl From<Network> for NetworkId {
         match network {
             Network::Mainnet => NetworkId::new(network.into()),
             Network::Testnet => NetworkId::with_suffix(network.into(), 10),
+            Network::Devnet => NetworkId::with_suffix(network.into(), 11),
         }
     }
 }
@@ -81,6 +87,7 @@ impl From<&Network> for NetworkId {
         match network {
             Network::Mainnet => NetworkId::new(network.into()),
             Network::Testnet => NetworkId::with_suffix(network.into(), 10),
+            Network::Devnet => NetworkId::with_suffix(network.into(), 11),
         }
     }
 }
@@ -94,7 +101,11 @@ impl From<NetworkId> for Network {
                 Some(x) => unreachable!("Testnet suffix {} is not supported", x),
                 None => panic!("Testnet suffix not provided"),
             },
-            NetworkType::Devnet => unreachable!("Devnet is not supported"),
+            NetworkType::Devnet => match value.suffix {
+                Some(11) => Network::Devnet,
+                Some(x) => unreachable!("Devnet suffix {} is not supported", x),
+                None => panic!("Devnet suffix not provided"),
+            },
             NetworkType::Simnet => unreachable!("Simnet is not supported"),
         }
     }
@@ -124,7 +135,7 @@ impl From<&Network> for &'static NetworkParams {
     }
 }
 
-const NETWORKS: [Network; 2] = [Network::Mainnet, Network::Testnet];
+const NETWORKS: [Network; 3] = [Network::Mainnet, Network::Testnet, Network::Devnet];
 
 impl Network {
     pub fn iter() -> impl Iterator<Item = &'static Network> {
@@ -135,6 +146,7 @@ impl Network {
         match self {
             Network::Mainnet => i18n("Mainnet"),
             Network::Testnet => i18n("Testnet"),
+            Network::Devnet => i18n("Devnet"),
         }
     }
 
@@ -142,6 +154,7 @@ impl Network {
         match self {
             Network::Mainnet => i18n("Main Tondi network"),
             Network::Testnet => i18n("Test network"),
+            Network::Devnet => i18n("Devnet network"),
         }
     }
 

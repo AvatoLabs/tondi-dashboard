@@ -171,6 +171,7 @@ impl Transaction {
         let explorer = match network {
             Network::Mainnet => MAINNET_EXPLORER,
             Network::Testnet => TESTNET_EXPLORER,
+            Network::Devnet => DEVNET_EXPLORER,
         };
 
         match record.transaction_data() {

@@ -383,6 +383,8 @@ pub struct NodeSettings {
     pub tondid_daemon_storage_folder_enable: bool,
     #[serde(default)]
     pub tondid_daemon_storage_folder: String,
+    #[serde(default)]
+    pub devnet_custom_url: Option<String>,
 }
 
 impl Default for NodeSettings {
@@ -407,6 +409,7 @@ impl Default for NodeSettings {
             tondid_daemon_args_enable: false,
             tondid_daemon_storage_folder_enable: false,
             tondid_daemon_storage_folder: String::default(),
+            devnet_custom_url: None,
         }
     }
 }
@@ -444,6 +447,8 @@ impl NodeSettings {
                     Some(self.node_kind.is_config_capable())
                 } else if self.tondid_daemon_binary != other.tondid_daemon_binary {
                     Some(self.node_kind == TondidNodeKind::ExternalAsDaemon)
+                } else if self.devnet_custom_url != other.devnet_custom_url {
+                    Some(true)
                 } else {
                     None
                 }
@@ -461,6 +466,8 @@ impl NodeSettings {
                     || self.wrpc_url != other.wrpc_url
                     || self.wrpc_encoding != other.wrpc_encoding
                 {
+                    Some(true)
+                } else if self.devnet_custom_url != other.devnet_custom_url {
                     Some(true)
                 } else {
                     None

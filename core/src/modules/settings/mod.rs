@@ -136,6 +136,12 @@ impl ModuleT for Settings {
         _core.storage.clear_settings();
     }
 
+    fn network_change(&mut self, core: &mut Core, network: Network) {
+        // Update the network setting and save
+        self.settings.node.network = network;
+        core.store_settings();
+    }
+
 }
 
 impl Settings {
@@ -145,6 +151,14 @@ impl Settings {
         core: &mut Core,
         ui: &mut egui::Ui,
     ) {
+        // Sync settings from core to ensure we have the latest values
+        if self.settings.node.network != core.settings.node.network {
+            self.settings.node.network = core.settings.node.network;
+        }
+        if self.settings.node.devnet_custom_url != core.settings.node.devnet_custom_url {
+            self.settings.node.devnet_custom_url = core.settings.node.devnet_custom_url.clone();
+        }
+        
         #[allow(unused_variables)]
         let half_width = ui.ctx().screen_rect().width() * 0.5;
 
@@ -160,9 +174,33 @@ impl Settings {
                     .show(ui, |ui| {
                         ui.horizontal_wrapped(|ui|{
                             Network::iter().for_each(|network| {
-                                ui.radio_value(&mut self.settings.node.network, *network, network.name());
+                                if ui.radio_value(&mut self.settings.node.network, *network, network.name()).changed() {
+                                    // Update core settings when network changes
+                                    core.settings.node.network = *network;
+                                    core.store_settings();
+                                }
                             });
                         });
+                        
+                        // Devnet custom URL configuration
+                        if self.settings.node.network == Network::Devnet {
+                            ui.add_space(8.0);
+                            ui.horizontal(|ui| {
+                                ui.label(i18n("Custom Devnet URL (optional):"));
+                                let mut url_input = self.settings.node.devnet_custom_url.clone().unwrap_or_default();
+                                if ui.add(TextEdit::singleline(&mut url_input)).changed() {
+                                    self.settings.node.devnet_custom_url = if url_input.is_empty() { None } else { Some(url_input) };
+                                    core.settings.node.devnet_custom_url = self.settings.node.devnet_custom_url.clone();
+                                    core.store_settings();
+                                }
+                            });
+                            if let Some(url) = &self.settings.node.devnet_custom_url {
+                                if !url.is_empty() {
+                                    ui.label(format!("{}: {}", i18n("Using custom devnet URL"), url));
+                                }
+                            }
+                            ui.label(i18n("Leave empty to use default devnet configuration"));
+                        }
                     });
 
 

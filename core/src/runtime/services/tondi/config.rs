@@ -35,6 +35,7 @@ pub struct Config {
     tondid_daemon_storage_folder_enable: bool,
     tondid_daemon_storage_folder: String,
     memory_scale: NodeMemoryScale,
+    devnet_custom_url: Option<String>,
 }
 
 impl From<NodeSettings> for Config {
@@ -51,6 +52,7 @@ impl From<NodeSettings> for Config {
             tondid_daemon_storage_folder_enable: node_settings.tondid_daemon_storage_folder_enable,
             tondid_daemon_storage_folder: node_settings.tondid_daemon_storage_folder,
             memory_scale: node_settings.memory_scale,
+            devnet_custom_url: node_settings.devnet_custom_url,
         }
     }
 }
@@ -68,6 +70,10 @@ cfg_if! {
                         args.testnet = true;
                         args.testnet_suffix = 10;
                     }
+                    Network::Devnet => {
+                        args.testnet = true;
+                        args.testnet_suffix = 11;
+                    }
                 }
 
                 args.perf_metrics = true;
@@ -81,6 +87,15 @@ cfg_if! {
                 }
 
                 args.user_agent_comments = vec![user_agent_comment()];
+
+                // Add custom devnet URL if specified
+                if let Some(custom_url) = &config.devnet_custom_url {
+                    if !custom_url.is_empty() {
+                        // Add the custom URL as a command line argument
+                        // This will be parsed by tondid to connect to the custom devnet node
+                        args.user_agent_comments.push(format!("devnet-url:{}", custom_url));
+                    }
+                }
 
                 // TODO - parse custom args and overlap on top of the defaults
 
@@ -97,6 +112,10 @@ cfg_if! {
                     Network::Testnet => {
                         args.push("--testnet");
                         args.push("--netsuffix=10");
+                    }
+                    Network::Devnet => {
+                        args.push("--testnet");
+                        args.push("--netsuffix=11");
                     }
                 }
 
@@ -129,6 +148,14 @@ cfg_if! {
                 }
 
                 args.push(format!("--uacomment={}", user_agent_comment()));
+
+                // Add custom devnet URL if specified
+                if let Some(custom_url) = &config.devnet_custom_url {
+                    if !custom_url.is_empty() {
+                        // Add the custom URL as a command line argument
+                        args.push(format!("--uacomment=devnet-url:{}", custom_url));
+                    }
+                }
 
                 if config.tondid_daemon_storage_folder_enable && !config.tondid_daemon_storage_folder.is_empty() && !(config.tondid_daemon_args_enable && config.tondid_daemon_args.contains("--appdir")) {
                     args.push(format!("--appdir={}", config.tondid_daemon_storage_folder));
