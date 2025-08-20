@@ -253,8 +253,8 @@ impl Overview {
                             "https://github.com/aspectron/tondi-ng"
                         );
                         ui.hyperlink_to_tab(
-                            format!("• {}",i18n("Rusty Tondi on GitHub")),
-                            "https://github.com/tondinet/rusty-tondi",
+                            format!("• {}",i18n("Tondi Client on GitHub")),
+                            "https://github.com/AvatoLabs/Tondi",
                         );
                         ui.hyperlink_to_tab(
                             format!("• {}",i18n("Tondi Integration Guide")),
@@ -320,8 +320,8 @@ impl Overview {
                 CollapsingHeader::new(i18n("Build"))
                     .default_open(true)
                     .show(ui, |ui| {
-                        ui.add(Label::new(format!("Tondi Dashboard v{}-{} + Rusty Tondi {}", env!("CARGO_PKG_VERSION"),crate::app::GIT_DESCRIBE, tondi_version())));
-                        // if ui.add(Label::new(format!("Tondi Dashboard v{}-{} + Rusty Tondi v{}", env!("CARGO_PKG_VERSION"),crate::app::GIT_DESCRIBE, tondi_wallet_core::version())).sense(Sense::click())).clicked() {
+                        ui.add(Label::new(format!("Tondi Dashboard v{}-{} + Tondi Client {}", env!("CARGO_PKG_VERSION"),crate::app::GIT_DESCRIBE, tondi_version())));
+                        // if ui.add(Label::new(format!("Tondi Dashboard v{}-{} + Tondi Client v{}", env!("CARGO_PKG_VERSION"),crate::app::GIT_DESCRIBE, tondi_wallet_core::version())).sense(Sense::click())).clicked() {
                         //     core.select::<modules::Changelog>();
                         // }
                         // ui.label(format!("Timestamp: {}", crate::app::BUILD_TIMESTAMP));
@@ -346,18 +346,18 @@ impl Overview {
                     .default_open(false)
                     .show(ui, |ui| {
                         ui.vertical(|ui|{
-                            ui.label("Rusty Tondi");
-                            ui.label("Copyright (c) 2024 Tondi Developers");
+                            ui.label("Tondi Client");
+                            ui.label("Copyright (c) 2025 Tondi Foundation");
                             ui.label("License: ISC");
-                            ui.hyperlink_url_to_tab("https://github.com/tondinet/rusty-tondi");
+                            ui.hyperlink_url_to_tab("https://github.com/AvatoLabs/Tondi");
                             ui.label("");
                             ui.label("Tondi Dashboard");
-                            ui.label("Copyright (c) 2024 ASPECTRON");
+                            ui.label("Copyright (c) 2025 Tondi Foundation");
                             ui.label("License: MIT (RESTRICTED)");
-                            ui.hyperlink_url_to_tab("https://github.com/aspectron/tondi-ng");
+                            ui.hyperlink_url_to_tab("https://github.com/Tondi-Foundation/tondi-dashboard");
                             ui.label("");
                             ui.label("WORKFLOW-RS");
-                            ui.label("Copyright (c) 2024 ASPECTRON");
+                            ui.label("Copyright (c) 2025 Tondi Foundation");
                             ui.label("License: MIT or Apache 2.0");
                             ui.hyperlink_url_to_tab("https://github.com/workflow-rs/workflow-rs");
                             ui.label("");
@@ -378,14 +378,6 @@ impl Overview {
                             ui.label("");
                         });
                     });
-
-                    CollapsingHeader::new(i18n("Donations"))
-                        .default_open(true)
-                        .show(ui, |ui| {
-                            if ui.link(i18n("Please support Tondi Dashboard development")).clicked() {
-                                core.select::<modules::Donations>();
-                            }
-                        });
             });
     }
 

@@ -103,11 +103,11 @@ cfg_if! {
 
                 let cmd = Command::new("tondi-dashboard")
 
-                    .about(format!("tondi-dashboard v{VERSION}-{GIT_DESCRIBE} (rusty-tondi {})", tondi_version()))
+                    .about(format!("tondi-dashboard v{VERSION}-{GIT_DESCRIBE} (tondi client {})", tondi_version()))
                     .arg(arg!(--version "Display software version"))
                     .arg(arg!(--disable "Disable node services when starting"))
-                    .arg(arg!(--daemon "Run as Rusty Tondi p2p daemon"))
-                    .arg(arg!(--cli "Run as Rusty Tondi Cli Wallet"))
+                    .arg(arg!(--daemon "Run as Tondi Client p2p daemon"))
+                    .arg(arg!(--cli "Run as Tondi Client Cli Wallet"))
                     .arg(
                         Arg::new("reset-settings")
                         .long("reset-settings")
@@ -215,7 +215,7 @@ cfg_if! {
 
                     workflow_log::set_colors_enabled(true);
 
-                                            println!("tondi-dashboard v{VERSION}-{GIT_DESCRIBE} (rusty-tondi {})", tondi_version());
+                                            println!("tondi-dashboard v{VERSION}-{GIT_DESCRIBE} (tondi client {})", tondi_version());
 
                     // Log to stderr (if you run with `RUST_LOG=debug`).
                     env_logger::init();

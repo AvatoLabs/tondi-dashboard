@@ -75,7 +75,7 @@ impl TondidNodeKind {
     pub fn describe(&self) -> &str {
         match self {
             TondidNodeKind::Disable => i18n("Disables node connectivity (Offline Mode)."),
-            TondidNodeKind::Remote => i18n("Connects to a Remote Rusty Tondi Node via wRPC."),
+            TondidNodeKind::Remote => i18n("Connects to a Remote Tondi Client Node via wRPC."),
             #[cfg(not(target_arch = "wasm32"))]
             TondidNodeKind::IntegratedInProc => i18n("The node runs as a part of the Tondi Dashboard application process. This reduces communication overhead (experimental)."),
             #[cfg(not(target_arch = "wasm32"))]
@@ -292,7 +292,7 @@ impl std::fmt::Display for NodeMemoryScale {
 impl NodeMemoryScale {
     pub fn describe(&self) -> &str {
         match self {
-            NodeMemoryScale::Default => i18n("Managed by the Rusty Tondi daemon"),
+            NodeMemoryScale::Default => i18n("Managed by the Tondi Client daemon"),
             NodeMemoryScale::Conservative => i18n("Use 50%-75% of available system memory"),
             NodeMemoryScale::Performance => i18n("Use all available system memory"),
         }
@@ -702,6 +702,9 @@ pub struct Settings {
     pub language_code: String,
     pub update_monitor: bool,
     pub market_monitor: bool,
+    pub update_check_timeout: u64, // 更新检查超时时间（秒）
+    pub update_check_retries: u32, // 更新检查重试次数
+    pub update_check_interval: u64, // 更新检查间隔（秒）
     // #[serde(default)]
     // pub disable_frame: bool,
 }
@@ -722,6 +725,9 @@ impl Default for Settings {
             language_code: "en".to_string(),
             update_monitor: true,
             market_monitor: true,
+            update_check_timeout: 30, // 默认30秒超时
+            update_check_retries: 3,  // 默认3次重试
+            update_check_interval: 60 * 60 * 12, // 默认12小时检查一次
             // disable_frame: false,
         }
     }

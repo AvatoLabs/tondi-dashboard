@@ -378,7 +378,12 @@ impl Runtime {
     }
 
     pub fn request_repaint(&self) {
-        self.repaint_service().trigger();
+        self.repaint_service().smart_trigger();
+    }
+
+    /// 强制立即重绘（用于重要更新）
+    pub fn force_repaint(&self) {
+        self.repaint_service().force_repaint();
     }
 }
 

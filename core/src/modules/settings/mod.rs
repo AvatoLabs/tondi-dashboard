@@ -283,17 +283,17 @@ impl Settings {
                             TondidNodeKind::ExternalAsDaemon => {
 
                                 ui.horizontal(|ui|{
-                                    ui.label(i18n("Rusty Tondi Daemon Path:"));
+                                    ui.label(i18n("Tondi Client Daemon Path:"));
                                     ui.add(TextEdit::singleline(&mut self.settings.node.tondid_daemon_binary));
                                 });
 
                                 let path = std::path::PathBuf::from(&self.settings.node.tondid_daemon_binary);
                                 if path.exists() && !path.is_file() {
                                     ui.label(
-                                        RichText::new(format!("Rusty Tondi Daemon not found at '{path}'", path = self.settings.node.tondid_daemon_binary))
+                                        RichText::new(format!("Tondi Client Daemon not found at '{path}'", path = self.settings.node.tondid_daemon_binary))
                                             .color(theme_color().error_color),
                                     );
-                                    node_settings_error = Some("Rusty Tondi Daemon not found");
+                                    node_settings_error = Some("Tondi Client Daemon not found");
                                 }
                             },
                             _ => { }
@@ -708,6 +708,38 @@ impl Settings {
                             self.runtime.update_monitor_service().enable(core.settings.update_monitor);
                             core.store_settings();
                         }
+                        
+                        // 添加超时设置
+                        ui.add_space(5.0);
+                        ui.label(i18n("Update Check Timeout (seconds):"));
+                        if ui.add(egui::DragValue::new(&mut self.settings.update_check_timeout)
+                            .range(10..=120)
+                            .speed(1.0)).changed() {
+                            core.settings.update_check_timeout = self.settings.update_check_timeout;
+                            core.store_settings();
+                        }
+                        
+                        // 添加重试次数设置
+                        ui.add_space(5.0);
+                        ui.label(i18n("Update Check Retries:"));
+                        if ui.add(egui::DragValue::new(&mut self.settings.update_check_retries)
+                            .range(1..=5)
+                            .speed(1.0)).changed() {
+                            core.settings.update_check_retries = self.settings.update_check_retries;
+                            core.store_settings();
+                        }
+                        
+                        // 添加检查间隔设置
+                        ui.add_space(5.0);
+                        ui.label(i18n("Update Check Interval (hours):"));
+                        let mut interval_hours = self.settings.update_check_interval / 3600;
+                        if ui.add(egui::DragValue::new(&mut interval_hours)
+                            .range(1..=168) // 1小时到1周
+                            .speed(1.0)).changed() {
+                            self.settings.update_check_interval = interval_hours * 3600;
+                            core.settings.update_check_interval = self.settings.update_check_interval;
+                            core.store_settings();
+                        }
                     });    
             });
 
@@ -759,7 +791,7 @@ impl Settings {
                             &mut self.settings.developer.enable_custom_daemon_args, 
                             i18n("Enable custom daemon arguments")
                         ).on_hover_text_at_pointer(
-                            i18n("Allow custom arguments for the Rusty Tondi daemon")
+                            i18n("Allow custom arguments for the Tondi Client daemon")
                         );
                         
                         ui.checkbox(

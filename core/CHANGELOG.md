@@ -6,14 +6,14 @@
 
 # 1.0.0
 
-- Rusty Tondi 1.0.0 (Crescendo support)
+- Tondi Client 1.0.0 (Crescendo support)
 - Remove legacy testnet-11 support.
 - Update testnet to 10 BPS (visualizer & load estimation).
 - Fix occasional issues detecting previously used addresses when importing legacy wallets.
 
 # 0.3.0
 
-- Rusty Tondi 0.15.1 
+- Tondi Client 0.15.1 
 - Add `Settings > ... > Local p2p Node .. > Public wRPC (Borsh)` to allow for external wRPC connections.
 - A new priority fee estimation algorithm based on the network load (Send panel).
 - Add support for legacy wallets created with [KDX](https://kdx.app) and Web Wallet at [https://wallet.tondinet.io](https://wallet.tondinet.io).
@@ -27,7 +27,7 @@
 
 - Pagination in transaction history panel
 - Resolve an issue with some transactions not being displayed in the correct sort order.
-- Refactor public node connectivity (now using Rusty Tondi public node resolver).
+- Refactor public node connectivity (now using Tondi Client public node resolver).
 - Add `Settings > User Interface > Options > Disable Window Frame` options that allows the user to disable custom window frame. Custom window frame currently affects ability to resize TondiNG window on the Windows operating system.
 
 NOTE: This release includes the underlying changes to the wRPC Borsh protocol that breaks compatibility with older versions of Tondi nodes (all versions before `0.14.2`). This change is necessary to support future features and improvements.
@@ -39,8 +39,8 @@ NOTE: This release includes the underlying changes to the wRPC Borsh protocol th
 - Fix a crash in the Send panel when the user enters an invalid address, some amount and then hits the enter key.
 
 # 0.2.5
-- Update Rusty Tondi p2p client (tondid) to `0.14.1`.
-- WASM SDK is now available that allows developers using TypeScript and JavaScript to access and interface with wallets created using Tondi Dashboard and Rusty Tondi CLI - [https://aspectron.org/en/projects/tondi-wasm.html](https://aspectron.org/en/projects/tondi-wasm.html)
+- Update Tondi Client p2p client (tondid) to `0.14.1`.
+- WASM SDK is now available that allows developers using TypeScript and JavaScript to access and interface with wallets created using Tondi Dashboard and Tondi Client CLI - [https://aspectron.org/en/projects/tondi-wasm.html](https://aspectron.org/en/projects/tondi-wasm.html)
 
 # 0.2.4
 - Add `Settings > Node > Custom Data Folder` option
