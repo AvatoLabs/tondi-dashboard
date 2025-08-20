@@ -53,7 +53,7 @@ impl Welcome {
                                 Network::Mainnet => {
                                     // ui.colored_label(theme_color().warning_color, i18n("Please note that this is a beta release. Until this message is removed, please avoid using the wallet with mainnet funds."));
                                 }
-                                Network::Testnet10 => { }
+                                Network::Testnet => { }
                             }
                         });
                 
@@ -96,7 +96,12 @@ impl Welcome {
                                     ui.style_mut().wrap_mode = Some(TextWrapMode::Extend);
                                     ui.set_min_width(60.0);
                                     dictionary.enabled_languages().into_iter().for_each(|(code,lang)| {
-                                        ui.selectable_value(&mut self.settings.language_code, code.to_string(), lang);
+                                        if ui.selectable_value(&mut self.settings.language_code, code.to_string(), lang).clicked() {
+                                            // 立即激活新选择的语言
+                                            if let Err(err) = dictionary.activate_language_code(code) {
+                                                log::error!("Unable to activate language {}: {}", code, err);
+                                            }
+                                        }
                                     });
                                 });
 
@@ -157,6 +162,12 @@ impl Welcome {
                         if ui.medium_button(format!("{} {}", egui_phosphor::light::CHECK, i18n("Apply"))).clicked() {
                             let mut settings = self.settings.clone();
                             settings.initialized = true;
+                            
+                            // 确保语言设置被正确应用
+                            if let Err(err) = i18n::dictionary().activate_language_code(&settings.language_code) {
+                                log::error!("Unable to activate language {}: {}", settings.language_code, err);
+                            }
+                            
                             let message = i18n("Unable to store settings");
                             settings.store_sync().expect(message);
                             self.runtime.tondi_service().update_services(&self.settings.node, None);

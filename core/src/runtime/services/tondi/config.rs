@@ -64,7 +64,7 @@ cfg_if! {
                 let mut args = Args::default();
                 match config.network {
                     Network::Mainnet => {}
-                    Network::Testnet10 => {
+                    Network::Testnet => {
                         args.testnet = true;
                         args.testnet_suffix = 10;
                     }
@@ -94,7 +94,7 @@ cfg_if! {
 
                 match config.network {
                     Network::Mainnet => {}
-                    Network::Testnet10 => {
+                    Network::Testnet => {
                         args.push("--testnet");
                         args.push("--netsuffix=10");
                     }

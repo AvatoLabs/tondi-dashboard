@@ -101,9 +101,9 @@ cfg_if! {
                 }
             } else {
 
-                let cmd = Command::new("tondi-ng")
+                let cmd = Command::new("tondi-dashboard")
 
-                    .about(format!("tondi-ng v{VERSION}-{GIT_DESCRIBE} (rusty-tondi {})", tondi_version()))
+                    .about(format!("tondi-dashboard v{VERSION}-{GIT_DESCRIBE} (rusty-tondi {})", tondi_version()))
                     .arg(arg!(--version "Display software version"))
                     .arg(arg!(--disable "Disable node services when starting"))
                     .arg(arg!(--daemon "Run as Rusty Tondi p2p daemon"))
@@ -112,11 +112,11 @@ cfg_if! {
                         Arg::new("reset-settings")
                         .long("reset-settings")
                         .action(ArgAction::SetTrue)
-                        .help("Reset tondi-ng settings")
+                        .help("Reset tondi-dashboard settings")
                     )
                     .subcommand(
                         Command::new("i18n").hide(true)
-                        .about("tondi-ng i18n user interface translation")
+                        .about("tondi-dashboard i18n user interface translation")
                         .subcommand(
                             Command::new("import")
                                 .about("import JSON files suffixed with language codes (*_en.json, *_de.json, etc.)")
@@ -215,7 +215,7 @@ cfg_if! {
 
                     workflow_log::set_colors_enabled(true);
 
-                    println!("tondi-ng v{VERSION}-{GIT_DESCRIBE} (rusty-tondi {})", tondi_version());
+                                            println!("tondi-dashboard v{VERSION}-{GIT_DESCRIBE} (rusty-tondi {})", tondi_version());
 
                     // Log to stderr (if you run with `RUST_LOG=debug`).
                     env_logger::init();
@@ -223,7 +223,7 @@ cfg_if! {
                     set_log_level(LevelFilter::Info);
 
                     let mut settings = if reset_settings {
-                        println!("Resetting tondi-ng settings on user request...");
+                        println!("Resetting tondi-dashboard settings on user request...");
                         Settings::default().store_sync()?.clone()
                     } else {
                         Settings::load().await.unwrap_or_else(|err| {
@@ -351,7 +351,7 @@ cfg_if! {
 
             eframe::WebRunner::new()
                 .start(
-                    document().get_element_by_id("tondi-ng").expect("<canvas id=\"tondi-ng\"> not found.").dyn_into::<web_sys::HtmlCanvasElement>().unwrap(),
+                    document().get_element_by_id("tondi-dashboard").expect("<canvas id=\"tondi-dashboard\"> not found.").dyn_into::<web_sys::HtmlCanvasElement>().unwrap(),
                     web_options,
                     Box::new(move |cc| {
 
@@ -416,7 +416,7 @@ cfg_if! {
                     } else {
                         std::env::current_dir()?
                     };
-                    target_folder.push("tondi-ng_en.json");
+                    target_folder.push("tondi-dashboard_en.json");
                     println!("exporting default language to: '{}'", target_folder.display());
                     i18n::export_default_language(move |json_data: &str| {
                         Ok(fs::write(&target_folder, json_data)?)

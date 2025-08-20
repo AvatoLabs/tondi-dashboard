@@ -219,8 +219,8 @@ impl Overview {
                                 self.render_fee_rate(core, ui);
                             });
                     }
-                    Network::Testnet10 => {
-                        CollapsingHeader::new(i18n("Testnet 10"))
+                    Network::Testnet => {
+                        CollapsingHeader::new(i18n("Testnet"))
                             .default_open(true)
                             .show(ui, |ui| {
                                 CollapsingHeader::new(i18n("Resources"))

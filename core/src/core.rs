@@ -14,7 +14,7 @@ use workflow_i18n::*;
 use workflow_wasm::callback::CallbackMap;
 pub const TRANSACTION_PAGE_SIZE: u64 = 20;
 pub const MAINNET_EXPLORER: &str = "https://explorer.tondi.org";
-pub const TESTNET10_EXPLORER: &str = "https://explorer-tn10.tondi.org";
+pub const TESTNET_EXPLORER: &str = "https://explorer-tn10.tondi.org";
 
 pub enum Exception {
     #[allow(dead_code)]
