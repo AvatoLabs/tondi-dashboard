@@ -65,7 +65,7 @@ impl From<Network> for NetworkId {
         match network {
             Network::Mainnet => NetworkId::new(network.into()),
             Network::Testnet => NetworkId::with_suffix(network.into(), 10),
-            Network::Devnet => NetworkId::with_suffix(network.into(), 11),
+            Network::Devnet => NetworkId::new(network.into()), // Devnet is a separate network type, not testnet with suffix
         }
     }
 }
@@ -87,7 +87,7 @@ impl From<&Network> for NetworkId {
         match network {
             Network::Mainnet => NetworkId::new(network.into()),
             Network::Testnet => NetworkId::with_suffix(network.into(), 10),
-            Network::Devnet => NetworkId::with_suffix(network.into(), 11),
+            Network::Devnet => NetworkId::new(network.into()), // Devnet is a separate network type, not testnet with suffix
         }
     }
 }
@@ -98,38 +98,18 @@ impl From<NetworkId> for Network {
             NetworkType::Mainnet => Network::Mainnet,
             NetworkType::Testnet => match value.suffix {
                 Some(10) => Network::Testnet,
-                Some(11) => {
-                    // Handle case where devnet suffix is mistakenly used with testnet type
-                    log::warn!("NetworkId has testnet type but devnet suffix (11), defaulting to testnet");
-                    Network::Testnet
-                },
                 Some(x) => {
-                    log::error!("Unsupported testnet suffix {}, defaulting to testnet", x);
+                    log::warn!("Unsupported testnet suffix {}, defaulting to testnet", x);
                     Network::Testnet
                 },
                 None => {
-                    log::error!("Testnet suffix not provided, defaulting to testnet");
+                    log::warn!("Testnet suffix not provided, defaulting to testnet");
                     Network::Testnet
                 },
             },
-            NetworkType::Devnet => match value.suffix {
-                Some(11) => Network::Devnet,
-                Some(10) => {
-                    // Handle case where testnet suffix is mistakenly used with devnet type
-                    log::warn!("NetworkId has devnet type but testnet suffix (10), defaulting to devnet");
-                    Network::Devnet
-                },
-                Some(x) => {
-                    log::error!("Unsupported devnet suffix {}, defaulting to devnet", x);
-                    Network::Devnet
-                },
-                None => {
-                    log::error!("Devnet suffix not provided, defaulting to devnet");
-                    Network::Devnet
-                },
-            },
+            NetworkType::Devnet => Network::Devnet, // Devnet is a separate network type
             NetworkType::Simnet => {
-                log::error!("Simnet is not supported, defaulting to mainnet");
+                log::warn!("Simnet is not supported, defaulting to mainnet");
                 Network::Mainnet
             },
         }

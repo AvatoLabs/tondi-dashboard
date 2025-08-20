@@ -400,14 +400,10 @@ impl Core {
             
             self.settings.node.network = network;
             
-            // Update settings module first
-            {
-                let mut settings_module = self.get_mut::<modules::Settings>();
-                settings_module.change_current_network(network);
-            } // Explicitly drop the borrow here
-            
-            // Store settings and restart services with new network configuration
+            // Store settings first
             self.store_settings();
+            
+            // Update services with new network configuration
             self.runtime
                 .tondi_service()
                 .update_services(&self.settings.node, None);

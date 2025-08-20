@@ -114,8 +114,8 @@ cfg_if! {
                         args.push("--netsuffix=10");
                     }
                     Network::Devnet => {
-                        args.push("--testnet");
-                        args.push("--netsuffix=11");
+                        // Devnet is a separate network type, not testnet with suffix
+                        // No additional arguments needed
                     }
                 }
 
