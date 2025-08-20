@@ -641,10 +641,10 @@ pub fn padded_sompi_to_tondi_string(sompi: u64, padding: usize) -> String {
 
 pub fn tondi_suffix(network_type: &NetworkType) -> &'static str {
     match network_type {
-        NetworkType::Mainnet => "KAS",
-        NetworkType::Testnet => "TKAS",
-        NetworkType::Simnet => "SKAS",
-        NetworkType::Devnet => "DKAS",
+        NetworkType::Mainnet => "TONDI",
+        NetworkType::Testnet => "TestTONDI",
+        NetworkType::Simnet => "SimTONDI",
+        NetworkType::Devnet => "DevTONDI",
     }
 }
 
