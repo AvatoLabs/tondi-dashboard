@@ -4,10 +4,13 @@ pub use tondi_consensus_core::constants::SOMPI_PER_TONDI;
 pub use tondi_consensus_core::network::{NetworkId, NetworkType};
 pub use tondi_consensus_core::Hash as TondiHash;
 pub use tondi_metrics_core::MetricsSnapshot;
+pub use tondi_utils::networking::ContextualNetAddress;
+pub use crate::network::Network;
+pub use crate::settings::{NetworkInterfaceConfig, NetworkInterfaceKind, RpcConfig};
 pub use tondi_rpc_core::api::rpc::RpcApi;
 pub use tondi_rpc_core::{RpcFeeEstimate, RpcFeerateBucket};
 pub use tondi_utils::hex::{FromHex, ToHex};
-pub use tondi_utils::{hashmap::GroupExtension, networking::ContextualNetAddress};
+pub use tondi_utils::{hashmap::GroupExtension};
 pub use tondi_wallet_core::prelude::{
     Account as CoreAccount, AccountCreateArgs, AccountCreateArgsBip32, AccountDescriptor,
     AccountId, AccountKind, Address, Balance, DynRpcApi, IdT, TondiRpcClient, Language,
@@ -80,7 +83,7 @@ pub use crate::menu::Menu;
 pub use crate::modules;
 pub use crate::modules::{Module, ModuleCaps, ModuleStyle, ModuleT};
 pub use crate::network::BASIC_TRANSACTION_MASS;
-pub use crate::network::{Network, NetworkPressure};
+pub use crate::network::NetworkPressure;
 pub use crate::notifications::{Notifications, UserNotification, UserNotifyKind};
 pub use crate::primitives::{
     Account, AccountCollection, AccountSelectorButtonExtension, BlockDagGraphSettings, DaaBucket,
@@ -89,8 +92,8 @@ pub use crate::primitives::{
 pub use crate::result::Result;
 pub use crate::runtime::{runtime, spawn, spawn_with_result, Payload, Runtime, Service};
 pub use crate::settings::{
-    EstimatorMode, EstimatorSettings, TondidNodeKind, NetworkInterfaceConfig, NetworkInterfaceKind,
-    NodeConnectionConfigKind, NodeMemoryScale, NodeSettings, RpcConfig, RpcOptions, Settings,
+    EstimatorMode, EstimatorSettings, TondidNodeKind,
+    NodeConnectionConfigKind, NodeMemoryScale, NodeSettings, RpcOptions, Settings,
     UserInterfaceSettings,
 };
 pub use crate::state::State;

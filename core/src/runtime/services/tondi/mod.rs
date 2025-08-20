@@ -203,16 +203,22 @@ impl TondiService {
                     if #[cfg(not(target_arch = "wasm32"))] {
                         // 桌面版：支持gRPC
                         if let Some(network_interface) = url {
-                            let grpc_client = TondiGrpcClient::connect(network_interface.clone()).await?;
+                            let grpc_client = TondiGrpcClient::connect(network_interface.clone(), network).await?;
                             let rpc_api: Arc<DynRpcApi> = Arc::new(grpc_client);
-                            let rpc_ctl = RpcCtl::new();
+                            let mut rpc_ctl = RpcCtl::new();
+                            // 设置gRPC URL描述符
+                            let address: ContextualNetAddress = network_interface.clone().into();
+                            rpc_ctl.set_descriptor(Some(format!("grpc://{}", address)));
                             Ok(Rpc::new(rpc_api, rpc_ctl))
                         } else {
                             // 如果没有配置URL，使用默认配置
                             let default_interface = NetworkInterfaceConfig::default();
-                            let grpc_client = TondiGrpcClient::connect(default_interface).await?;
+                            let grpc_client = TondiGrpcClient::connect(default_interface.clone(), network).await?;
                             let rpc_api: Arc<DynRpcApi> = Arc::new(grpc_client);
-                            let rpc_ctl = RpcCtl::new();
+                            let mut rpc_ctl = RpcCtl::new();
+                            // 设置默认gRPC URL描述符
+                            let address: ContextualNetAddress = default_interface.into();
+                            rpc_ctl.set_descriptor(Some(format!("grpc://{}", address)));
                             Ok(Rpc::new(rpc_api, rpc_ctl))
                         }
                     } else {

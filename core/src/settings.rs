@@ -390,15 +390,15 @@ pub struct NodeSettings {
 impl Default for NodeSettings {
     fn default() -> Self {
         Self {
-            connection_config_kind: NodeConnectionConfigKind::default(),
-            rpc_kind: RpcKind::Wrpc,
+            connection_config_kind: NodeConnectionConfigKind::Custom,  // 改为Custom以启用自定义RPC配置
+            rpc_kind: RpcKind::Grpc,  // 默认使用gRPC而不是Wrpc
             wrpc_url: "127.0.0.1".to_string(),
             wrpc_encoding: WrpcEncoding::Borsh,
             enable_wrpc_borsh: false,
             wrpc_borsh_network_interface: NetworkInterfaceConfig::default(),
             enable_wrpc_json: false,
             wrpc_json_network_interface: NetworkInterfaceConfig::default(),
-            enable_grpc: false,
+            enable_grpc: true,  // 默认启用gRPC
             grpc_network_interface: NetworkInterfaceConfig::default(),
             enable_upnp: true,
             memory_scale: NodeMemoryScale::default(),

@@ -44,23 +44,23 @@ egui-phosphor = { version = "=0.9.0", features = ["thin","light","regular","bold
 egui-notify = { version = "0.19.0"}
 
 # Tondi dependencies
-tondi-addresses = { path = "../Tondi/crypto/addresses" }
-tondi-alloc = { path = "../Tondi/utils/alloc" }
-tondi-bip32 = { path = "../Tondi/wallet/bip32" }
-tondi-cli = { path = "../Tondi/cli" }
-tondi-consensus-core = { path = "../Tondi/consensus/core" }
-tondi-core = { path = "../Tondi/core" }
-tondi-metrics-core = { path = "../Tondi/metrics/core" }
-tondi-notify = { path = "../Tondi/notify" }
-tondi-rpc-core = { path = "../Tondi/rpc/core" }
-tondi-rpc-service = { path = "../Tondi/rpc/service" }
-tondi-utils = { path = "../Tondi/utils" }
-tondi-wallet-core = { path = "../Tondi/wallet/core" }
-tondi-wallet-keys = { path = "../Tondi/wallet/keys" }
-tondi-wrpc-client = { path = "../Tondi/rpc/wrpc/client" }
-tondi-wrpc-server = { path = "../Tondi/rpc/wrpc/server" }
-tondi-txscript = { path = "../Tondi/crypto/txscript" }
-tondid = { path = "../Tondi/tondid" }
+tondi-addresses = { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-alloc =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-bip32 =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-cli =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-consensus-core =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-core =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-metrics-core =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-notify =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-rpc-core =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-rpc-service =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-utils =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-wallet-core = { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-wallet-keys =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-wrpc-client =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-wrpc-server =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-txscript =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondid = { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
 
 # bp-tondi-client dependency for gRPC support
 bp-tondi = { path = "/home/arthur/AvatoLabs/bp-tondi" }

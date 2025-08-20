@@ -1,8 +1,8 @@
 use crate::imports::*;
-use tondi_notify::{listener::ListenerId, scope::*};
 use tondi_rpc_core::api::notifications::Notification;
 use tondi_rpc_core::notify::connection::{ChannelConnection, ChannelType};
 use tondi_rpc_core::{RpcBlock, VirtualChainChangedNotification};
+use tondi_notify::{listener::ListenerId, scope::{Scope, BlockAddedScope, VirtualChainChangedScope}};
 
 pub enum BlockDagMonitorEvents {
     Enable,
