@@ -117,9 +117,19 @@ fn title_bar_ui(
 
     let title_bar_response = ui.interact(title_bar_rect, Id::new("title_bar"), Sense::click());
 
-    // Paint the title:
+    // Calculate the width of the control buttons on the right side
+    let button_width_estimate = 120.0; // Approximate width for all control buttons
+    
+    // Create a centered area for the title, accounting for the right-side buttons
+    let title_center_rect = {
+        let mut rect = title_bar_rect;
+        rect.max.x -= button_width_estimate; // Leave space for control buttons
+        rect
+    };
+    
+    // Paint the title centered in the available space
     painter.text(
-        title_bar_rect.center(),
+        title_center_rect.center(),
         Align2::CENTER_CENTER,
         title,
         FontId::proportional(16.0),
@@ -144,15 +154,7 @@ fn title_bar_ui(
         ui.ctx().send_viewport_cmd(ViewportCommand::StartDrag);
     }
 
-    // ui.allocate_ui_at_rect(title_bar_rect, |ui| {
-    //     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-    //         ui.spacing_mut().item_spacing.x = 0.0;
-    //         ui.visuals_mut().button_frame = false;
-    //         ui.add_space(8.0);
-    //         close_maximize_minimize(ui, is_fullscreen, is_maximized);
-    //     });
-    // });
-
+    // Place window control buttons on the right side
     ui.allocate_new_ui(UiBuilder::new().max_rect(title_bar_rect), |ui| {
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             ui.spacing_mut().item_spacing.x = 0.0;

@@ -98,15 +98,40 @@ impl From<NetworkId> for Network {
             NetworkType::Mainnet => Network::Mainnet,
             NetworkType::Testnet => match value.suffix {
                 Some(10) => Network::Testnet,
-                Some(x) => unreachable!("Testnet suffix {} is not supported", x),
-                None => panic!("Testnet suffix not provided"),
+                Some(11) => {
+                    // Handle case where devnet suffix is mistakenly used with testnet type
+                    log::warn!("NetworkId has testnet type but devnet suffix (11), defaulting to testnet");
+                    Network::Testnet
+                },
+                Some(x) => {
+                    log::error!("Unsupported testnet suffix {}, defaulting to testnet", x);
+                    Network::Testnet
+                },
+                None => {
+                    log::error!("Testnet suffix not provided, defaulting to testnet");
+                    Network::Testnet
+                },
             },
             NetworkType::Devnet => match value.suffix {
                 Some(11) => Network::Devnet,
-                Some(x) => unreachable!("Devnet suffix {} is not supported", x),
-                None => panic!("Devnet suffix not provided"),
+                Some(10) => {
+                    // Handle case where testnet suffix is mistakenly used with devnet type
+                    log::warn!("NetworkId has devnet type but testnet suffix (10), defaulting to devnet");
+                    Network::Devnet
+                },
+                Some(x) => {
+                    log::error!("Unsupported devnet suffix {}, defaulting to devnet", x);
+                    Network::Devnet
+                },
+                None => {
+                    log::error!("Devnet suffix not provided, defaulting to devnet");
+                    Network::Devnet
+                },
             },
-            NetworkType::Simnet => unreachable!("Simnet is not supported"),
+            NetworkType::Simnet => {
+                log::error!("Simnet is not supported, defaulting to mainnet");
+                Network::Mainnet
+            },
         }
     }
 }

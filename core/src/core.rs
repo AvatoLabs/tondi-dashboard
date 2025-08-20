@@ -390,9 +390,12 @@ impl Core {
 
     pub fn change_current_network(&mut self, network: Network) {
         if self.settings.node.network != network {
+            log::info!("Changing network from {:?} to {:?}", self.settings.node.network, network);
+            
             // Clear devnet custom URL when switching away from devnet
             if self.settings.node.network == Network::Devnet && network != Network::Devnet {
                 self.settings.node.devnet_custom_url = None;
+                log::info!("Cleared devnet custom URL when switching away from devnet");
             }
             
             self.settings.node.network = network;
@@ -403,11 +406,13 @@ impl Core {
                 settings_module.change_current_network(network);
             } // Explicitly drop the borrow here
             
-            // Now update services and store settings
+            // Store settings and restart services with new network configuration
+            self.store_settings();
             self.runtime
                 .tondi_service()
                 .update_services(&self.settings.node, None);
-            self.store_settings();
+                
+            log::info!("Network change completed successfully");
         }
     }
 }
