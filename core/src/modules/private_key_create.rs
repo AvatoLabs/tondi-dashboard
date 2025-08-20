@@ -236,7 +236,7 @@ impl ModuleT for PrivateKeyCreate {
 
                             if this.args.payment_secret_confirm.is_not_empty() && this.args.payment_secret != this.args.payment_secret_confirm {
                                 ui.label(" ");
-                                ui.label(RichText::new("Passwords do not match").color(egui::Color32::from_rgb(255, 120, 120)));
+                                ui.label(RichText::new("Passwords do not match").color(theme_color().error_color));
                                 ui.label(" ");
                             } else {
                                 ui.label(" ");
@@ -354,8 +354,8 @@ impl ModuleT for PrivateKeyCreate {
                     .with_header(move |this,ui| {
                         ui.label(" ");
                         ui.label(" ");
-                        ui.label(RichText::new(i18n("Error creating account")).color(egui::Color32::from_rgb(255, 120, 120)));
-                        ui.label(RichText::new(err.to_string()).color(egui::Color32::from_rgb(255, 120, 120)));
+                                                        ui.label(RichText::new(i18n("Error creating account")).color(theme_color().error_color));
+                                ui.label(RichText::new(err.to_string()).color(theme_color().error_color));
 
                         if ui.large_button(i18n("Restart")).clicked() {
                             this.state = State::Start;

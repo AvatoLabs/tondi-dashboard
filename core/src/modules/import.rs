@@ -72,7 +72,7 @@ impl ModuleT for Import {
                                 // ui.label(this.mnemonic.last().unwrap_or(&String::new()));
                                 this.mnemonic.iter().for_each(|word| {
                                     ui.label(" ");
-                                    ui.label(RichText::new(word).family(FontFamily::Monospace).size(14.).color(egui::Color32::WHITE));
+                                    ui.label(RichText::new(word).family(FontFamily::Monospace).size(14.).color(theme_color().strong_color));
                                 });
                             });
                             // ui.label(" ");
@@ -152,11 +152,11 @@ impl ModuleT for Import {
 
                                 ui.label(
                                     RichText::new(i18n("Error unlocking wallet"))
-                                        .color(egui::Color32::from_rgb(255, 120, 120)),
+                                        .color(theme_color().error_color),
                                 );
                                 ui.label(
                                     RichText::new(message)
-                                        .color(egui::Color32::from_rgb(255, 120, 120)),
+                                        .color(theme_color().error_color),
                                 );
 
                                 ui.label(" ");

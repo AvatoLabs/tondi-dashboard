@@ -408,7 +408,7 @@ impl Testing {
                                 // });
                                 ui.label(
                                     RichText::new(err.to_string())
-                                        .color(egui::Color32::from_rgb(255, 120, 120)),
+                                        .color(theme_color().error_color),
                                 );
                                 ui.label(" ");
                             }

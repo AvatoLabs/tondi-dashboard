@@ -32,7 +32,8 @@ impl Device {
     pub fn set_screen_size(&mut self, rect: &Rect) {
         let size = rect.size();
 
-        if size.x * 3. < size.y * 2. || size.x < 540.0 {
+        // 优化屏幕尺寸检测，避免过早触发移动设备布局
+        if size.x * 3. < size.y * 2. || size.x < 768.0 {
             self.orientation = Orientation::Portrait;
         } else {
             self.orientation = Orientation::Landscape;
@@ -69,7 +70,7 @@ impl Device {
         workflow_core::runtime::is_chrome_extension()
             || self.mobile_forced
             || self.mobile_device
-            || self.orientation() == Orientation::Portrait
+            || (self.orientation() == Orientation::Portrait && self.screen_size.x < 768.0)
     }
 
     #[inline]

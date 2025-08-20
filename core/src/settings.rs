@@ -539,7 +539,7 @@ impl Default for UserInterfaceSettings {
         // }
 
         Self {
-            theme_color: "Dark".to_string(),
+            theme_color: "Tondi".to_string(),
             theme_style: "Rounded".to_string(),
             scale: 1.0,
             metrics: MetricsSettings::default(),

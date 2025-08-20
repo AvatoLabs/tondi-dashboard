@@ -534,9 +534,10 @@ impl<'core> Menu<'core> {
                                 let theme_color = theme_color();
                                 let current_theme_color_name = theme_color.name();
                                 ui.menu_button(format!("{} ⏷", current_theme_color_name), |ui| {
+                                    ui.set_min_width(150.0);  // 设置下拉菜单最小宽度
                                     theme_colors().keys().for_each(|name| {
                                         if name.as_str() != current_theme_color_name
-                                            && ui.button(name).clicked()
+                                            && ui.add_sized(Vec2::new(150.0, 24.0), Button::new(name)).clicked()  // 设置按钮大小
                                         {
                                             apply_theme_color_by_name(ui.ctx(), name);
                                             self.core.settings.user_interface.theme_color =
@@ -556,9 +557,10 @@ impl<'core> Menu<'core> {
                             let theme_style = theme_style();
                             let current_theme_style_name = theme_style.name();
                             ui.menu_button(format!("{} ⏷", current_theme_style_name), |ui| {
+                                ui.set_min_width(150.0);  // 设置下拉菜单最小宽度
                                 theme_styles().keys().for_each(|name| {
                                     if name.as_str() != current_theme_style_name
-                                        && ui.button(name).clicked()
+                                        && ui.add_sized(Vec2::new(150.0, 24.0), Button::new(name)).clicked()  // 设置按钮大小
                                     {
                                         apply_theme_style_by_name(ui.ctx(), name);
                                         self.core.settings.user_interface.theme_style =

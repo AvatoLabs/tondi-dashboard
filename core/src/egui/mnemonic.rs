@@ -82,9 +82,9 @@ impl<'render> MnemonicPresenter<'render> {
                     strip.empty();
                     strip.cell(|ui| {
                         ui.vertical(|ui| {
-                            Frame::new()
-                                .stroke(Stroke::new(1.0, Color32::from_black_alpha(48)))
-                                .fill(Color32::from_black_alpha(32))
+                                                    Frame::new()
+                            .stroke(Stroke::new(1.0, theme_color().selection_background_color))
+                            .fill(theme_color().selection_background_color.linear_multiply(0.3))
                                 .inner_margin(16.)
                                 .outer_margin(0.)
                                 .corner_radius(8.)
@@ -133,8 +133,8 @@ impl<'render> MnemonicPresenter<'render> {
 
     fn render_word(ui: &mut Ui, word: &str, seq: usize, font_size: f32) {
         Frame::new()
-            .stroke(Stroke::new(1.0, Color32::DARK_GRAY))
-            .fill(Color32::from_black_alpha(32))
+            .stroke(Stroke::new(1.0, theme_color().selection_background_color))
+            .fill(theme_color().selection_background_color.linear_multiply(0.3))
             .inner_margin(Margin {
                 left: 4,
                 right: 4,
@@ -148,14 +148,14 @@ impl<'render> MnemonicPresenter<'render> {
                     RichText::new(format!("{seq:>2}."))
                         .size(font_size)
                         .family(FontFamily::Name(MNEMONIC_FONT.into()))
-                        .color(egui::Color32::GRAY),
+                        .color(theme_color().default_color),
                 );
                 ui.vertical_centered(|ui| {
                     ui.label(
                         RichText::new(word)
                             .size(font_size)
                             .family(FontFamily::Name(MNEMONIC_FONT.into()))
-                            .color(egui::Color32::WHITE),
+                            .color(theme_color().strong_color),
                     );
                 });
             });

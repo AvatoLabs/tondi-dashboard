@@ -326,7 +326,7 @@ impl ModuleT for Export {
                         .with_body(|_this, ui| {
                             ui.label(
                                 RichText::new(error.to_string())
-                                    .color(egui::Color32::from_rgb(255, 120, 120)),
+                                    .color(theme_color().error_color),
                             );
                             ui.label(" ");
                         })

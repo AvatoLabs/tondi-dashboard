@@ -465,9 +465,10 @@ impl Settings {
                                 ui.menu_button(
                                     format!("{} ⏷", current_theme_color_name),
                                     |ui| {
+                                        ui.set_min_width(150.0);  // 设置下拉菜单最小宽度
                                         theme_colors().keys().for_each(|name| {
                                             if name.as_str() != current_theme_color_name
-                                                && ui.button(name).clicked()
+                                                && ui.add_sized(Vec2::new(150.0, 24.0), Button::new(name)).clicked()  // 设置按钮大小
                                             {
                                                 apply_theme_color_by_name(
                                                     ui.ctx(),
@@ -498,9 +499,10 @@ impl Settings {
                                 ui.menu_button(
                                     format!("{} ⏷", current_theme_style_name),
                                     |ui| {
+                                        ui.set_min_width(150.0);  // 设置下拉菜单最小宽度
                                         theme_styles().keys().for_each(|name| {
                                             if name.as_str() != current_theme_style_name
-                                                && ui.button(name).clicked()
+                                                && ui.add_sized(Vec2::new(150.0, 24.0), Button::new(name)).clicked()  // 设置按钮大小
                                             {
                                                 apply_theme_style_by_name(ui.ctx(), name);
                                                 core
@@ -735,8 +737,17 @@ impl Settings {
                                     initialized : true,
                                     ..Default::default()
                                 };
+                                // 更新核心设置
+                                core.settings = settings.clone();
+                                // 更新本地设置副本
                                 self.settings = settings.clone();
-                                settings.store_sync().unwrap();
+                                // 保存到存储
+                                if let Err(err) = settings.store_sync() {
+                                    log_error!("Failed to store reset settings: {}", err);
+                                }
+                                // 重置确认状态
+                                self.reset_settings = false;
+                                // Web版本需要重新加载
                                 #[cfg(target_arch = "wasm32")]
                                 workflow_dom::utils::window().location().reload().ok();
                             },

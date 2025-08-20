@@ -138,6 +138,75 @@ impl ThemeColor {
         }
     }
 
+    pub fn dark_yellow() -> Self {
+        Self {
+            name: "Tondi".to_string(),
+            dark_mode: true,
+            tondi_color: Color32::from_rgb(255, 215, 0), // 深黄色
+            hyperlink_color: Color32::from_rgb(255, 193, 7), // 琥珀色
+
+            default_color: Color32::from_rgb(255, 235, 59), // 浅黄色
+            strong_color: Color32::from_rgb(255, 255, 255), // 白色
+
+            node_data_color: Color32::from_rgb(255, 255, 255), // 白色
+            balance_color: Color32::from_rgb(255, 255, 255), // 白色
+            balance_syncing_color: Color32::from_rgb(255, 193, 7), // 琥珀色
+            error_color: Color32::from_rgb(255, 87, 34), // 深橙红色
+            alert_color: Color32::from_rgb(255, 87, 34), // 深橙红色
+            warning_color: Color32::from_rgb(255, 235, 59), // 浅黄色
+            info_color: Color32::from_rgb(33, 150, 243), // 蓝色
+            icon_syncing_color: Color32::from_rgb(255, 235, 59), // 浅黄色
+            icon_connected_color: Color32::from_rgb(76, 175, 80), // 绿色
+            icon_color_default: Color32::from_rgb(255, 193, 7), // 琥珀色
+            ack_color: Color32::from_rgb(76, 175, 80), // 绿色
+            nack_color: Color32::from_rgb(244, 67, 54), // 红色
+            metrics_text_color: Color32::from_rgb(255, 255, 255), // 白色
+            market_default_color: Color32::from_rgb(255, 193, 7), // 琥珀色
+            market_up_color: Color32::from_rgb(76, 175, 80), // 绿色
+            market_down_color: Color32::from_rgb(244, 67, 54), // 红色
+
+            raised_text_color: Color32::from_rgb(255, 255, 255), // 白色
+            raised_text_shadow: Color32::from_rgba(0, 0, 0, 96), // 黑色阴影
+
+            qr_background: Color32::from_rgba(0, 0, 0, 0), // 透明
+            qr_foreground: Color32::from_rgb(255, 215, 0), // 深黄色
+            selection_background_color: Color32::from_rgb(255, 193, 7), // 琥珀色
+            selection_text_color: Color32::from_rgb(0, 0, 0), // 黑色
+            progress_color: Color32::from_rgb(255, 193, 7), // 琥珀色
+
+            transaction_incoming: Color32::from_rgb(76, 175, 80), // 绿色
+            transaction_outgoing: Color32::from_rgb(244, 67, 54), // 红色
+            transaction_transfer_incoming: Color32::from_rgb(76, 175, 80), // 绿色
+            transaction_transfer_outgoing: Color32::from_rgb(244, 67, 54), // 红色
+            transaction_external: Color32::from_rgb(76, 175, 80), // 绿色
+            transaction_reorg: Color32::from_rgb(158, 158, 158), // 灰色
+            transaction_batch: Color32::from_rgb(158, 158, 158), // 灰色
+            transaction_stasis: Color32::from_rgb(158, 158, 158), // 灰色
+            transaction_change: Color32::from_rgb(158, 158, 158), // 灰色
+
+            logs_info_color: Color32::from_rgb(255, 255, 255), // 白色
+            logs_error_color: Color32::from_rgb(244, 67, 54), // 红色
+            logs_warning_color: Color32::from_rgb(255, 193, 7), // 琥珀色
+            logs_debug_color: Color32::from_rgb(33, 150, 243), // 蓝色
+            logs_trace_color: Color32::from_rgb(158, 158, 158), // 灰色
+            logs_processed_color: Color32::from_rgb(76, 175, 80), // 绿色
+
+            graph_frame_color: Color32::from_rgb(158, 158, 158), // 灰色
+            performance_graph_color: Color32::from_rgb(255, 193, 7), // 琥珀色
+            storage_graph_color: Color32::from_rgb(255, 235, 59), // 浅黄色
+            connections_graph_color: Color32::from_rgb(255, 193, 7), // 琥珀色
+            bandwidth_graph_color: Color32::from_rgb(255, 235, 59), // 浅黄色
+            network_graph_color: Color32::from_rgb(255, 193, 7), // 琥珀色
+
+            block_dag_separator_color: Color32::from_rgb(255, 193, 7), // 琥珀色
+            block_dag_new_block_fill_color: Color32::from_rgb(255, 215, 0), // 深黄色
+            block_dag_block_fill_color: Color32::from_rgb(255, 235, 59), // 浅黄色
+            block_dag_block_stroke_color: Color32::from_rgb(255, 193, 7), // 琥珀色
+            block_dag_vspc_connect_color: Color32::from_rgb(255, 215, 0), // 深黄色
+            block_dag_parent_connect_color: Color32::from_rgba_premultiplied(255, 193, 7, 220), // 琥珀色
+        }
+    }
+
     pub fn light() -> Self {
         Self {
             name: "Light".to_string(),
@@ -210,7 +279,7 @@ impl ThemeColor {
 
 impl Default for ThemeColor {
     fn default() -> Self {
-        Self::dark()
+        Self::dark_yellow()
     }
 }
 
@@ -228,7 +297,7 @@ pub fn theme_colors() -> Arc<HashMap<String, ThemeColor>> {
     colors_lock
         .get_or_insert_with(|| {
             let mut themes = HashMap::new();
-            [ThemeColor::dark(), ThemeColor::light()]
+            [ThemeColor::dark(), ThemeColor::light(), ThemeColor::dark_yellow()]
                 .into_iter()
                 .for_each(|theme| {
                     themes.insert(theme.name.clone(), theme.clone());

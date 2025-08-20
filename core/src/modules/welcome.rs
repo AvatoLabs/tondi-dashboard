@@ -92,9 +92,10 @@ impl Welcome {
                             let language = dictionary.language_title(language_code.as_str()).unwrap();//.unwrap();
                             egui::ComboBox::from_id_salt("language_selector")
                                 .selected_text(language)
+                                .width(150.0)  // 增加ComboBox按钮宽度
                                 .show_ui(ui, |ui| {
                                     ui.style_mut().wrap_mode = Some(TextWrapMode::Extend);
-                                    ui.set_min_width(60.0);
+                                    ui.set_min_width(150.0);  // 增加下拉面板最小宽度
                                     dictionary.enabled_languages().into_iter().for_each(|(code,lang)| {
                                         if ui.selectable_value(&mut self.settings.language_code, code.to_string(), lang).clicked() {
                                             // 立即激活新选择的语言
@@ -111,9 +112,10 @@ impl Welcome {
                             let mut theme_color = self.settings.user_interface.theme_color.clone();
                             egui::ComboBox::from_id_salt("theme_color_selector")
                                 .selected_text(theme_color.as_str())
+                                .width(150.0)  // 增加ComboBox按钮宽度
                                 .show_ui(ui, |ui| {
                                     ui.style_mut().wrap_mode = Some(TextWrapMode::Extend);
-                                    ui.set_min_width(60.0);
+                                    ui.set_min_width(150.0);  // 增加下拉面板最小宽度
                                     theme_colors().keys().for_each(|name| {
                                         ui.selectable_value(&mut theme_color, name.to_string(), name);
                                     });
@@ -130,9 +132,10 @@ impl Welcome {
                             let mut theme_style = self.settings.user_interface.theme_style.clone();
                             egui::ComboBox::from_id_salt("theme_style_selector")
                                 .selected_text(theme_style.as_str())
+                                .width(150.0)  // 增加ComboBox按钮宽度
                                 .show_ui(ui, |ui| {
                                     ui.style_mut().wrap_mode = Some(TextWrapMode::Extend);
-                                    ui.set_min_width(60.0);
+                                    ui.set_min_width(150.0);  // 增加下拉面板最小宽度
                                     theme_styles().keys().for_each(|name| {
                                         ui.selectable_value(&mut theme_style, name.to_string(), name);
                                     });

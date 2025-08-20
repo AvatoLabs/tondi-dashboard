@@ -13,7 +13,7 @@ use workflow_log::*;
 pub const TONDI_NG_ICON_SVG: &[u8] = include_bytes!("../resources/images/tondi-node-dark.svg");
 pub const TONDI_NG_ICON_TRANSPARENT_SVG: &[u8] =
     include_bytes!("../resources/images/tondi-node-transparent.svg");
-pub const TONDI_NG_LOGO_SVG: &[u8] = include_bytes!("../resources/images/tondi-ng.svg");
+pub const TONDI_DASHBOARD_LOGO_SVG: &[u8] = include_bytes!("../resources/images/tondi-dashboard.svg");
 pub const I18N_EMBEDDED: &str = include_str!("../resources/i18n/i18n.json");
 pub const BUILD_TIMESTAMP: &str = env!("VERGEN_BUILD_TIMESTAMP");
 pub const GIT_DESCRIBE: &str = env!("VERGEN_GIT_DESCRIBE");
@@ -259,8 +259,8 @@ cfg_if! {
                     let mut viewport = egui::ViewportBuilder::default()
                         .with_resizable(true)
                         .with_title(i18n("Tondi Dashboard"))
-                        .with_min_inner_size([400.0,320.0])
-                        .with_inner_size([1000.0,600.0])
+                        .with_min_inner_size([600.0,400.0])
+                        .with_inner_size([1400.0,800.0])
                         .with_icon(svg_to_icon_data(TONDI_NG_ICON_SVG, Some(SizeHint::Size(256,256))));
 
                     if window_frame {

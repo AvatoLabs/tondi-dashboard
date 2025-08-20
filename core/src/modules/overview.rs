@@ -1,6 +1,4 @@
-use std::borrow::Cow;
 use workflow_core::runtime::is_wasm;
-use egui::load::Bytes;
 
 #[cfg(not(feature = "lean"))]
 use tondi_metrics_core::{Metric,MetricGroup};
@@ -106,23 +104,6 @@ impl Overview {
     }
 
     fn render_details(&mut self, core: &mut Core, ui : &mut Ui) {
-
-        let screen_rect = ui.ctx().screen_rect();
-        let logo_size = vec2(648., 994.,) * 0.25;
-        let left = screen_rect.width() - logo_size.x - 8.;
-        let top = core.device().top_offset() + 32.0;
-        let logo_rect = Rect::from_min_size(Pos2::new(left, top), logo_size);
-
-        if screen_rect.width() > 768.0 && !core.device().single_pane() {
-            Image::new(ImageSource::Bytes { uri : Cow::Borrowed("bytes://logo.svg"), bytes : Bytes::Static(crate::app::TONDI_NG_LOGO_SVG)})
-            .maintain_aspect_ratio(true)
-            .max_size(logo_size)
-            .fit_to_exact_size(logo_size)
-            .shrink_to_fit()
-            .texture_options(TextureOptions::LINEAR)
-            .tint(Color32::from_f32(0.8))
-            .paint_at(ui, logo_rect);
-        }
 
         egui::ScrollArea::vertical()
             .id_salt("overview_metrics")
@@ -457,8 +438,9 @@ impl Overview {
             if view_width < 200. {
                 return;
             }
-            const GRAPH_WIDTH: f32 = 128.+6.+8.;
-            const GRAPH_VIEW_MARGIN: f32 = 48.;
+            // 增加图表宽度，减少边距，让metrics部分更宽
+            const GRAPH_WIDTH: f32 = 160.+6.+8.;  // 从128增加到160
+            const GRAPH_VIEW_MARGIN: f32 = 32.;   // 从48减少到32
             let graph_columns = ((view_width-GRAPH_VIEW_MARGIN) / GRAPH_WIDTH) as usize;
 
             let mut draw = true;

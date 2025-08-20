@@ -457,7 +457,7 @@ impl eframe::App for Core {
         // ---
         let current_visuals = ctx.style().visuals.clone(); //.widgets.noninteractive;
         let mut visuals = current_visuals.clone();
-        visuals.widgets.noninteractive.bg_fill = egui::Color32::from_rgb(0, 0, 0);
+        visuals.widgets.noninteractive.bg_fill = theme_color().selection_background_color;
         ctx.set_visuals(visuals);
         self.toasts.show(ctx);
         ctx.set_visuals(current_visuals);
@@ -549,20 +549,25 @@ impl Core {
                     });
                 }
 
-                let device_width = 390.0;
-                let margin_width = (ctx.screen_rect().width() - device_width) * 0.5;
+                // 动态计算设备宽度，避免水平压缩
+                let device_width = ctx.screen_rect().width().min(1200.0).max(390.0);
+                let margin_width = if ctx.screen_rect().width() > device_width {
+                    (ctx.screen_rect().width() - device_width) * 0.5
+                } else {
+                    0.0
+                };
 
                 SidePanel::right("portrait_right")
                     .exact_width(margin_width)
                     .resizable(false)
                     .show_separator_line(true)
-                    .frame(Frame::default().fill(Color32::BLACK))
+                    .frame(Frame::default().fill(theme_color().selection_background_color))
                     .show_inside(ui, |_ui| {});
                 SidePanel::left("portrait_left")
                     .exact_width(margin_width)
                     .resizable(false)
                     .show_separator_line(true)
-                    .frame(Frame::default().fill(Color32::BLACK))
+                    .frame(Frame::default().fill(theme_color().selection_background_color))
                     .show_inside(ui, |_ui| {});
 
                 CentralPanel::default()
@@ -656,7 +661,7 @@ impl Core {
         let logo_size = logo_rect.size();
         Image::new(ImageSource::Bytes {
             uri: Cow::Borrowed("bytes://logo.svg"),
-            bytes: Bytes::Static(crate::app::TONDI_NG_LOGO_SVG),
+                            bytes: Bytes::Static(crate::app::TONDI_DASHBOARD_LOGO_SVG),
         })
         .maintain_aspect_ratio(true)
         // .max_size(logo_size)

@@ -812,7 +812,7 @@ impl ModuleT for WalletCreate {
 
                                 if this.context.payment_secret.is_not_empty() && this.context.payment_secret != this.context.payment_secret_confirm {
                                     ui.label(" ");
-                                    ui.label(RichText::new(i18n("Passphrases do not match")).color(egui::Color32::from_rgb(255, 120, 120)));
+                                    ui.label(RichText::new(i18n("Passphrases do not match")).color(theme_color().error_color));
                                     ui.label(" ");
                                     submit = false;
                                 } else {
@@ -830,7 +830,7 @@ impl ModuleT for WalletCreate {
                                     }
                                 }
                                 if this.context.payment_secret_submitted {
-                                    ui.label(RichText::new(i18n("Please provide BIP39 passphrase.")).color(egui::Color32::from_rgb(255, 120, 120)));
+                                    ui.label(RichText::new(i18n("Please provide BIP39 passphrase.")).color(theme_color().error_color));
                                 }
                             }
                         })
@@ -1313,8 +1313,8 @@ impl ModuleT for WalletCreate {
                 .with_header(move |this,ui| {
                     ui.label(" ");
                     ui.label(" ");
-                    ui.label(RichText::new(msg).color(egui::Color32::from_rgb(255, 120, 120)));
-                    ui.label(RichText::new(err.to_string()).color(egui::Color32::from_rgb(255, 120, 120)));
+                                                    ui.label(RichText::new(msg).color(theme_color().error_color));
+                                ui.label(RichText::new(err.to_string()).color(theme_color().error_color));
                     ui.label(" ");
                     ui.label(" ");
 
