@@ -11,7 +11,7 @@ impl Changelog {
 
         Self { 
             runtime,
-            changelog : include_str!("../../CHANGELOG.md")
+            changelog : "# Tondi Dashboard 更新日志\n\n## 版本 1.0.0\n\n### 新功能\n- 多平台支持 (Web, Chrome扩展, 桌面应用)\n- Tondi钱包管理\n- 多账户支持\n- gRPC节点通信\n- 实时区块链数据同步\n\n### 技术特性\n- Rust + WebAssembly架构\n- egui UI框架\n- 加密存储\n- BIP32/BIP39兼容\n\n### 改进\n- 性能优化\n- 安全性增强\n- 用户体验改进\n\n---\n\n*更多详细信息请访问项目仓库*"
         }
     }
 }
