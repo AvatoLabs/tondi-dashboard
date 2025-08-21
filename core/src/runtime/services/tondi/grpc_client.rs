@@ -183,20 +183,21 @@ impl RpcApi for TondiGrpcClient {
     async fn get_block_dag_info(&self) -> RpcResult<GetBlockDagInfoResponse> {
         cfg_if! {
             if #[cfg(not(target_arch = "wasm32"))] {
-                // Get DAG info through get_blocks
+                // bp-tondi doesn't have get_block_dag_info method, construct from get_blocks
                 match self.inner.get_blocks(None, false, false).await {
                     Ok(blocks) => {
+                        let block_count = blocks.block_hashes.len() as u64;
                         let response = GetBlockDagInfoResponse::new(
                             RpcNetworkId::from(self.network),
-                            blocks.block_hashes.len() as u64,
-                            blocks.block_hashes.len() as u64,
+                            block_count,
+                            block_count,
                             blocks.block_hashes.into_iter().map(|h| h.into()).collect(),
-                            1.0, // Temporarily use default difficulty
-                            0,    // Temporarily use default time
-                            vec![], // Temporarily use empty virtual parent hashes
-                            RpcHash::default(), // Temporarily use default pruning point hash
-                            0,    // Temporarily use default virtual DAA score
-                            RpcHash::default(), // Temporarily use default sink hash
+                            1.0, // Default difficulty
+                            0,    // Default time
+                            vec![], // Empty virtual parent hashes
+                            RpcHash::default(), // Default pruning point hash
+                            block_count, // Use block count as virtual DAA score
+                            RpcHash::default(), // Default sink hash
                         );
                         Ok(response)
                     }
@@ -238,10 +239,11 @@ impl RpcApi for TondiGrpcClient {
                         };
                         
                         // Try to get system ID and other info
-                        let system_id = match self.inner.get_block_dag_info().await {
-                            Ok(dag_info) => {
-                                // Use DAG info to construct a system ID
-                                let id_bytes = format!("tondi-grpc-{}", dag_info.virtual_daa_score);
+                        // bp-tondi doesn't have get_block_dag_info method, use get_blocks instead
+                        let system_id = match self.inner.get_blocks(None, false, false).await {
+                            Ok(blocks) => {
+                                // Use block count to construct a system ID
+                                let id_bytes = format!("tondi-grpc-{}", blocks.block_hashes.len());
                                 Some(id_bytes.as_bytes().to_vec())
                             },
                             Err(_) => None
@@ -271,29 +273,24 @@ impl RpcApi for TondiGrpcClient {
     async fn get_connections_call(&self, _connection: Option<&DynRpcConnection>, request: GetConnectionsRequest) -> RpcResult<GetConnectionsResponse> {
         cfg_if! {
             if #[cfg(not(target_arch = "wasm32"))] {
-                // Implement connection info retrieval
-                match self.inner.get_connections(request.include_profile_data).await {
-                    Ok(connections_info) => {
-                        // Construct connection response with basic connection statistics
-                        let response = GetConnectionsResponse {
-                            clients: connections_info.clients,
-                            peers: connections_info.peers,
-                            profile_data: if request.include_profile_data {
-                                // If request includes profile data, provide basic profile data structure
-                                Some(ConnectionsProfileData {
-                                    cpu_usage: 0.0,
-                                    memory_usage: 0,
-                                })
-                            } else {
-                                None
-                            }
-                        };
-                        Ok(response)
+                // bp-tondi doesn't have get_connections method, return empty connection info
+                println!("[gRPC] get_connections_call called - bp-tondi doesn't support this method");
+                
+                // Return empty connection response since bp-tondi doesn't provide connection info
+                let response = GetConnectionsResponse {
+                    clients: 0,
+                    peers: 0,
+                    profile_data: if request.include_profile_data {
+                        // If request includes profile data, provide basic profile data structure
+                        Some(ConnectionsProfileData {
+                            cpu_usage: 0.0,
+                            memory_usage: 0,
+                        })
+                    } else {
+                        None
                     }
-                    Err(e) => {
-                        Err(RpcError::General(format!("Failed to get connections: {}", e)))
-                    }
-                }
+                };
+                Ok(response)
             } else {
                 Err(RpcError::General("gRPC is not supported in Web/WASM version".to_string()))
             }
@@ -320,21 +317,15 @@ impl RpcApi for TondiGrpcClient {
                         println!("[gRPC DEBUG] Successfully got blocks, count: {}", block_count);
                         
                         // Try to get more detailed network info
-                        let (difficulty, daa_score, median_time) = match self.inner.get_block_dag_info().await {
-                            Ok(dag_info) => (
-                                dag_info.difficulty,
-                                dag_info.virtual_daa_score,
-                                dag_info.past_median_time
-                            ),
-                            Err(_) => (
-                                1.0, // Default difficulty
-                                block_count, // Use block count as DAA score
-                                std::time::SystemTime::now()
-                                    .duration_since(std::time::UNIX_EPOCH)
-                                    .unwrap_or_default()
-                                    .as_secs()
-                            )
-                        };
+                        // bp-tondi doesn't have get_block_dag_info method, use default values
+                        let (difficulty, daa_score, median_time) = (
+                            1.0, // Default difficulty
+                            block_count, // Use block count as DAA score
+                            std::time::SystemTime::now()
+                                .duration_since(std::time::UNIX_EPOCH)
+                                .unwrap_or_default()
+                                .as_secs()
+                        );
 
                                                     // Estimate transaction count: reasonable estimation based on block count
                             let estimated_transactions = if block_count > 0 {
@@ -394,40 +385,19 @@ impl RpcApi for TondiGrpcClient {
                 }
                 
                 // 2. Try to get connection info as connection metrics
-                match self.inner.get_connections(false).await {
-                    Ok(connections) => {
-                        let connection_count = connections.clients as u64;
-                        println!("[gRPC DEBUG] Successfully got connections, count: {}", connection_count);
-                        
-                        // Build connection metrics based on actual connection data
-                        // In real systems, connection attempts are usually slightly higher than successful connections
-                        let connection_attempts_multiplier = if connection_count > 0 { 1.2 } else { 1.0 };
-                        let estimated_attempts = (connection_count as f64 * connection_attempts_multiplier) as u64;
-                        
-                        connection_metrics = Some(ConnectionMetrics {
-                            json_live_connections: connection_count as u32,
-                            json_connection_attempts: estimated_attempts,
-                            json_handshake_failures: 0, // New systems usually have few handshake failures
-                            borsh_live_connections: connection_count as u32,
-                            borsh_connection_attempts: estimated_attempts, 
-                            borsh_handshake_failures: 0,
-                            active_peers: connection_count as u32,
-                        });
-                    }
-                    Err(e) => {
-                        println!("[gRPC DEBUG] Failed to get connections: {}", e);
-                        // Return default connection metrics
-                        connection_metrics = Some(ConnectionMetrics {
-                            json_live_connections: 0,
-                            json_connection_attempts: 0,
-                            json_handshake_failures: 0,
-                            borsh_live_connections: 0,
-                            borsh_connection_attempts: 0,
-                            borsh_handshake_failures: 0,
-                            active_peers: 0,
-                        });
-                    }
-                }
+                // bp-tondi doesn't have get_connections method, use default values
+                println!("[gRPC DEBUG] bp-tondi doesn't support get_connections, using default connection metrics");
+                
+                // Return default connection metrics since bp-tondi doesn't provide connection info
+                connection_metrics = Some(ConnectionMetrics {
+                    json_live_connections: 0,
+                    json_connection_attempts: 0,
+                    json_handshake_failures: 0,
+                    borsh_live_connections: 0,
+                    borsh_connection_attempts: 0,
+                    borsh_handshake_failures: 0,
+                    active_peers: 0,
+                });
                 
                 // 3. Construct complete metrics response
                 let response = GetMetricsResponse {
@@ -518,6 +488,7 @@ impl RpcApi for TondiGrpcClient {
                 };
                 Ok(response)
             } else {
+                // Web version: gRPC not supported
                 Err(RpcError::General("gRPC is not supported in Web/WASM version".to_string()))
             }
         }
