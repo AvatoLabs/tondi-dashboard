@@ -1,6 +1,6 @@
 use crate::imports::*;
 
-// 移除硬编码的常量，改为从设置中获取
+// Remove hardcoded constants, get from settings instead
 // pub const UPDATE_POLLING_INTERVAL_SECONDS: u64 = 60 * 60 * 12;
 
 pub enum UpdateMonitorEvents {
@@ -51,7 +51,7 @@ impl Service for UpdateMonitorService {
         let this = self.clone();
         let _application_events_sender = self.application_events.sender.clone();
 
-        // 从设置中获取更新检查间隔
+        // Get update check interval from settings
         let settings = crate::settings::Settings::load().await
             .unwrap_or_else(|_| crate::settings::Settings::default());
         let update_interval = Duration::from_secs(settings.update_check_interval);

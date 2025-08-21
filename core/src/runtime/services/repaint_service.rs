@@ -2,21 +2,21 @@ use crate::imports::*;
 use std::sync::OnceLock;
 use crate::runtime::try_runtime;
 
-/// 重绘性能配置
-/// 可以根据不同的使用场景和设备性能进行调整
+/// Repaint performance configuration
+/// Can be adjusted based on different usage scenarios and device performance
 #[derive(Debug, Clone)]
 pub struct RepaintConfig {
-    /// 目标帧率
+    /// Target frame rate
     pub target_fps: u64,
-    /// 最小重绘间隔（毫秒）
+    /// Minimum repaint interval (milliseconds)
     pub min_repaint_interval_ms: u64,
-    /// 最大重绘延迟（毫秒）
+    /// Maximum repaint delay (milliseconds)
     pub max_repaint_delay_ms: u64,
-    /// 批量更新阈值
+    /// Batch update threshold
     pub batch_update_threshold: usize,
-    /// 是否启用智能重绘
+    /// Whether to enable smart repaint
     pub smart_repaint_enabled: bool,
-    /// 是否启用批量更新
+    /// Whether to enable batch updates
     pub batch_update_enabled: bool,
 }
 
@@ -24,22 +24,22 @@ impl Default for RepaintConfig {
     fn default() -> Self {
         cfg_if! {
             if #[cfg(not(target_arch = "wasm32"))] {
-                // 桌面版：高性能配置
+                // Desktop version: high performance configuration
                 Self {
                     target_fps: 60,
-                    min_repaint_interval_ms: 16, // 约60 FPS
-                    max_repaint_delay_ms: 50,    // 最大50ms延迟
-                    batch_update_threshold: 3,    // 3个更新后批量重绘
+                    min_repaint_interval_ms: 16, // About 60 FPS
+                    max_repaint_delay_ms: 50,    // Maximum 50ms delay
+                    batch_update_threshold: 3,   // Batch repaint after 3 updates
                     smart_repaint_enabled: true,
                     batch_update_enabled: true,
                 }
             } else {
-                // Web版：平衡性能配置
+                // Web version: balanced performance configuration
                 Self {
                     target_fps: 30,
-                    min_repaint_interval_ms: 33, // 约30 FPS
-                    max_repaint_delay_ms: 100,   // 最大100ms延迟
-                    batch_update_threshold: 5,    // 5个更新后批量重绘
+                    min_repaint_interval_ms: 33, // About 30 FPS
+                    max_repaint_delay_ms: 100,   // Maximum 100ms delay
+                    batch_update_threshold: 5,   // Batch repaint after 5 updates
                     smart_repaint_enabled: true,
                     batch_update_enabled: true,
                 }
@@ -49,59 +49,59 @@ impl Default for RepaintConfig {
 }
 
 impl RepaintConfig {
-    /// 高性能模式配置
+    /// High performance mode configuration
     pub fn high_performance() -> Self {
         Self {
             target_fps: 120,
-            min_repaint_interval_ms: 8,  // 约120 FPS
-            max_repaint_delay_ms: 25,    // 最大25ms延迟
-            batch_update_threshold: 2,    // 2个更新后批量重绘
+            min_repaint_interval_ms: 8,  // About 120 FPS
+            max_repaint_delay_ms: 25,    // Maximum 25ms delay
+            batch_update_threshold: 2,   // Batch repaint after 2 updates
             smart_repaint_enabled: true,
             batch_update_enabled: true,
         }
     }
 
-    /// 省电模式配置
+    /// Power saving mode configuration
     pub fn power_saving() -> Self {
         Self {
             target_fps: 30,
-            min_repaint_interval_ms: 33, // 约30 FPS
-            max_repaint_delay_ms: 200,   // 最大200ms延迟
-            batch_update_threshold: 10,   // 10个更新后批量重绘
+            min_repaint_interval_ms: 33, // About 30 FPS
+            max_repaint_delay_ms: 200,   // Maximum 200ms delay
+            batch_update_threshold: 10,  // Batch repaint after 10 updates
             smart_repaint_enabled: true,
             batch_update_enabled: true,
         }
     }
 
-    /// 调试模式配置
+    /// Debug mode configuration
     pub fn debug() -> Self {
         Self {
             target_fps: 60,
             min_repaint_interval_ms: 16,
             max_repaint_delay_ms: 50,
-            batch_update_threshold: 1,    // 调试时立即重绘
-            smart_repaint_enabled: false, // 调试时禁用智能重绘
-            batch_update_enabled: false,  // 调试时禁用批量更新
+            batch_update_threshold: 1,   // Immediate repaint when debugging
+            smart_repaint_enabled: false, // Disable smart repaint when debugging
+            batch_update_enabled: false,  // Disable batch updates when debugging
         }
     }
 
-    /// 计算重绘间隔
+    /// Calculate repaint interval
     pub fn repaint_interval_ms(&self) -> u64 {
         1000 / self.target_fps
     }
 }
 
-// 全局重绘配置
+// Global repaint configuration
 static REPAINT_CONFIG: OnceLock<Arc<Mutex<RepaintConfig>>> = OnceLock::new();
 
-/// 获取全局重绘配置
+/// Get global repaint configuration
 pub fn get_repaint_config() -> Arc<Mutex<RepaintConfig>> {
     REPAINT_CONFIG
         .get_or_init(|| Arc::new(Mutex::new(RepaintConfig::default())))
         .clone()
 }
 
-/// 设置全局重绘配置
+/// Set global repaint configuration
 pub fn set_repaint_config(config: RepaintConfig) {
     if let Some(existing_config) = REPAINT_CONFIG.get() {
         if let Ok(mut config_mutex) = existing_config.lock() {
@@ -122,12 +122,12 @@ cfg_if! {
 
 pub const REPAINT_INTERVAL_MILLIS: u64 = 1000 / TARGET_FPS;
 
-// 智能重绘配置 - 从全局配置获取
+// Smart repaint configuration - get from global configuration
 pub fn smart_repaint_enabled() -> bool {
     if let Ok(config) = get_repaint_config().lock() {
         config.smart_repaint_enabled
     } else {
-        true // 默认启用
+        true // Default enabled
     }
 }
 
@@ -135,7 +135,7 @@ pub fn min_repaint_interval_millis() -> u64 {
     if let Ok(config) = get_repaint_config().lock() {
         config.min_repaint_interval_ms
     } else {
-        16 // 默认16ms
+        16 // Default 16ms
     }
 }
 
@@ -143,7 +143,7 @@ pub fn max_repaint_delay_millis() -> u64 {
     if let Ok(config) = get_repaint_config().lock() {
         config.max_repaint_delay_ms
     } else {
-        100 // 默认100ms
+        100 // Default 100ms
     }
 }
 
@@ -151,15 +151,15 @@ pub fn batch_update_threshold() -> usize {
     if let Ok(config) = get_repaint_config().lock() {
         config.batch_update_threshold
     } else {
-        3 // 默认3
+        3 // Default 3
     }
 }
 
-// 智能重绘配置
+// Smart repaint configuration constants
 pub const SMART_REPAINT_ENABLED: bool = true;
-pub const MIN_REPAINT_INTERVAL_MILLIS: u64 = 16; // 最小重绘间隔 (约60 FPS)
-pub const MAX_REPAINT_DELAY_MILLIS: u64 = 100;   // 最大重绘延迟
-pub const BATCH_UPDATE_THRESHOLD: usize = 3;     // 批量更新阈值
+pub const MIN_REPAINT_INTERVAL_MILLIS: u64 = 16; // Minimum repaint interval (about 60 FPS)
+pub const MAX_REPAINT_DELAY_MILLIS: u64 = 100;   // Maximum repaint delay
+pub const BATCH_UPDATE_THRESHOLD: usize = 3;     // Batch update threshold
 
 pub enum RepaintServiceEvents {
     Exit,
@@ -170,11 +170,11 @@ pub struct RepaintService {
     pub service_events: Channel<RepaintServiceEvents>,
     pub task_ctl: Channel<()>,
     pub repaint: Arc<AtomicBool>,
-    // 智能重绘控制
+    // Smart repaint control
     pub last_repaint: Arc<Mutex<Instant>>,
     pub pending_repaint: Arc<AtomicBool>,
     pub repaint_timer: Arc<Mutex<Option<tokio::time::Sleep>>>,
-    // 批量更新控制
+    // Batch update control
     pub pending_updates: Arc<AtomicUsize>,
     pub batch_timer: Arc<Mutex<Option<tokio::time::Sleep>>>,
 }
@@ -202,7 +202,7 @@ impl RepaintService {
         self.repaint.store(false, Ordering::SeqCst);
     }
 
-    /// 批量更新重绘 - 收集多个更新后一次性重绘
+    /// Batch update repaint - collect multiple updates then repaint once
     pub fn batch_update(&self) {
         if !batch_update_enabled() {
             self.smart_trigger();
@@ -213,42 +213,42 @@ impl RepaintService {
         let threshold = batch_update_threshold();
         
         if current_updates >= threshold {
-            // 达到阈值，立即重绘
+            // Reached threshold, repaint immediately
             self.force_repaint();
             self.pending_updates.store(0, Ordering::SeqCst);
         } else {
-            // 使用更高效的延迟机制，避免频繁创建异步任务
+            // Use more efficient delay mechanism to avoid frequent async task creation
             self.schedule_delayed_repaint();
         }
     }
 
-    /// 优化的延迟重绘调度
+    /// Optimized delayed repaint scheduling
     fn schedule_delayed_repaint(&self) {
-        // 检查是否已经有延迟重绘计划
+        // Check if a delayed repaint is already scheduled
         if self.pending_repaint.load(Ordering::SeqCst) {
-            return; // 避免重复调度
+            return; // Avoid duplicate scheduling
         }
 
         let pending_updates = self.pending_updates.clone();
         let repaint_service = self.clone();
         let max_delay = max_repaint_delay_millis();
         
-        // 标记有待处理的重绘
+        // Mark as pending repaint
         self.pending_repaint.store(true, Ordering::SeqCst);
         
-        // 使用更短的延迟，提高响应性
-        let delay = (max_delay / 4).max(10); // 最小10ms延迟
+        // Use shorter delay for better responsiveness
+        let delay = (max_delay / 4).max(10); // Minimum 10ms delay
         
-        // 取消之前的批量定时器（如果存在）
+        // Cancel previous batch timer (if any)
         if let Ok(mut timer_guard) = self.batch_timer.lock() {
             timer_guard.take();
         }
         
-        // 创建新的延迟任务
+        // Create new delayed task
         tokio::spawn(async move {
             tokio::time::sleep(Duration::from_millis(delay)).await;
             
-            // 检查是否仍然需要重绘
+            // Check if repaint is still needed
             if pending_updates.load(Ordering::SeqCst) > 0 {
                 repaint_service.force_repaint();
                 pending_updates.store(0, Ordering::SeqCst);
@@ -256,7 +256,7 @@ impl RepaintService {
         });
     }
 
-    /// 优化的智能触发重绘
+    /// Optimized smart repaint trigger
     pub fn smart_trigger(&self) {
         if !smart_repaint_enabled() {
             self.trigger();
@@ -266,22 +266,22 @@ impl RepaintService {
         let now = Instant::now();
         let min_interval = min_repaint_interval_millis();
         
-        // 使用更高效的锁策略
+        // More efficient lock strategy
         let should_delay = {
             if let Ok(last_repaint) = self.last_repaint.try_lock() {
                 let elapsed = now.duration_since(*last_repaint).as_millis() as u64;
                 elapsed < min_interval
             } else {
-                // 如果无法获取锁，直接触发重绘
+                // If lock fails, trigger repaint immediately
                 false
             }
         };
 
         if should_delay {
-            // 延迟重绘
+            // Delay repaint
             self.pending_repaint.store(true, Ordering::SeqCst);
             
-            // 计算延迟时间
+            // Calculate delay time
             let delay = {
                 if let Ok(last_repaint) = self.last_repaint.lock() {
                     let elapsed = now.duration_since(*last_repaint).as_millis() as u64;
@@ -291,10 +291,10 @@ impl RepaintService {
                 }
             };
             
-            // 使用更高效的延迟机制
+            // Use more efficient delay mechanism
             self.schedule_smart_delayed_repaint(delay, now);
         } else {
-            // 直接触发重绘
+            // Trigger repaint immediately
             self.trigger();
             if let Ok(mut last_repaint) = self.last_repaint.try_lock() {
                 *last_repaint = now;
@@ -302,18 +302,18 @@ impl RepaintService {
         }
     }
 
-    /// 优化的智能延迟重绘
+    /// Optimized smart delayed repaint
     fn schedule_smart_delayed_repaint(&self, delay: u64, now: Instant) {
         let pending_repaint = self.pending_repaint.clone();
         let last_repaint = self.last_repaint.clone();
         let repaint_service = self.clone();
         
-        // 取消之前的定时器
+        // Cancel previous timer
         if let Ok(mut timer_guard) = self.repaint_timer.lock() {
             timer_guard.take();
         }
         
-        // 创建延迟任务
+        // Create delayed task
         tokio::spawn(async move {
             tokio::time::sleep(Duration::from_millis(delay)).await;
             
@@ -321,7 +321,7 @@ impl RepaintService {
                 pending_repaint.store(false, Ordering::SeqCst);
                 repaint_service.trigger();
                 
-                // 更新最后重绘时间
+                // Update last repaint time
                 if let Ok(mut last_repaint_guard) = last_repaint.lock() {
                     *last_repaint_guard = now;
                 }
@@ -329,7 +329,7 @@ impl RepaintService {
         });
     }
 
-    /// 强制立即重绘（用于重要更新）
+    /// Force repaint immediately (for critical updates)
     pub fn force_repaint(&self) {
         self.trigger();
         *self.last_repaint.lock().unwrap() = Instant::now();
@@ -337,14 +337,14 @@ impl RepaintService {
         self.pending_updates.store(0, Ordering::SeqCst);
     }
 
-    /// 检查是否需要重绘
+    /// Check if repaint is needed
     pub fn needs_repaint(&self) -> bool {
         self.repaint.load(Ordering::SeqCst) || 
         self.pending_repaint.load(Ordering::SeqCst) ||
         self.pending_updates.load(Ordering::SeqCst) > 0
     }
 
-    /// 获取当前重绘统计信息
+    /// Get current repaint statistics
     pub fn get_stats(&self) -> RepaintStats {
         RepaintStats {
             pending_repaint: self.pending_repaint.load(Ordering::SeqCst),
@@ -356,7 +356,7 @@ impl RepaintService {
     }
 }
 
-/// 重绘统计信息
+/// Repaint statistics info
 #[derive(Debug, Clone)]
 pub struct RepaintStats {
     pub pending_repaint: bool,
@@ -364,14 +364,15 @@ pub struct RepaintStats {
     pub last_repaint_ago: u64,
 }
 
-// 辅助函数
+// Helper function
 fn batch_update_enabled() -> bool {
     if let Ok(config) = get_repaint_config().lock() {
         config.batch_update_enabled
     } else {
-        true // 默认启用
+        true // Default enabled
     }
 }
+
 
 impl Clone for RepaintService {
     fn clone(&self) -> Self {
@@ -403,7 +404,6 @@ impl Service for RepaintService {
         loop {
             select! {
                 _ = interval.next().fuse() => {
-                    // 使用 compare_exchange 优化原子操作
                     if self.repaint.compare_exchange(true, false, Ordering::SeqCst, Ordering::SeqCst).is_ok() {
                         runtime().egui_ctx().request_repaint();
                     }
@@ -438,8 +438,7 @@ impl Service for RepaintService {
         Ok(())
     }
 }
-
-/// 智能重绘配置选项
+/// Smart repaint configuration options
 #[derive(Debug, Clone)]
 pub struct SmartRepaintConfig {
     pub enabled: bool,
@@ -459,48 +458,48 @@ impl Default for SmartRepaintConfig {
     }
 }
 
-/// 全局智能重绘配置
+/// Global smart repaint configuration
 pub static SMART_REPAINT_CONFIG: OnceLock<Arc<Mutex<SmartRepaintConfig>>> = OnceLock::new();
 
-/// 获取全局智能重绘配置
+/// Get global smart repaint configuration
 pub fn get_smart_repaint_config() -> Arc<Mutex<SmartRepaintConfig>> {
     SMART_REPAINT_CONFIG
         .get_or_init(|| Arc::new(Mutex::new(SmartRepaintConfig::default())))
         .clone()
 }
 
-/// 智能重绘工具函数
+/// Smart repaint utility functions
 pub mod utils {
     use super::*;
 
-    /// 智能重绘请求 - 自动合并短时间内的多次调用
+    /// Smart repaint request - automatically merges multiple calls within a short time
     pub fn smart_request_repaint() {
         if let Some(runtime) = try_runtime() {
             runtime.request_repaint();
         }
     }
 
-    /// 强制重绘请求 - 立即执行，不进行合并
+    /// Force repaint request - execute immediately without merging
     pub fn force_request_repaint() {
         if let Some(runtime) = try_runtime() {
             runtime.force_repaint();
         }
     }
 
-    /// 批量重绘请求 - 收集多个更新后一次性重绘
+    /// Batch repaint request - collect multiple updates and repaint once
     pub fn batch_request_repaint<F>(updates: F) 
     where 
         F: FnOnce() + Send + 'static 
     {
         if let Some(runtime) = try_runtime() {
-            // 执行所有更新
+            // Execute all updates
             updates();
-            // 然后触发重绘
+            // Then trigger repaint
             runtime.request_repaint();
         }
     }
 
-    /// 延迟重绘请求 - 在指定延迟后重绘
+    /// Delayed repaint request - repaint after a specified delay
     pub fn delayed_request_repaint(delay_ms: u64) {
         if let Some(runtime) = try_runtime() {
             let runtime_clone = runtime.clone();
@@ -512,288 +511,45 @@ pub mod utils {
     }
 }
 
-/// 重绘优先级枚举
+/// Repaint priority levels
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum RepaintPriority {
-    Low,      // 低优先级 - 可以合并和延迟
-    Normal,   // 普通优先级 - 智能合并
-    High,     // 高优先级 - 立即执行
-    Critical, // 关键优先级 - 强制立即执行
+    Low,      // Low priority - can be merged and delayed
+    Normal,   // Normal priority - smart merge
+    High,     // High priority - repaint immediately
+    Critical, // Critical priority - force repaint immediately
 }
 
 impl RepaintService {
-    /// 根据优先级触发重绘
+    /// Trigger repaint according to priority
     pub fn trigger_with_priority(&self, priority: RepaintPriority) {
         match priority {
             RepaintPriority::Low => {
-                // 低优先级：使用批量更新
+                // Low priority: use batch update
                 self.batch_update();
             }
             RepaintPriority::Normal => {
-                // 普通优先级：智能重绘
+                // Normal priority: smart repaint
                 self.smart_trigger();
             }
             RepaintPriority::High => {
-                // 高优先级：立即重绘
+                // High priority: repaint immediately
                 self.trigger();
             }
             RepaintPriority::Critical => {
-                // 关键优先级：强制重绘
+                // Critical priority: force repaint
                 self.force_repaint();
             }
         }
     }
 
-    /// 请求重绘（兼容性方法）
+    /// Request repaint (compatibility method)
     pub fn request_repaint(&self) {
         self.smart_trigger();
     }
 }
 
-/// 使用示例和迁移指南
-/// 
-/// ## 迁移现有代码
-/// 
-/// ### 1. 替换直接的重绘调用
-/// ```rust
-/// // 旧代码
-/// runtime().request_repaint();
-/// 
-/// // 新代码 - 智能重绘（推荐）
-/// runtime().request_repaint();
-/// 
-/// // 或者使用工具函数
-/// use crate::runtime::services::repaint_service::utils::smart_request_repaint;
-/// smart_request_repaint();
-/// ```
-/// 
-/// ### 2. 根据优先级选择重绘方式
-/// ```rust
-/// use crate::runtime::services::repaint_service::{RepaintPriority, utils};
-/// 
-/// // 低优先级更新（如日志更新）
-/// utils::delayed_request_repaint(100);
-/// 
-/// // 普通优先级更新（如数据更新）
-/// utils::smart_request_repaint();
-/// 
-/// // 高优先级更新（如用户交互）
-/// utils::force_request_repaint();
-/// 
-/// // 批量更新
-/// utils::batch_request_repaint(|| {
-///     // 执行多个更新操作
-///     update_data();
-///     update_ui();
-/// });
-/// ```
-/// 
-/// ### 3. 在服务中使用优先级重绘
-/// ```rust
-/// impl SomeService {
-///     pub fn update_data(&self) {
-///         // 更新数据
-///         self.data.store(new_data);
-///         
-///         // 根据更新类型选择重绘优先级
-///         let priority = if self.is_critical_update() {
-///             RepaintPriority::Critical
-///         } else if self.is_user_interaction() {
-///             RepaintPriority::High
-///         } else {
-///             RepaintPriority::Normal
-///         };
-///         
-///         // 触发重绘
-///         self.repaint_service.trigger_with_priority(priority);
-///     }
-/// }
-/// ```
-/// 
-/// ## 性能优化效果
-/// 
-/// - **减少重绘次数**: 从每秒30-60次减少到每秒16-30次
-/// - **降低CPU使用**: 减少不必要的UI重绘计算
-/// - **提高响应性**: 重要更新仍然立即执行
-/// - **智能合并**: 自动合并短时间内的多次更新请求
-/// 
-/// ## 配置选项
-/// 
-/// ```rust
-/// use crate::runtime::services::repaint_service::get_smart_repaint_config;
-/// 
-/// // 动态调整配置
-/// if let Ok(mut config) = get_smart_repaint_config().lock() {
-///     config.min_interval_ms = 33; // 30 FPS
-///     config.max_delay_ms = 200;   // 最大延迟200ms
-/// }
-/// ```
-
-/// 重绘优化使用指南
-/// 
-/// ## 基本原则
-/// 
-/// 1. **避免频繁重绘**: 不要在每个小更新后都调用重绘
-/// 2. **批量处理**: 将多个相关更新合并后一次性重绘
-/// 3. **优先级管理**: 根据更新重要性选择合适的重绘策略
-/// 4. **智能合并**: 让系统自动合并短时间内的重绘请求
-/// 
-/// ## 使用场景和推荐策略
-/// 
-/// ### 1. 数据更新 (低优先级)
-/// ```rust
-/// // 不推荐：每次数据更新都重绘
-/// for item in data_items {
-///     update_item(item);
-///     runtime().request_repaint(); // ❌ 频繁重绘
-/// }
-/// 
-/// // 推荐：批量更新后重绘
-/// for item in data_items {
-///     update_item(item);
-/// }
-/// runtime().request_repaint(); // ✅ 一次重绘
-/// 
-/// // 或者使用批量重绘工具
-/// use crate::runtime::services::repaint_service::utils::batch_request_repaint;
-/// batch_request_repaint(|| {
-///     for item in data_items {
-///         update_item(item);
-///     }
-/// });
-/// ```
-/// 
-/// ### 2. 用户交互 (高优先级)
-/// ```rust
-/// // 用户点击按钮 - 立即重绘
-/// runtime().force_repaint();
-/// 
-/// // 或者使用优先级重绘
-/// runtime().trigger_with_priority(RepaintPriority::High);
-/// ```
-/// 
-/// ### 3. 实时数据流 (普通优先级)
-/// ```rust
-/// // 网络数据更新 - 智能合并重绘
-/// runtime().request_repaint();
-/// 
-/// // 或者明确指定优先级
-/// runtime().trigger_with_priority(RepaintPriority::Normal);
-/// ```
-/// 
-/// ### 4. 后台任务 (低优先级)
-/// ```rust
-/// // 日志更新、状态检查等 - 批量处理
-/// runtime().trigger_with_priority(RepaintPriority::Low);
-/// 
-/// // 或者使用延迟重绘
-/// use crate::runtime::services::repaint_service::utils::delayed_request_repaint;
-/// delayed_request_repaint(100); // 100ms后重绘
-/// ```
-/// 
-/// ## 性能监控
-/// 
-/// ```rust
-/// // 检查重绘状态
-/// if runtime().repaint_service().needs_repaint() {
-///     println!("重绘待处理");
-/// }
-/// 
-/// // 获取待处理更新数量
-/// let pending_updates = runtime().repaint_service().pending_updates.load(Ordering::SeqCst);
-/// println!("待处理更新: {}", pending_updates);
-/// ```
-/// 
-/// ## 配置调优
-/// 
-/// ```rust
-/// // 根据设备性能调整重绘参数
-/// #[cfg(target_arch = "wasm32")]
-/// pub const MIN_REPAINT_INTERVAL_MILLIS: u64 = 33; // Web版：30 FPS
-/// 
-/// #[cfg(not(target_arch = "wasm32"))]
-/// pub const MIN_REPAINT_INTERVAL_MILLIS: u64 = 16; // 桌面版：60 FPS
-/// 
-/// // 根据应用类型调整批量阈值
-/// pub const BATCH_UPDATE_THRESHOLD: usize = if cfg!(debug_assertions) { 1 } else { 3 };
-/// ```
-/// 
-/// ## 常见陷阱和解决方案
-/// 
-/// ### 陷阱1: 在循环中频繁重绘
-/// ```rust
-/// // ❌ 错误做法
-/// for i in 0..1000 {
-///     update_progress(i);
-///     runtime().request_repaint(); // 1000次重绘！
-/// }
-/// 
-/// // ✅ 正确做法
-/// for i in 0..1000 {
-///     update_progress(i);
-///     if i % 100 == 0 { // 每100次更新重绘一次
-///         runtime().request_repaint();
-///     }
-/// }
-/// runtime().request_repaint(); // 确保最后一次更新被显示
-/// ```
-/// 
-/// ### 陷阱2: 忽略重绘优先级
-/// ```rust
-/// // ❌ 所有更新都使用相同策略
-/// runtime().request_repaint(); // 可能是低优先级更新
-/// 
-/// // ✅ 根据更新类型选择策略
-/// match update_type {
-///     UpdateType::Critical => runtime().force_repaint(),
-///     UpdateType::UserAction => runtime().trigger_with_priority(RepaintPriority::High),
-///     UpdateType::DataSync => runtime().request_repaint(),
-///     UpdateType::Background => runtime().trigger_with_priority(RepaintPriority::Low),
-/// }
-/// ```
-/// 
-/// ### 陷阱3: 忘记清理状态
-/// ```rust
-/// // ❌ 可能导致重绘卡住
-/// runtime().request_repaint();
-/// // 如果后续没有其他重绘请求，UI可能不会更新
-/// 
-/// // ✅ 确保状态正确清理
-/// runtime().request_repaint();
-/// // 系统会自动清理状态，无需手动干预
-/// ```
-/// 
-/// ## 性能测试
-/// 
-/// ```rust
-/// #[cfg(test)]
-/// mod performance_tests {
-///     use super::*;
-///     use std::time::Instant;
-///     
-///     #[test]
-///     fn test_repaint_performance() {
-///         let repaint_service = RepaintService::new(
-///             ApplicationEventsChannel::new(),
-///             &Settings::default(),
-///         );
-///         
-///         let start = Instant::now();
-///         
-///         // 模拟1000次更新
-///         for _ in 0..1000 {
-///             repaint_service.batch_update();
-///         }
-///         
-///         let duration = start.elapsed();
-///         println!("1000次批量更新耗时: {:?}", duration);
-///         
-///         // 验证重绘次数
-///         assert!(repaint_service.pending_updates.load(Ordering::SeqCst) == 0);
-///     }
-/// }
-
-/// 重绘性能监控器
+/// Repaint performance monitor
 pub struct RepaintMonitor {
     total_repaints: Arc<AtomicUsize>,
     total_updates: Arc<AtomicUsize>,
@@ -811,17 +567,17 @@ impl RepaintMonitor {
         }
     }
 
-    /// 记录重绘事件
+    /// Record repaint event
     pub fn record_repaint(&self) {
         self.total_repaints.fetch_add(1, Ordering::SeqCst);
     }
 
-    /// 记录更新事件
+    /// Record update event
     pub fn record_update(&self) {
         self.total_updates.fetch_add(1, Ordering::SeqCst);
     }
 
-    /// 获取性能统计
+    /// Get performance statistics
     pub fn get_performance_stats(&self) -> PerformanceStats {
         let runtime = self.start_time.elapsed();
         let repaints = self.total_repaints.load(Ordering::SeqCst);
@@ -849,35 +605,35 @@ impl RepaintMonitor {
         }
     }
 
-    /// 重置统计
+    /// Reset statistics
     pub fn reset(&mut self) {
         self.total_repaints.store(0, Ordering::SeqCst);
         self.total_updates.store(0, Ordering::SeqCst);
         self.start_time = Instant::now();
     }
 
-    /// 打印性能报告
+    /// Print performance report
     pub fn print_report(&self) {
         let stats = self.get_performance_stats();
-        println!("=== 重绘性能报告 ===");
-        println!("运行时间: {:.2} 秒", stats.runtime_seconds);
-        println!("总重绘次数: {}", stats.total_repaints);
-        println!("总更新次数: {}", stats.total_updates);
-        println!("重绘频率: {:.2} 次/秒", stats.repaints_per_second);
-        println!("更新频率: {:.2} 次/秒", stats.updates_per_second);
-        println!("效率比率: {:.2} (重绘/更新)", stats.efficiency_ratio);
+        println!("=== Repaint Performance Report ===");
+        println!("Runtime: {:.2} seconds", stats.runtime_seconds);
+        println!("Total repaints: {}", stats.total_repaints);
+        println!("Total updates: {}", stats.total_updates);
+        println!("Repaint frequency: {:.2} /sec", stats.repaints_per_second);
+        println!("Update frequency: {:.2} /sec", stats.updates_per_second);
+        println!("Efficiency ratio: {:.2} (repaints/updates)", stats.efficiency_ratio);
         
         if let Ok(config) = self.config.lock() {
-            println!("当前配置:");
-            println!("  目标帧率: {} FPS", config.target_fps);
-            println!("  最小重绘间隔: {}ms", config.min_repaint_interval_ms);
-            println!("  批量更新阈值: {}", config.batch_update_threshold);
+            println!("Current config:");
+            println!("  Target FPS: {}", config.target_fps);
+            println!("  Min repaint interval: {}ms", config.min_repaint_interval_ms);
+            println!("  Batch update threshold: {}", config.batch_update_threshold);
         }
         println!("==================");
     }
 }
 
-/// 性能统计信息
+/// Performance statistics info
 #[derive(Debug, Clone)]
 pub struct PerformanceStats {
     pub runtime_seconds: f64,
@@ -888,38 +644,38 @@ pub struct PerformanceStats {
     pub efficiency_ratio: f64,
 }
 
-// 全局性能监控器
+// Global performance monitor
 static REPAINT_MONITOR: OnceLock<Arc<RepaintMonitor>> = OnceLock::new();
 
-/// 获取全局重绘性能监控器
+/// Get global repaint performance monitor
 pub fn get_repaint_monitor() -> Arc<RepaintMonitor> {
     REPAINT_MONITOR
         .get_or_init(|| Arc::new(RepaintMonitor::new()))
         .clone()
 }
 
-/// 记录重绘事件（用于性能监控）
+/// Record repaint event (for performance monitoring)
 pub fn record_repaint_event() {
     if let Some(monitor) = REPAINT_MONITOR.get() {
         monitor.record_repaint();
     }
 }
 
-/// 记录更新事件（用于性能监控）
+/// Record update event (for performance monitoring)
 pub fn record_update_event() {
     if let Some(monitor) = REPAINT_MONITOR.get() {
         monitor.record_update();
     }
 }
 
-/// 打印性能报告
+/// Print performance report
 pub fn print_performance_report() {
     if let Some(monitor) = REPAINT_MONITOR.get() {
         monitor.print_report();
     }
 }
 
-/// 重绘优化建议生成器
+/// Repaint optimization suggestion generator
 pub struct RepaintOptimizer {
     monitor: Arc<RepaintMonitor>,
 }
@@ -931,47 +687,47 @@ impl RepaintOptimizer {
         }
     }
 
-    /// 分析当前性能并生成优化建议
+    /// Analyze current performance and generate optimization suggestions
     pub fn analyze_and_suggest(&self) -> Vec<OptimizationSuggestion> {
         let stats = self.monitor.get_performance_stats();
         let mut suggestions = Vec::new();
 
-        // 分析重绘频率
+        // Analyze repaint frequency
         if stats.repaints_per_second > 60.0 {
             suggestions.push(OptimizationSuggestion {
-                category: "重绘频率过高".to_string(),
-                description: "当前重绘频率超过60FPS，可能造成性能浪费".to_string(),
-                suggestion: "考虑增加最小重绘间隔或启用批量更新".to_string(),
+                category: "Repaint frequency too high".to_string(),
+                description: "Current repaint frequency exceeds 60FPS, which may cause performance waste".to_string(),
+                suggestion: "Consider increasing the minimum repaint interval or enabling batch updates".to_string(),
                 priority: SuggestionPriority::High,
             });
         }
 
-        // 分析效率比率
+        // Analyze efficiency ratio
         if stats.efficiency_ratio > 0.5 {
             suggestions.push(OptimizationSuggestion {
-                category: "重绘效率低".to_string(),
-                description: format!("重绘/更新比率: {:.2}，存在过多不必要的重绘", stats.efficiency_ratio),
-                suggestion: "优化更新逻辑，减少重复更新，使用批量更新".to_string(),
+                category: "Low repaint efficiency".to_string(),
+                description: format!("Repaint/update ratio: {:.2}, too many unnecessary repaints", stats.efficiency_ratio),
+                suggestion: "Optimize update logic, reduce duplicate updates, use batch updates".to_string(),
                 priority: SuggestionPriority::Medium,
             });
         }
 
-        // 分析更新频率
+        // Analyze update frequency
         if stats.updates_per_second > 100.0 {
             suggestions.push(OptimizationSuggestion {
-                category: "更新频率过高".to_string(),
-                description: "更新频率过高，可能导致性能问题".to_string(),
-                suggestion: "考虑使用防抖或节流技术，减少更新频率".to_string(),
+                category: "Update frequency too high".to_string(),
+                description: "Update frequency is too high, which may cause performance issues".to_string(),
+                suggestion: "Consider using debounce or throttling to reduce update frequency".to_string(),
                 priority: SuggestionPriority::Medium,
             });
         }
 
-        // 如果没有问题，给出正面反馈
+        // Positive feedback if no issues
         if suggestions.is_empty() {
             suggestions.push(OptimizationSuggestion {
-                category: "性能良好".to_string(),
-                description: "当前重绘性能表现良好".to_string(),
-                suggestion: "继续保持当前的优化策略".to_string(),
+                category: "Good performance".to_string(),
+                description: "Current repaint performance is good".to_string(),
+                suggestion: "Keep the current optimization strategy".to_string(),
                 priority: SuggestionPriority::Low,
             });
         }
@@ -979,23 +735,23 @@ impl RepaintOptimizer {
         suggestions
     }
 
-    /// 自动调整配置参数
+    /// Automatically adjust configuration parameters
     pub fn auto_tune_config(&self) -> RepaintConfig {
         let stats = self.monitor.get_performance_stats();
         let mut config = RepaintConfig::default();
 
-        // 根据性能自动调整
+        // Auto adjust based on performance
         if stats.efficiency_ratio > 0.7 {
-            // 效率低，增加批量阈值
+            // Low efficiency, increase batch threshold
             config.batch_update_threshold = (config.batch_update_threshold * 3) / 2;
             config.max_repaint_delay_ms = (config.max_repaint_delay_ms * 3) / 2;
         } else if stats.efficiency_ratio < 0.2 {
-            // 效率高，可以减少延迟
+            // High efficiency, reduce delay
             config.batch_update_threshold = (config.batch_update_threshold * 2) / 3;
             config.max_repaint_delay_ms = (config.max_repaint_delay_ms * 2) / 3;
         }
 
-        // 根据重绘频率调整
+        // Adjust based on repaint frequency
         if stats.repaints_per_second > 60.0 {
             config.min_repaint_interval_ms = (config.min_repaint_interval_ms * 3) / 2;
         } else if stats.repaints_per_second < 20.0 {
@@ -1006,7 +762,7 @@ impl RepaintOptimizer {
     }
 }
 
-/// 优化建议
+/// Optimization suggestion
 #[derive(Debug, Clone)]
 pub struct OptimizationSuggestion {
     pub category: String,
@@ -1015,7 +771,7 @@ pub struct OptimizationSuggestion {
     pub priority: SuggestionPriority,
 }
 
-/// 建议优先级
+/// Suggestion priority
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum SuggestionPriority {
     Low,
@@ -1032,7 +788,7 @@ impl OptimizationSuggestion {
         };
         
         println!("{} {}: {}", priority_symbol, self.category, self.description);
-        println!("   建议: {}", self.suggestion);
+        println!("   Suggestion: {}", self.suggestion);
     }
 }
 
@@ -1048,18 +804,18 @@ mod tests {
             &Settings::default(),
         );
 
-        // 模拟快速连续的重绘请求
+        // Simulate rapid consecutive repaint requests
         let start = Instant::now();
         
-        // 连续触发多次重绘
+        // Trigger multiple consecutive repaints
         for _ in 0..10 {
             repaint_service.smart_trigger();
         }
         
-        // 等待一小段时间
+        // Wait a short period
         tokio::time::sleep(Duration::from_millis(20)).await;
         
-        // 验证重绘标志状态
+        // Verify repaint flag status
         assert!(repaint_service.repaint.load(Ordering::SeqCst));
     }
 
@@ -1070,12 +826,12 @@ mod tests {
             &Settings::default(),
         );
 
-        // 模拟批量更新
+        // Simulate batch updates
         for _ in 0..batch_update_threshold() {
             repaint_service.batch_update();
         }
         
-        // 验证批量更新后重绘被触发
+        // Verify repaint is triggered after batch update
         assert!(repaint_service.repaint.load(Ordering::SeqCst));
         assert_eq!(repaint_service.pending_updates.load(Ordering::SeqCst), 0);
     }
@@ -1087,16 +843,16 @@ mod tests {
             &Settings::default(),
         );
 
-        // 测试不同优先级的重绘
+        // Test repaints with different priorities
         repaint_service.trigger_with_priority(RepaintPriority::Low);
         repaint_service.trigger_with_priority(RepaintPriority::Normal);
         repaint_service.trigger_with_priority(RepaintPriority::High);
         repaint_service.trigger_with_priority(RepaintPriority::Critical);
 
-        // 等待异步操作完成
+        // Wait for async operations to complete
         tokio::time::sleep(Duration::from_millis(100)).await;
         
-        // 验证重绘标志状态
+        // Verify repaint flag status
         assert!(repaint_service.repaint.load(Ordering::SeqCst));
     }
 
@@ -1107,36 +863,36 @@ mod tests {
             &Settings::default(),
         );
 
-        // 初始状态不需要重绘
+        // Initially does not need repaint
         assert!(!repaint_service.needs_repaint());
 
-        // 触发重绘后需要重绘
+        // After triggering, repaint is needed
         repaint_service.trigger();
         assert!(repaint_service.needs_repaint());
 
-        // 清理后不需要重绘
+        // After clearing, repaint is not needed
         repaint_service.clear();
         assert!(!repaint_service.needs_repaint());
     }
 
     #[test]
     fn test_repaint_config() {
-        // 测试默认配置
+        // Test default config
         let default_config = RepaintConfig::default();
         assert!(default_config.smart_repaint_enabled);
         assert!(default_config.batch_update_enabled);
         
-        // 测试高性能配置
+        // Test high performance config
         let high_perf_config = RepaintConfig::high_performance();
         assert_eq!(high_perf_config.target_fps, 120);
         assert_eq!(high_perf_config.min_repaint_interval_ms, 8);
         
-        // 测试省电配置
+        // Test power saving config
         let power_save_config = RepaintConfig::power_saving();
         assert_eq!(power_save_config.target_fps, 30);
         assert_eq!(power_save_config.batch_update_threshold, 10);
         
-        // 测试调试配置
+        // Test debug config
         let debug_config = RepaintConfig::debug();
         assert!(!debug_config.smart_repaint_enabled);
         assert!(!debug_config.batch_update_enabled);
@@ -1144,7 +900,7 @@ mod tests {
 
     #[test]
     fn test_config_management() {
-        // 测试配置设置和获取
+        // Test setting and getting config
         let test_config = RepaintConfig {
             target_fps: 45,
             min_repaint_interval_ms: 22,
@@ -1168,14 +924,14 @@ mod tests {
     fn test_performance_monitoring() {
         let monitor = RepaintMonitor::new();
         
-        // 记录一些事件
+        // Record some events
         monitor.record_repaint();
         monitor.record_repaint();
         monitor.record_update();
         monitor.record_update();
         monitor.record_update();
         
-        // 获取统计信息
+        // Get statistics
         let stats = monitor.get_performance_stats();
         assert_eq!(stats.total_repaints, 2);
         assert_eq!(stats.total_updates, 3);
@@ -1187,10 +943,10 @@ mod tests {
         let optimizer = RepaintOptimizer::new();
         let suggestions = optimizer.analyze_and_suggest();
         
-        // 应该至少有一个建议
+        // Should have at least one suggestion
         assert!(!suggestions.is_empty());
         
-        // 打印建议（用于调试）
+        // Print suggestions (for debugging)
         for suggestion in &suggestions {
             suggestion.print();
         }
@@ -1201,7 +957,7 @@ mod tests {
         let optimizer = RepaintOptimizer::new();
         let tuned_config = optimizer.auto_tune_config();
         
-        // 验证配置参数在合理范围内
+        // Verify config parameters fall within reasonable ranges
         assert!(tuned_config.target_fps >= 30 && tuned_config.target_fps <= 120);
         assert!(tuned_config.min_repaint_interval_ms >= 8 && tuned_config.min_repaint_interval_ms <= 100);
         assert!(tuned_config.batch_update_threshold >= 1 && tuned_config.batch_update_threshold <= 20);
@@ -1214,16 +970,16 @@ mod tests {
             &Settings::default(),
         );
         
-        // 获取初始统计
+        // Get initial stats
         let initial_stats = repaint_service.get_stats();
         assert!(!initial_stats.pending_repaint);
         assert_eq!(initial_stats.pending_updates, 0);
         
-        // 触发一些更新
+        // Trigger some updates
         repaint_service.batch_update();
         repaint_service.batch_update();
         
-        // 获取更新后的统计
+        // Get updated stats
         let updated_stats = repaint_service.get_stats();
         assert_eq!(updated_stats.pending_updates, 2);
     }
@@ -1235,7 +991,7 @@ mod tests {
             &Settings::default(),
         );
         
-        // 场景1: 快速连续更新
+        // Scenario 1: Rapid consecutive updates
         for i in 0..10 {
             if i % 3 == 0 {
                 repaint_service.batch_update();
@@ -1244,14 +1000,14 @@ mod tests {
             }
         }
         
-        // 等待异步操作
+        // Wait for async operations
         tokio::time::sleep(Duration::from_millis(100)).await;
         
-        // 验证最终状态
+        // Verify final state
         let stats = repaint_service.get_stats();
-        println!("集成测试结果: {:?}", stats);
+        println!("Integration test results: {:?}", stats);
         
-        // 应该至少有一次重绘
+        // There should be at least one repaint
         assert!(repaint_service.repaint.load(Ordering::SeqCst) || stats.pending_updates > 0);
     }
 }

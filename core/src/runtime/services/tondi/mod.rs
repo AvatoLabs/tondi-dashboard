@@ -22,7 +22,7 @@ cfg_if! {
     }
 }
 
-// 添加gRPC客户端模块
+// Add gRPC client module
 pub mod grpc_client;
 pub use grpc_client::{TondiGrpcClient, GrpcRpcCtl};
 
@@ -201,28 +201,28 @@ impl TondiService {
             RpcConfig::Grpc { url } => {
                 cfg_if! {
                     if #[cfg(not(target_arch = "wasm32"))] {
-                        // 桌面版：支持gRPC
+                        // Desktop version: supports gRPC
                         if let Some(network_interface) = url {
                             let grpc_client = TondiGrpcClient::connect(network_interface.clone(), network).await?;
                             let rpc_api: Arc<DynRpcApi> = Arc::new(grpc_client);
                             let rpc_ctl = RpcCtl::new();
-                            // 设置gRPC URL描述符
+                            // Set gRPC URL descriptor
                             let address: ContextualNetAddress = network_interface.clone().into();
                             rpc_ctl.set_descriptor(Some(format!("grpc://{}", address)));
                             Ok(Rpc::new(rpc_api, rpc_ctl))
                         } else {
-                            // 如果没有配置URL，使用默认配置
+                            // If no URL configured, use default configuration
                             let default_interface = NetworkInterfaceConfig::default();
                             let grpc_client = TondiGrpcClient::connect(default_interface.clone(), network).await?;
                             let rpc_api: Arc<DynRpcApi> = Arc::new(grpc_client);
                             let rpc_ctl = RpcCtl::new();
-                            // 设置默认gRPC URL描述符
+                            // Set default gRPC URL descriptor
                             let address: ContextualNetAddress = default_interface.into();
                             rpc_ctl.set_descriptor(Some(format!("grpc://{}", address)));
                             Ok(Rpc::new(rpc_api, rpc_ctl))
                         }
                     } else {
-                        // Web版：不支持gRPC，提示使用wRPC
+                        // Web version: gRPC not supported, prompt to use wRPC
                         Err(Error::custom("gRPC is not supported in Web/WASM version. Please use wRPC instead."))
                     }
                 }
@@ -350,7 +350,7 @@ impl TondiService {
                 let instant = Instant::now();
                 let service_name = service.name().to_string();
                 
-                // 添加超时机制，防止单个服务卡住
+                // Add timeout mechanism to prevent individual services from hanging
                 let detach_result = tokio::time::timeout(
                     tokio::time::Duration::from_secs(5),
                     service.clone().detach_rpc()

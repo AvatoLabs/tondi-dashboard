@@ -95,7 +95,7 @@ impl Service for PeerMonitorService {
                                 println!("[PeerMonitor] Successfully received peer info: {} peers", resp.peer_info.len());
                                 this.peer_info.lock().unwrap().replace(Arc::new(resp.peer_info));
                                 
-                                // 发送事件通知UI更新
+                                // Send event to notify UI update
                                 if let Err(e) = _application_events_sender.try_send(crate::events::Events::UpdateLogs) {
                                     println!("[PeerMonitor] Failed to send update logs event: {}", e);
                                 }

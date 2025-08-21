@@ -112,19 +112,19 @@ impl MetricsService {
         self.samples_since_connection.load(Ordering::SeqCst)
     }
 
-    /// 手动启动metrics更新循环
-    /// 因为tondi_metrics_core::Metrics可能没有正确工作，所以我们手动实现
+    /// Manually start metrics update loop
+    /// Because tondi_metrics_core::Metrics may not work correctly, we implement it manually
     async fn start_manual_metrics_update_loop(self: Arc<Self>) -> Result<()> {
         let this = self.clone();
         let handle = tokio::spawn(async move {
-            let mut interval = interval(Duration::from_secs(1)); // 每秒更新一次
+            let mut interval = interval(Duration::from_secs(1)); // Update once per second
             
             loop {
                 interval.tick().await;
                 
-                // 检查是否有RPC API可用
+                // Check if RPC API is available
                 if let Some(rpc_api) = this.rpc_api() {
-                    // 尝试获取metrics数据
+                    // Try to get metrics data
                     let request = GetMetricsRequest {
                         bandwidth_metrics: false,
                         connection_metrics: true,
@@ -137,12 +137,12 @@ impl MetricsService {
                         Ok(metrics_response) => {
                             println!("[METRICS] Successfully got metrics from gRPC: {:?}", metrics_response);
                             
-                            // 将RPC metrics转换为MetricsSnapshot
+                            // Convert RPC metrics to MetricsSnapshot
                             if let Some(consensus_metrics) = metrics_response.consensus_metrics {
-                                // 创建模拟的MetricsSnapshot
+                                // Create simulated MetricsSnapshot
                                 let snapshot = this.create_metrics_snapshot_from_rpc(consensus_metrics);
                                 
-                                // 处理metrics快照
+                                // Process metrics snapshot
                                 if let Err(err) = this.ingest_metrics_snapshot(Box::new(snapshot)) {
                                     println!("[METRICS] Error ingesting metrics snapshot: {}", err);
                                 }
@@ -158,27 +158,27 @@ impl MetricsService {
             }
         });
         
-        // 存储任务句柄
+        // Store task handle
         self.metrics_update_task.lock().unwrap().replace(handle);
         
         Ok(())
     }
 
-    /// 从RPC metrics创建MetricsSnapshot
+    /// Create MetricsSnapshot from RPC metrics
     fn create_metrics_snapshot_from_rpc(&self, consensus_metrics: tondi_rpc_core::ConsensusMetrics) -> MetricsSnapshot {
         let now = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap_or_default()
             .as_millis() as f64;
         
-        // 创建完整的MetricsSnapshot，包含所有必要字段
+        // Create complete MetricsSnapshot with all necessary fields
         let mut snapshot = MetricsSnapshot::default();
         
-        // 基本时间信息
+        // Basic time information
         snapshot.unixtime_millis = now;
-        snapshot.duration_millis = 1000.0; // 1秒更新间隔
+        snapshot.duration_millis = 1000.0; // 1 second update interval
         
-        // 网络相关metrics
+        // Network related metrics
         snapshot.network_difficulty = consensus_metrics.network_difficulty;
         snapshot.network_mempool_size = consensus_metrics.network_mempool_size as f64;
         snapshot.network_past_median_time = consensus_metrics.network_past_median_time as f64;
@@ -186,7 +186,7 @@ impl MetricsService {
         snapshot.network_virtual_daa_score = consensus_metrics.network_virtual_daa_score as f64;
         snapshot.network_virtual_parent_hashes_count = consensus_metrics.network_virtual_parent_hashes_count as f64;
         
-        // 计算TPS：基于最近的区块处理情况
+        // Calculate TPS: based on recent block processing
         let recent_blocks = consensus_metrics.node_chain_blocks_processed_count;
         let recent_transactions = consensus_metrics.node_transactions_processed_count;
         snapshot.network_transactions_per_second = if recent_blocks > 0 {
@@ -195,10 +195,10 @@ impl MetricsService {
             0.0
         };
         
-        // 节点活跃度指标
+        // Node activity metrics
         snapshot.node_active_peers = consensus_metrics.network_mempool_size as f64;
         
-        // 节点处理统计
+        // Node processing statistics
         snapshot.node_blocks_submitted_count = consensus_metrics.node_blocks_submitted_count as f64;
         snapshot.node_bodies_processed_count = consensus_metrics.node_bodies_processed_count as f64;
         snapshot.node_chain_blocks_processed_count = consensus_metrics.node_chain_blocks_processed_count as f64;
@@ -233,15 +233,15 @@ impl Service for MetricsService {
 
         self.reset_metrics_data()?;
         
-        // 尝试启动tondi_metrics_core::Metrics的任务
+        // Try to start tondi_metrics_core::Metrics task
         if let Err(e) = self.metrics.start_task().await {
             println!("[METRICS] Warning: tondi_metrics_core::Metrics start_task failed: {}", e);
         }
         
-        // 绑定RPC API
+        // Bind RPC API
         self.metrics.bind_rpc(Some(rpc_api.clone()));
         
-        // 启动我们的手动metrics更新循环作为备用方案
+        // Start our manual metrics update loop as backup solution
         if let Err(e) = self.clone().start_manual_metrics_update_loop().await {
             println!("[METRICS] Warning: Failed to start manual metrics update loop: {}", e);
         }
@@ -251,7 +251,7 @@ impl Service for MetricsService {
     async fn detach_rpc(self: Arc<Self>) -> Result<()> {
         self.rpc_api.lock().unwrap().take();
 
-        // 停止手动metrics更新任务
+        // Stop manual metrics update task
         if let Some(task_handle) = self.metrics_update_task.lock().unwrap().take() {
             task_handle.abort();
             println!("[METRICS] Manual metrics update task aborted");
@@ -259,7 +259,7 @@ impl Service for MetricsService {
 
         self.metrics.unregister_sink();
         
-        // 尝试停止tondi_metrics_core::Metrics的任务
+        // Try to stop tondi_metrics_core::Metrics task
         if let Err(e) = self.metrics.stop_task().await {
             println!("[METRICS] Warning: tondi_metrics_core::Metrics stop_task failed: {}", e);
         }
