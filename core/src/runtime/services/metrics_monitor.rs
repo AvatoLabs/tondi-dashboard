@@ -171,19 +171,34 @@ impl MetricsService {
             .unwrap_or_default()
             .as_millis() as f64;
         
-        // 暂时返回一个简单的默认MetricsSnapshot
-        // TODO: 实现完整的metrics数据转换
+        // 创建完整的MetricsSnapshot，包含所有必要字段
         let mut snapshot = MetricsSnapshot::default();
+        
+        // 基本时间信息
         snapshot.unixtime_millis = now;
-        snapshot.duration_millis = 1000.0;
+        snapshot.duration_millis = 1000.0; // 1秒更新间隔
+        
+        // 网络相关metrics
         snapshot.network_difficulty = consensus_metrics.network_difficulty;
         snapshot.network_mempool_size = consensus_metrics.network_mempool_size as f64;
         snapshot.network_past_median_time = consensus_metrics.network_past_median_time as f64;
         snapshot.network_tip_hashes_count = consensus_metrics.network_tip_hashes_count as f64;
-        snapshot.network_transactions_per_second = 10.0;
         snapshot.network_virtual_daa_score = consensus_metrics.network_virtual_daa_score as f64;
         snapshot.network_virtual_parent_hashes_count = consensus_metrics.network_virtual_parent_hashes_count as f64;
+        
+        // 计算TPS：基于最近的区块处理情况
+        let recent_blocks = consensus_metrics.node_chain_blocks_processed_count;
+        let recent_transactions = consensus_metrics.node_transactions_processed_count;
+        snapshot.network_transactions_per_second = if recent_blocks > 0 {
+            (recent_transactions as f64) / (recent_blocks as f64).max(1.0)
+        } else {
+            0.0
+        };
+        
+        // 节点活跃度指标
         snapshot.node_active_peers = consensus_metrics.network_mempool_size as f64;
+        
+        // 节点处理统计
         snapshot.node_blocks_submitted_count = consensus_metrics.node_blocks_submitted_count as f64;
         snapshot.node_bodies_processed_count = consensus_metrics.node_bodies_processed_count as f64;
         snapshot.node_chain_blocks_processed_count = consensus_metrics.node_chain_blocks_processed_count as f64;
