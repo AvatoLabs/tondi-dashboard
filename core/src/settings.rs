@@ -455,10 +455,28 @@ impl NodeSettings {
                 }
             }
             Network::Devnet => {
-                // Devnet: gRPC 16610, wRPC 17610
+                // Devnet: 支持远程连接
                 if self.enable_grpc {
-                    self.grpc_network_interface.kind = NetworkInterfaceKind::Custom;
-                    self.grpc_network_interface.custom = "127.0.0.1:16610".parse().unwrap();
+                    if let Some(ref custom_url) = self.devnet_custom_url {
+                        if !custom_url.is_empty() {
+                            // 如果有自定义URL，使用远程地址
+                            self.grpc_network_interface.kind = NetworkInterfaceKind::Custom;
+                            if let Ok(addr) = custom_url.parse() {
+                                self.grpc_network_interface.custom = addr;
+                            } else {
+                                // 解析失败时使用默认本地地址
+                                self.grpc_network_interface.custom = "127.0.0.1:16610".parse().unwrap();
+                            }
+                        } else {
+                            // 没有自定义URL时使用默认本地地址
+                            self.grpc_network_interface.kind = NetworkInterfaceKind::Custom;
+                            self.grpc_network_interface.custom = "127.0.0.1:16610".parse().unwrap();
+                        }
+                    } else {
+                        // 没有自定义URL时使用默认本地地址
+                        self.grpc_network_interface.kind = NetworkInterfaceKind::Custom;
+                        self.grpc_network_interface.custom = "127.0.0.1:16610".parse().unwrap();
+                    }
                 }
                 if self.enable_wrpc_borsh {
                     self.wrpc_borsh_network_interface.kind = NetworkInterfaceKind::Custom;
