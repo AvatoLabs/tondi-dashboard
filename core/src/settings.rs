@@ -175,9 +175,9 @@ impl Default for RpcConfig {
 #[derive(Default, Debug, Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum NetworkInterfaceKind {
-    #[default]
     Local,
     Any,
+    #[default]
     Custom,
 }
 
@@ -192,8 +192,8 @@ pub struct NetworkInterfaceConfig {
 impl Default for NetworkInterfaceConfig {
     fn default() -> Self {
         Self {
-            kind: NetworkInterfaceKind::Local,
-            custom: ContextualNetAddress::loopback(),
+            kind: NetworkInterfaceKind::Custom,
+            custom: "127.0.0.1:16610".parse().unwrap(), // 默认Tondi devnet gRPC端口
         }
     }
 }
@@ -390,12 +390,24 @@ pub struct NodeSettings {
 impl Default for NodeSettings {
     fn default() -> Self {
         // 使用带端口的默认配置，便于连接本地或远程节点
-        let default_grpc_interface = NetworkInterfaceConfig {
-            kind: NetworkInterfaceKind::Custom,
-            custom: "127.0.0.1:16110".parse().unwrap(), // 默认 Tondi mainnet gRPC 端口
+        let default_grpc_interface = if cfg!(target_arch = "wasm32") {
+            // Web版本使用本地地址
+            NetworkInterfaceConfig {
+                kind: NetworkInterfaceKind::Custom,
+                custom: "127.0.0.1:16610".parse().unwrap(),
+            }
+        } else {
+            // 桌面版本，Devnet默认使用远程节点
+            NetworkInterfaceConfig {
+                kind: NetworkInterfaceKind::Custom,
+                custom: "8.210.45.192:16610".parse().unwrap(), // 默认连接到远程devnet节点
+            }
         };
+        
+        println!("[NODESETTINGS DEBUG] NodeSettings::default() 被调用");
+        println!("[NODESETTINGS DEBUG] default_grpc_interface: {:?}", default_grpc_interface);
 
-        Self {
+        let settings = Self {
             connection_config_kind: NodeConnectionConfigKind::Custom,  // 改为Custom以启用自定义RPC配置
             rpc_kind: RpcKind::Grpc,  // 默认使用gRPC而不是Wrpc
             wrpc_url: "127.0.0.1".to_string(),
@@ -408,21 +420,31 @@ impl Default for NodeSettings {
             grpc_network_interface: default_grpc_interface,
             enable_upnp: true,
             memory_scale: NodeMemoryScale::default(),
-            network: Network::default(),
-            node_kind: TondidNodeKind::Remote,  // 改为Remote以使用我们的gRPC客户端
+            network: Network::Devnet,  // 改为Devnet
+            node_kind: TondidNodeKind::Remote,  // 改为Remote以连接远程节点
             tondid_daemon_binary: String::default(),
             tondid_daemon_args: String::default(),
             tondid_daemon_args_enable: false,
             tondid_daemon_storage_folder_enable: false,
             tondid_daemon_storage_folder: String::default(),
-            devnet_custom_url: None,
-        }
+            devnet_custom_url: Some("https://8.210.45.192/".to_string()),  // 设置远程devnet地址
+        };
+        
+        println!("[NODESETTINGS DEBUG] 创建的settings.grpc_network_interface: {:?}", settings.grpc_network_interface);
+        println!("[NODESETTINGS DEBUG] 创建的settings.network: {:?}", settings.network);
+        println!("[NODESETTINGS DEBUG] 创建的settings.node_kind: {:?}", settings.node_kind);
+        
+        settings
     }
 }
 
 impl NodeSettings {
     /// 根据网络类型自动更新端口配置
     pub fn update_ports_for_network(&mut self) {
+        println!("[UPDATE PORTS DEBUG] update_ports_for_network 被调用");
+        println!("[UPDATE PORTS DEBUG] self.network: {:?}", self.network);
+        println!("[UPDATE PORTS DEBUG] 调用前 grpc_network_interface: {:?}", self.grpc_network_interface);
+        
         match self.network {
             Network::Mainnet => {
                 // Mainnet: gRPC 16110, wRPC 17110
@@ -455,36 +477,22 @@ impl NodeSettings {
                 }
             }
             Network::Devnet => {
-                // Devnet: 支持远程连接
-                if self.enable_grpc {
-                    if let Some(ref custom_url) = self.devnet_custom_url {
-                        if !custom_url.is_empty() {
-                            // 如果有自定义URL，使用远程地址
-                            self.grpc_network_interface.kind = NetworkInterfaceKind::Custom;
-                            if let Ok(addr) = custom_url.parse() {
-                                self.grpc_network_interface.custom = addr;
-                            } else {
-                                // 解析失败时使用默认本地地址
-                                self.grpc_network_interface.custom = "127.0.0.1:16610".parse().unwrap();
-                            }
-                        } else {
-                            // 没有自定义URL时使用默认本地地址
-                            self.grpc_network_interface.kind = NetworkInterfaceKind::Custom;
-                            self.grpc_network_interface.custom = "127.0.0.1:16610".parse().unwrap();
-                        }
-                    } else {
-                        // 没有自定义URL时使用默认本地地址
-                        self.grpc_network_interface.kind = NetworkInterfaceKind::Custom;
-                        self.grpc_network_interface.custom = "127.0.0.1:16610".parse().unwrap();
+                // Devnet: gRPC 16610, wRPC 17610
+                if self.network == Network::Devnet {
+                    // 对于devnet，默认连接到远程节点
+                    println!("[UPDATE PORTS DEBUG] 处理Devnet配置");
+                    self.grpc_network_interface.kind = NetworkInterfaceKind::Custom;
+                    self.grpc_network_interface.custom = "8.210.45.192:16610".parse().unwrap();
+                    println!("[UPDATE PORTS DEBUG] 设置grpc_network_interface: {:?}", self.grpc_network_interface);
+                    
+                    if self.enable_wrpc_borsh {
+                        self.wrpc_borsh_network_interface.kind = NetworkInterfaceKind::Custom;
+                        self.wrpc_borsh_network_interface.custom = "8.210.45.192:17610".parse().unwrap();
                     }
-                }
-                if self.enable_wrpc_borsh {
-                    self.wrpc_borsh_network_interface.kind = NetworkInterfaceKind::Custom;
-                    self.wrpc_borsh_network_interface.custom = "127.0.0.1:17610".parse().unwrap();
-                }
-                if self.enable_wrpc_json {
-                    self.wrpc_json_network_interface.kind = NetworkInterfaceKind::Custom;
-                    self.wrpc_json_network_interface.custom = "127.0.0.1:18610".parse().unwrap();
+                    if self.enable_wrpc_json {
+                        self.wrpc_json_network_interface.kind = NetworkInterfaceKind::Custom;
+                        self.wrpc_json_network_interface.custom = "8.210.45.192:18610".parse().unwrap();
+                    }
                 }
             }
 
@@ -850,8 +858,8 @@ mod tests {
         // 测试 Devnet 端口
         settings.network = Network::Devnet;
         settings.update_ports_for_network();
-        assert_eq!(settings.grpc_network_interface.custom.to_string(), "127.0.0.1:16610");
-        assert_eq!(settings.wrpc_borsh_network_interface.custom.to_string(), "127.0.0.1:17610");
-        assert_eq!(settings.wrpc_json_network_interface.custom.to_string(), "127.0.0.1:18610");
+        assert_eq!(settings.grpc_network_interface.custom.to_string(), "8.210.45.192:16610");
+        assert_eq!(settings.wrpc_borsh_network_interface.custom.to_string(), "8.210.45.192:17610");
+        assert_eq!(settings.wrpc_json_network_interface.custom.to_string(), "8.210.45.192:18610");
     }
 }

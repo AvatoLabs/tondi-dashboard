@@ -1,4 +1,6 @@
 use crate::imports::*;
+use crate::settings::{NodeSettings, RpcKind};
+use crate::egui::theme_color;
 
 pub struct Settings {
     #[allow(dead_code)]
@@ -42,7 +44,7 @@ impl Settings {
         self.settings.node.network = network;
     }
 
-    pub fn render_remote_settings(_core: &mut Core, ui: &mut Ui, settings : &mut NodeSettings) -> Option<&'static str> {
+    pub fn render_remote_settings(_core: &mut Core, ui: &mut Ui, settings : &mut NodeSettings, grpc_interface_editor: &mut NetworkInterfaceEditor) -> Option<&'static str> {
 
         let mut node_settings_error = None;
 
@@ -50,6 +52,12 @@ impl Settings {
         .default_open(true)
         .show(ui, |ui| {
 
+            // 添加RPC类型选择
+            ui.horizontal_wrapped(|ui|{
+                ui.label(i18n("RPC Type:"));
+                ui.radio_value(&mut settings.rpc_kind, RpcKind::Grpc, "gRPC");
+                ui.radio_value(&mut settings.rpc_kind, RpcKind::Wrpc, "wRPC");
+            });
 
             ui.horizontal_wrapped(|ui|{
                 ui.label(i18n("Remote Connection:"));
@@ -60,47 +68,56 @@ impl Settings {
 
             match settings.connection_config_kind {
                 NodeConnectionConfigKind::Custom => {
-
-                    CollapsingHeader::new(i18n("wRPC Connection Settings"))
-                        .default_open(true)
-                        .show(ui, |ui| {
-
-
-                            ui.horizontal(|ui|{
-                                ui.label(i18n("wRPC Encoding:"));
-                                WrpcEncoding::iter().for_each(|encoding| {
-                                    ui.radio_value(&mut settings.wrpc_encoding, *encoding, encoding.to_string());
+                    match settings.rpc_kind {
+                        RpcKind::Grpc => {
+                            // 显示gRPC连接设置
+                            CollapsingHeader::new(i18n("gRPC Connection Settings"))
+                                .default_open(true)
+                                .show(ui, |ui| {
+                                                                        // 使用NetworkInterfaceEditor来编辑gRPC接口
+                                    grpc_interface_editor.ui(ui);
+                                    
+                                    // 同步编辑器内容到设置
+                                    if let Ok(new_interface) = NetworkInterfaceConfig::try_from(grpc_interface_editor as &NetworkInterfaceEditor) {
+                                        settings.grpc_network_interface = new_interface;
+                                    }
+                                    
+                                    // 显示当前gRPC配置
+                                    ui.label(format!("当前gRPC配置: {}", settings.grpc_network_interface.custom));
+                                    
+                                    // 对于devnet，显示远程节点地址
+                                    if settings.network == Network::Devnet {
+                                        ui.label(RichText::new("Devnet远程节点: 8.210.45.192:16610").color(theme_color().strong_color));
+                                    }
                                 });
-                            });
+                        },
+                        RpcKind::Wrpc => {
+                            // 显示wRPC连接设置
+                            CollapsingHeader::new(i18n("wRPC Connection Settings"))
+                                .default_open(true)
+                                .show(ui, |ui| {
+                                    ui.horizontal(|ui|{
+                                        ui.label(i18n("wRPC Encoding:"));
+                                        WrpcEncoding::iter().for_each(|encoding| {
+                                            ui.radio_value(&mut settings.wrpc_encoding, *encoding, encoding.to_string());
+                                        });
+                                    });
 
+                                    ui.horizontal(|ui|{
+                                        ui.label(i18n("wRPC URL:"));
+                                        ui.add(TextEdit::singleline(&mut settings.wrpc_url));
+                                    });
 
-                            ui.horizontal(|ui|{
-                                ui.label(i18n("wRPC URL:"));
-                                ui.add(TextEdit::singleline(&mut settings.wrpc_url));
-                                
-                            });
-
-                            if let Err(err) = TondiRpcClient::parse_url(settings.wrpc_url.clone(), settings.wrpc_encoding, settings.network.into()) {
-                                ui.label(
-                                    RichText::new(err.to_string())
-                                        .color(theme_color().warning_color),
-                                );
-                                node_settings_error = Some(i18n("Invalid wRPC URL"));
-                            }
-                        });
-                    // cfg_if! {
-                    //     if #[cfg(not(target_arch = "wasm32"))] {
-                    //         ui.horizontal_wrapped(|ui|{
-                    //             ui.label(i18n("Recommended arguments for the remote node: "));
-                    //             ui.label(RichText::new("tondid --utxoindex --rpclisten-borsh=0.0.0.0").code().font(FontId::monospace(14.0)).color(theme_color().strong_color));
-                    //         });
-                    //         ui.horizontal_wrapped(|ui|{
-                    //             ui.label(i18n("If you are running locally, use: "));
-                    //             ui.label(RichText::new("--rpclisten-borsh=127.0.0.1.").code().font(FontId::monospace(14.0)).color(theme_color().strong_color));
-                    //         });
-                    //     }
-                    // }
-
+                                    if let Err(err) = TondiRpcClient::parse_url(settings.wrpc_url.clone(), settings.wrpc_encoding, settings.network.into()) {
+                                        ui.label(
+                                            RichText::new(err.to_string())
+                                                .color(theme_color().warning_color),
+                                        );
+                                        node_settings_error = Some(i18n("Invalid wRPC URL"));
+                                    }
+                                });
+                        }
+                    }
                 },
                 NodeConnectionConfigKind::PublicServerCustom => {
                 },
@@ -422,7 +439,7 @@ impl Settings {
                 }
 
                 if self.settings.node.node_kind == TondidNodeKind::Remote {
-                    node_settings_error = Self::render_remote_settings(core, ui, &mut self.settings.node);
+                    node_settings_error = Self::render_remote_settings(core, ui, &mut self.settings.node, &mut self.grpc_network_interface);
                 }
 
                 #[cfg(not(target_arch = "wasm32"))]

@@ -4,6 +4,7 @@ pub struct Welcome {
     #[allow(dead_code)]
     runtime: Runtime,
     settings : Settings,
+    grpc_network_interface : NetworkInterfaceEditor,
 }
 
 impl Welcome {
@@ -18,6 +19,7 @@ impl Welcome {
 
         Self { 
             runtime, 
+            grpc_network_interface: NetworkInterfaceEditor::from(&settings.node.grpc_network_interface),
             settings,
         }
     }
@@ -76,7 +78,7 @@ impl Welcome {
                         });
 
                         if self.settings.node.node_kind == TondidNodeKind::Remote {
-                            error = crate::modules::settings::Settings::render_remote_settings(core,ui,&mut self.settings.node);
+                            error = crate::modules::settings::Settings::render_remote_settings(core,ui,&mut self.settings.node, &mut self.grpc_network_interface);
                         }
                     });
 

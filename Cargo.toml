@@ -5,6 +5,7 @@ members = [
     "core",
     "macros",
     "extensions/chrome",
+    "test_grpc",
 ]
 default-members = ["app"]
 
@@ -59,6 +60,7 @@ tondi-wallet-core = { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/
 tondi-wallet-keys =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
 tondi-wrpc-client =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
 tondi-wrpc-server =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
+tondi-grpc-client =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
 tondi-txscript =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
 tondid = { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
 

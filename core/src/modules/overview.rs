@@ -93,9 +93,12 @@ impl Overview {
             .default_open(true)
             .show(ui, |ui| {
 
+                println!("[OVERVIEW DEBUG] is_connected: {}", core.state().is_connected());
                 if core.state().is_connected() {
+                    println!("[OVERVIEW DEBUG] 渲染图表");
                     self.render_graphs(core,ui);
                 } else {
+                    println!("[OVERVIEW DEBUG] 显示未连接状态");
                     ui.label(i18n("Not connected"));
                 }
             });

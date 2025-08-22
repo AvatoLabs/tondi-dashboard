@@ -765,6 +765,14 @@ impl Core {
             Events::UpdateLogs => {}
             Events::Metrics { snapshot } => {
                 self.state.node_metrics = Some(snapshot);
+                
+                // 如果能收到metrics数据，说明已经连接了，手动设置连接状态
+                if !self.state.is_connected {
+                    println!("[CORE DEBUG] 收到metrics数据，设置连接状态为true");
+                    self.state.is_connected = true;
+                    self.state.network_id = Some(self.settings.node.network.into());
+                    println!("[CORE DEBUG] 连接状态已设置：is_connected=true, network={:?}", self.settings.node.network);
+                }
             }
             Events::MempoolSize { mempool_size } => {
                 self.network_pressure
@@ -887,10 +895,11 @@ impl Core {
                     }
                     #[allow(unused_variables)]
                     CoreWallet::Connect { url, network_id } => {
-                        // log_info!("Connected to {url:?} on network {network_id}");
+                        println!("[CORE DEBUG] 收到 CoreWallet::Connect 事件: url={:?}, network_id={:?}", url, network_id);
                         self.state.is_connected = true;
                         self.state.url = url;
                         self.state.network_id = Some(network_id);
+                        println!("[CORE DEBUG] 设置 state.is_connected = true");
 
                         self.modules.clone().values().for_each(|module| {
                             module.connect(self, Network::from(network_id));

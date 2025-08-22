@@ -9,6 +9,7 @@ use tondi_wallet_core::rpc::{
 };
 use tondi_wrpc_client::Resolver;
 use workflow_core::runtime;
+use std::time::Duration;
 
 const ENABLE_PREEMPTIVE_DISCONNECT: bool = true;
 
@@ -24,7 +25,7 @@ cfg_if! {
 
 // Add gRPC client module
 pub mod grpc_client;
-pub use grpc_client::{TondiGrpcClient, GrpcRpcCtl};
+pub use grpc_client::TondiGrpcClient;
 
 cfg_if! {
     if #[cfg(not(target_arch = "wasm32"))] {
@@ -124,7 +125,14 @@ impl TondiService {
         }
 
         Self {
-            connect_on_startup: settings.initialized.then(|| settings.node.clone()),
+            // 对于devnet，总是尝试启动连接
+            connect_on_startup: if settings.node.network == Network::Devnet {
+                // 对于devnet，使用配置中的设置
+                Some(settings.node.clone())
+            } else {
+                // 对于其他网络，使用原有逻辑
+                settings.initialized.then(|| settings.node.clone())
+            },
             application_events,
             service_events,
             task_ctl: Channel::oneshot(),
@@ -162,12 +170,25 @@ impl TondiService {
     }
 
     pub async fn create_rpc_client(config: &RpcConfig, network: Network) -> Result<Rpc> {
+        println!("[TONDI SERVICE] create_rpc_client 被调用");
+        println!("[TONDI SERVICE] config: {:?}", config);
+        println!("[TONDI SERVICE] network: {:?}", network);
+        
+        // 打印调用栈信息（简化版本）
+        println!("[TONDI SERVICE] 调用来源检查...");
+        if let RpcConfig::Grpc { url: Some(net_config) } = config {
+            println!("[TONDI SERVICE] NetworkInterfaceConfig详细信息:");
+            println!("[TONDI SERVICE]   kind: {:?}", net_config.kind);
+            println!("[TONDI SERVICE]   custom: {:?}", net_config.custom);
+        }
+        
         match config {
             RpcConfig::Wrpc {
                 url,
                 encoding,
                 resolver_urls,
             } => {
+                println!("[TONDI SERVICE] 使用wRPC配置");
                 let resolver_or_none = match url {
                     Some(_) => None,
                     None => {
@@ -199,30 +220,37 @@ impl TondiService {
                 Ok(Rpc::new(rpc_api, rpc_ctl))
             }
             RpcConfig::Grpc { url } => {
+                println!("[TONDI SERVICE] 使用gRPC配置");
                 cfg_if! {
                     if #[cfg(not(target_arch = "wasm32"))] {
                         // Desktop version: supports gRPC
                         if let Some(network_interface) = url {
+                            println!("[TONDI SERVICE] 使用指定的网络接口: {:?}", network_interface);
                             let grpc_client = TondiGrpcClient::connect(network_interface.clone(), network).await?;
                             let rpc_api: Arc<DynRpcApi> = Arc::new(grpc_client);
                             let rpc_ctl = RpcCtl::new();
                             // Set gRPC URL descriptor
                             let address: ContextualNetAddress = network_interface.clone().into();
                             rpc_ctl.set_descriptor(Some(format!("grpc://{}", address)));
+                            println!("[TONDI SERVICE] gRPC客户端创建成功");
                             Ok(Rpc::new(rpc_api, rpc_ctl))
                         } else {
+                            println!("[TONDI SERVICE] 使用默认网络接口");
                             // If no URL configured, use default configuration
                             let default_interface = NetworkInterfaceConfig::default();
+                            println!("[TONDI SERVICE] 默认接口: {:?}", default_interface);
                             let grpc_client = TondiGrpcClient::connect(default_interface.clone(), network).await?;
                             let rpc_api: Arc<DynRpcApi> = Arc::new(grpc_client);
                             let rpc_ctl = RpcCtl::new();
                             // Set default gRPC URL descriptor
                             let address: ContextualNetAddress = default_interface.into();
                             rpc_ctl.set_descriptor(Some(format!("grpc://{}", address)));
+                            println!("[TONDI SERVICE] 默认gRPC客户端创建成功");
                             Ok(Rpc::new(rpc_api, rpc_ctl))
                         }
                     } else {
                         // Web version: gRPC not supported, prompt to use wRPC
+                        println!("[TONDI SERVICE] Web版本不支持gRPC");
                         Err(Error::custom("gRPC is not supported in Web/WASM version. Please use wRPC instead."))
                     }
                 }
@@ -251,6 +279,9 @@ impl TondiService {
                         .is_ok()
                     {
                         wallet.rpc_ctl().signal_open().await?;
+                    } else if let Ok(_grpc_client) = wallet.rpc_api().clone().downcast_arc::<TondiGrpcClient>() {
+                        // gRPC客户端已经在创建时连接，这里不需要额外的连接步骤
+                        println!("[TONDI SERVICE] gRPC客户端已连接，无需额外连接步骤");
                     } else {
                         unimplemented!("connect_rpc_client(): RPC client is not supported")
                     }
@@ -293,17 +324,44 @@ impl TondiService {
     }
 
     pub fn rpc_url(&self) -> Option<String> {
+        println!("[RPC URL DEBUG] rpc_url 被调用");
         if let Some(wallet) = self.core_wallet() {
+            println!("[RPC URL DEBUG] wallet 存在，has_rpc: {}", wallet.has_rpc());
             if !wallet.has_rpc() {
+                println!("[RPC URL DEBUG] wallet 没有 RPC，返回 None");
                 None
+            } else if let Ok(grpc_client) =
+                wallet.rpc_api().clone().downcast_arc::<TondiGrpcClient>()
+            {
+                // gRPC客户端 - 优先显示gRPC连接
+                println!("[RPC URL DEBUG] 检测到 gRPC 客户端");
+                let raw_url = grpc_client.url();
+                println!("[RPC URL DEBUG] gRPC 原始 URL: {:?}", raw_url);
+                let formatted_url = raw_url.map(|url| {
+                    // 检查URL是否已经包含scheme
+                    if url.starts_with("grpc://") || url.starts_with("http://") || url.starts_with("https://") {
+                        url
+                    } else {
+                        format!("grpc://{}", url)
+                    }
+                });
+                println!("[RPC URL DEBUG] gRPC 格式化 URL: {:?}", formatted_url);
+                formatted_url
             } else if let Ok(wrpc_client) =
                 wallet.rpc_api().clone().downcast_arc::<TondiRpcClient>()
             {
-                wrpc_client.url()
+                // wRPC客户端 - 作为fallback
+                println!("[RPC URL DEBUG] 检测到 wRPC 客户端");
+                let url = wrpc_client.url();
+                println!("[RPC URL DEBUG] wRPC URL: {:?}", url);
+                url
             } else {
+                // 其他类型的RPC客户端
+                println!("[RPC URL DEBUG] 未知的 RPC 客户端类型");
                 None
             }
         } else {
+            println!("[RPC URL DEBUG] wallet 不存在，返回 None");
             None
         }
     }
@@ -432,20 +490,38 @@ impl TondiService {
             cfg_if! {
                 if #[cfg(not(target_arch = "wasm32"))] {
                     // 桌面版本：尝试使用gRPC配置
+                    let default_net_config = NetworkInterfaceConfig::default();
+                    println!("[CALL SITE 481 DEBUG] NetworkInterfaceConfig::default(): {:?}", default_net_config);
                     let grpc_config = RpcConfig::Grpc {
-                        url: Some(NetworkInterfaceConfig::default()),
+                        url: Some(default_net_config),
                     };
-                                            match Self::create_rpc_client(&grpc_config, network).await {
+                                            println!("[CALL SITE 481] 调用 create_rpc_client");
+                        match Self::create_rpc_client(&grpc_config, network).await {
                             Ok(grpc_rpc) => {
                                 let rpc_api = grpc_rpc.rpc_api().clone();
                                 
                                 // 绑定gRPC客户端到钱包
                                 if let Some(wallet) = self.core_wallet() {
+                                    println!("[TONDI SERVICE DEBUG] 开始绑定gRPC客户端到钱包");
                                     wallet.bind_rpc(Some(grpc_rpc)).await.unwrap();
+                                    println!("[TONDI SERVICE DEBUG] gRPC客户端已成功绑定到钱包");
+                                    
+                                    println!("[TONDI SERVICE DEBUG] 启动钱包服务");
                                     wallet
                                         .start()
                                         .await
                                         .expect("Unable to start wallet service");
+                                    println!("[TONDI SERVICE DEBUG] 钱包服务已启动");
+                                    
+                                    // 手动触发连接事件，因为gRPC客户端不会自动触发
+                                    println!("[TONDI SERVICE DEBUG] 手动触发 CoreWallet::Connect 事件");
+                                    self.core_wallet_notify(CoreWalletEvents::Connect {
+                                        network_id: network.into(),
+                                        url: Some("grpc://8.210.45.192:16610".to_string()),
+                                    }).unwrap();
+                                    println!("[TONDI SERVICE DEBUG] CoreWallet::Connect 事件已发送");
+                                } else {
+                                    println!("[TONDI SERVICE DEBUG] 错误：core_wallet() 返回 None");
                                 }
 
                                 // 为所有服务附加gRPC API
@@ -565,19 +641,56 @@ impl TondiService {
 
                 self.handle_network_change(network).await?;
 
+                println!("[TONDI] 启动进程内节点...");
                 let tondid = Arc::new(inproc::InProc::default());
                 self.retain(tondid.clone());
 
+                // 克隆config以避免所有权问题
+                let config_clone = config.clone();
                 tondid.clone().start(config).await.unwrap();
+                println!("[TONDI] 进程内节点启动成功");
 
-                let rpc_api = tondid
-                    .rpc_core_services()
-                    .expect("Unable to obtain inproc rpc api");
-                let rpc_ctl = RpcCtl::new();
-                let rpc = Rpc::new(rpc_api, rpc_ctl.clone());
+                // 等待更长时间让节点完全启动和初始化
+                println!("[TONDI] 等待节点完全启动和初始化...");
+                tokio::time::sleep(Duration::from_secs(10)).await;
+                println!("[TONDI] 节点初始化完成，尝试连接gRPC...");
 
-                self.start_all_services(Some(rpc), network).await?;
-                self.connect_rpc_client().await?;
+                // 尝试使用gRPC连接到本地节点
+                let grpc_config = RpcConfig::Grpc {
+                    url: Some(config_clone.grpc_network_interface.clone()),
+                };
+                
+                match Self::create_rpc_client(&grpc_config, network).await {
+                    Ok(grpc_rpc) => {
+                        println!("[TONDI] 成功连接到本地gRPC端点");
+                        let rpc_api = grpc_rpc.rpc_api().clone();
+                        let rpc_ctl = RpcCtl::new();
+                        let rpc = Rpc::new(rpc_api, rpc_ctl.clone());
+
+                        self.start_all_services(Some(rpc), network).await?;
+                        self.connect_rpc_client().await?;
+                        
+                        // 等待一下让服务完全启动
+                        tokio::time::sleep(Duration::from_secs(2)).await;
+                        println!("[TONDI] 所有服务启动完成");
+                    }
+                    Err(e) => {
+                        println!("[TONDI] gRPC连接失败: {}, 回退到进程内RPC", e);
+                        // 回退到进程内RPC
+                        let rpc_api = tondid
+                            .rpc_core_services()
+                            .expect("Unable to obtain inproc rpc api");
+                        let rpc_ctl = RpcCtl::new();
+                        let rpc = Rpc::new(rpc_api, rpc_ctl.clone());
+
+                        self.start_all_services(Some(rpc), network).await?;
+                        self.connect_rpc_client().await?;
+                        
+                        // 等待一下让服务完全启动
+                        tokio::time::sleep(Duration::from_secs(2)).await;
+                        println!("[TONDI] 所有服务启动完成（进程内RPC模式）");
+                    }
+                }
 
                 self.update_storage();
             }
@@ -591,10 +704,24 @@ impl TondiService {
                 self.retain(tondid.clone());
                 tondid.clone().start(config).await.unwrap();
 
-                let rpc_config = RpcConfig::Wrpc {
-                    url: Some("127.0.0.1".to_string()),
-                    encoding: WrpcEncoding::Borsh,
-                    resolver_urls: None,
+                // 根据网络类型动态选择RPC配置
+                let rpc_config = if network == Network::Devnet {
+                    // 对于devnet，优先使用gRPC配置
+                    println!("[TONDI SERVICE] Devnet模式，使用gRPC配置");
+                    RpcConfig::Grpc {
+                        url: Some(NetworkInterfaceConfig {
+                            kind: NetworkInterfaceKind::Custom,
+                            custom: "8.210.45.192:16610".parse().unwrap(),
+                        }),
+                    }
+                } else {
+                    // 对于其他网络，使用wRPC配置
+                    println!("[TONDI SERVICE] 使用wRPC配置");
+                    RpcConfig::Wrpc {
+                        url: Some("127.0.0.1".to_string()),
+                        encoding: WrpcEncoding::Borsh,
+                        resolver_urls: None,
+                    }
                 };
 
                 let rpc = Self::create_rpc_client(&rpc_config, network).await
@@ -614,14 +741,28 @@ impl TondiService {
                 self.retain(tondid.clone());
                 tondid.clone().start(config).await.unwrap();
 
-                let rpc_config = RpcConfig::Wrpc {
-                    url: None,
-                    encoding: WrpcEncoding::Borsh,
-                    resolver_urls: None,
+                // 根据网络类型动态选择RPC配置
+                let rpc_config = if network == Network::Devnet {
+                    // 对于devnet，优先使用gRPC配置
+                    println!("[TONDI SERVICE] Devnet模式，使用gRPC配置");
+                    RpcConfig::Grpc {
+                        url: Some(NetworkInterfaceConfig {
+                            kind: NetworkInterfaceKind::Custom,
+                            custom: "8.210.45.192:16610".parse().unwrap(),
+                        }),
+                    }
+                } else {
+                    // 对于其他网络，使用wRPC配置
+                    println!("[TONDI SERVICE] 使用wRPC配置");
+                    RpcConfig::Wrpc {
+                        url: None,
+                        encoding: WrpcEncoding::Borsh,
+                        resolver_urls: None,
+                    }
                 };
 
                 let rpc = Self::create_rpc_client(&rpc_config, network).await
-                    .expect("Tondid Service - unable to create wRPC client");
+                    .expect("Tondid Service - unable to create RPC client");
                 self.start_all_services(Some(rpc), network).await?;
                 self.connect_rpc_client().await?;
 
@@ -642,10 +783,24 @@ impl TondiService {
 
                 tondid.clone().start(config).await.unwrap();
 
-                let rpc_config = RpcConfig::Wrpc {
-                    url: None,
-                    encoding: WrpcEncoding::Borsh,
-                    resolver_urls: None,
+                // 根据网络类型动态选择RPC配置
+                let rpc_config = if network == Network::Devnet {
+                    // 对于devnet，优先使用gRPC配置
+                    println!("[TONDI SERVICE] Devnet模式，使用gRPC配置");
+                    RpcConfig::Grpc {
+                        url: Some(NetworkInterfaceConfig {
+                            kind: NetworkInterfaceKind::Custom,
+                            custom: "8.210.45.192:16610".parse().unwrap(),
+                        }),
+                    }
+                } else {
+                    // 对于其他网络，使用wRPC配置
+                    println!("[TONDI SERVICE] 使用wRPC配置");
+                    RpcConfig::Wrpc {
+                        url: None,
+                        encoding: WrpcEncoding::Borsh,
+                        resolver_urls: None,
+                    }
                 };
 
                 let rpc = Self::create_rpc_client(&rpc_config, network).await
@@ -792,22 +947,17 @@ impl Service for TondiService {
                 wallet_descriptor,
                 account_descriptors,
             } = status;
+            
+            println!("[TONDI SERVICE DEBUG] GetStatusResponse: is_connected={}, url={:?}, network_id={:?}", is_connected, url, network_id);
 
             if let Some(context) = context {
                 let _context = Context::try_from_slice(&context)?;
 
                 if is_connected {
                     let network_id = network_id.unwrap_or_else(|| self.network().into());
-
-                    // let event = Box::new(tondi_wallet_core::events::Events::Connect {
-                    //     network_id,
-                    //     url: url.clone(),
-                    // });
-                    // self.application_events
-                    //     .sender
-                    //     .try_send(crate::events::Events::Wallet { event })
-                    //     // .await
-                    //     .unwrap();
+                    
+                    println!("[TONDI SERVICE DEBUG] GetStatusResponse.is_connected=true, 发送 CoreWallet::Connect 事件");
+                    println!("[TONDI SERVICE DEBUG] Connect 事件参数: network_id={:?}, url={:?}", network_id, url);
 
                     self.core_wallet_notify(CoreWalletEvents::Connect {
                         network_id,
@@ -866,7 +1016,63 @@ impl Service for TondiService {
             } else {
                 // new instance - emit startup event
                 if let Some(node_settings) = self.connect_on_startup.as_ref() {
-                    self.apply_node_settings(node_settings).await?;
+                    // 即使有connect_on_startup，也优先尝试启动本地集成节点
+                    cfg_if! {
+                        if #[cfg(not(target_arch = "wasm32"))] {
+                            if node_settings.node_kind == TondidNodeKind::IntegratedInProc {
+                                println!("[TONDI] 检测到集成节点配置，启动本地集成节点...");
+                                let config = Config::from(node_settings.clone());
+                                let event = TondidServiceEvents::StartInternalInProc { 
+                                    config: config.clone(), 
+                                    network: node_settings.network 
+                                };
+                                self.service_events.sender.try_send(event).unwrap_or_else(|err| {
+                                    println!("[TONDI] 无法发送启动事件: {}", err);
+                                });
+                            } else {
+                                // 非集成节点，使用原有逻辑
+                                self.apply_node_settings(node_settings).await?;
+                            }
+                        } else {
+                            // Web版本，使用原有逻辑
+                            self.apply_node_settings(node_settings).await?;
+                        }
+                    }
+                } else {
+                    // 如果没有配置启动连接，根据网络类型决定启动策略
+                    cfg_if! {
+                        if #[cfg(not(target_arch = "wasm32"))] {
+                            match Network::default() {
+                                Network::Devnet => {
+                                    println!("[TONDI] Devnet模式，尝试连接远程节点...");
+                                    // 对于devnet，使用远程连接配置
+                                    let event = TondidServiceEvents::StartRemoteConnection { 
+                                        rpc_config: RpcConfig::Grpc {
+                                            url: Some(NetworkInterfaceConfig {
+                                                kind: NetworkInterfaceKind::Custom,
+                                                custom: "8.210.45.192:16610".parse().unwrap(),
+                                            }),
+                                        },
+                                        network: Network::Devnet 
+                                    };
+                                    self.service_events.sender.try_send(event).unwrap_or_else(|err| {
+                                        println!("[TONDI] 无法发送启动事件: {}", err);
+                                    });
+                                }
+                                _ => {
+                                    println!("[TONDI] 自动启动本地集成节点...");
+                                    let config = Config::from_network(Network::Mainnet);
+                                    let event = TondidServiceEvents::StartInternalInProc { 
+                                        config: config.clone(), 
+                                        network: Network::Mainnet 
+                                    };
+                                    self.service_events.sender.try_send(event).unwrap_or_else(|err| {
+                                        println!("[TONDI] 无法发送启动事件: {}", err);
+                                    });
+                                }
+                            }
+                        }
+                    }
                 }
 
                 // new instance - setup new context
