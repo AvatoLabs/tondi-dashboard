@@ -331,10 +331,10 @@ impl ModuleT for BlockDag {
         //     self.last_daa_score = current_daa_score;
         // }
 
-        let delta = 0.025;
+        let delta = 0.035; // 增加动画速度
         let daa_diff = current_daa_score as f64 - self.daa_cursor;
         let step = daa_diff * delta;
-        let step = (1.0 + step).powf(2.0) - 1.0;
+        let step = (1.0 + step).powf(1.8) - 1.0; // 更平滑的缓动函数
         self.daa_cursor += step;
         
         let graph_width = ui.available_width();
@@ -455,20 +455,38 @@ impl ModuleT for BlockDag {
                             ].into_iter().map(|pt|pt.into()).collect::<Vec<_>>()
                         };
                         if self.settings.show_vspc && level == 0 && *current_vspc && parent_vspc {
-                            lines_vspc.push(Line::new("", PlotPoints::Owned(points)).color(theme_color.block_dag_vspc_connect_color).style(LineStyle::Solid).width(3.0));
+                            lines_vspc.push(Line::new("", PlotPoints::Owned(points))
+                                .color(theme_color.block_dag_vspc_connect_color)
+                                .style(LineStyle::Dotted { spacing: 1.2 })
+                                .width(2.5));
                         } else {
-                            lines_parent.push(Line::new("", PlotPoints::Owned(points)).color(theme_color.block_dag_parent_connect_color).style(LineStyle::Solid));
+                            lines_parent.push(Line::new("", PlotPoints::Owned(points))
+                                .color(theme_color.block_dag_parent_connect_color)
+                                .style(LineStyle::Solid)
+                                .width(1.8));
                         }
                     }
                 }
             }
 
             let d = 1.5 * self.block_scale;
+            // 为新区块添加缩放动画效果
+            let scale_factor = if new_blocks.contains(&block.header.hash) {
+                1.2 // 新区块稍微大一些
+            } else {
+                1.0
+            };
+            let d = d * scale_factor;
+            
             let points: PlotPoints<'_> = [
-                [x+d*0.2, y+d],
-                [x-d*0.2, y+d],
-                [x-d*0.2, y-d],
-                [x+d*0.2, y-d],
+                [x+d*0.25, y+d*0.8],
+                [x+d*0.8, y+d*0.25],
+                [x+d*0.8, y-d*0.25],
+                [x+d*0.25, y-d*0.8],
+                [x-d*0.25, y-d*0.8],
+                [x-d*0.8, y-d*0.25],
+                [x-d*0.8, y+d*0.25],
+                [x-d*0.25, y+d*0.8],
             ].to_vec().into();
         
             let fill_color = if new_blocks.contains(&block.header.hash) {

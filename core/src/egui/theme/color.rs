@@ -129,12 +129,12 @@ impl ThemeColor {
             bandwidth_graph_color: Color32::from_rgb(196, 255, 199),
             network_graph_color: Color32::from_rgb(186, 255, 241),
 
-            block_dag_separator_color: Color32::from_rgb(220, 220, 220),
-            block_dag_new_block_fill_color: Color32::from_rgb(220, 220, 220),
+            block_dag_separator_color: Color32::from_rgb(200, 200, 200),
+            block_dag_new_block_fill_color: Color32::from_rgb(240, 240, 240),
             block_dag_block_fill_color: Color32::from_rgb(173, 216, 230),
             block_dag_block_stroke_color: Color32::from_rgb(15, 84, 77),
             block_dag_vspc_connect_color: Color32::from_rgb(23, 150, 137),
-            block_dag_parent_connect_color: Color32::from_rgba_premultiplied(173, 216, 230, 220),
+            block_dag_parent_connect_color: Color32::from_rgba_premultiplied(173, 216, 230, 180),
         }
     }
 
@@ -191,7 +191,7 @@ impl ThemeColor {
             logs_trace_color: Color32::from_rgb(158, 158, 158), // 灰色
             logs_processed_color: Color32::from_rgb(76, 175, 80), // 绿色
 
-            graph_frame_color: Color32::from_rgb(158, 158, 158), // 灰色
+            graph_frame_color: Color32::from_rgb(120, 120, 120), // 更柔和的灰色
             performance_graph_color: Color32::from_rgb(255, 193, 7), // 琥珀色
             storage_graph_color: Color32::from_rgb(255, 235, 59), // 浅黄色
             connections_graph_color: Color32::from_rgb(255, 193, 7), // 琥珀色
@@ -203,7 +203,7 @@ impl ThemeColor {
             block_dag_block_fill_color: Color32::from_rgb(255, 235, 59), // 浅黄色
             block_dag_block_stroke_color: Color32::from_rgb(255, 193, 7), // 琥珀色
             block_dag_vspc_connect_color: Color32::from_rgb(255, 215, 0), // 深黄色
-            block_dag_parent_connect_color: Color32::from_rgba_premultiplied(255, 193, 7, 220), // 琥珀色
+            block_dag_parent_connect_color: Color32::from_rgba_premultiplied(255, 193, 7, 180), // 琥珀色，更透明
         }
     }
 
@@ -267,12 +267,12 @@ impl ThemeColor {
             bandwidth_graph_color: Color32::from_rgb(59, 77, 60),
             network_graph_color: Color32::from_rgb(56, 77, 72),
 
-            block_dag_separator_color: Color32::from_rgb(120, 120, 120),
-            block_dag_new_block_fill_color: Color32::from_rgb(220, 220, 220),
+            block_dag_separator_color: Color32::from_rgb(100, 100, 100),
+            block_dag_new_block_fill_color: Color32::from_rgb(240, 240, 240),
             block_dag_block_fill_color: Color32::from_rgb(201, 230, 240),
             block_dag_block_stroke_color: Color32::from_rgb(42, 51, 50),
             block_dag_vspc_connect_color: Color32::from_rgb(11, 77, 70),
-            block_dag_parent_connect_color: Color32::from_rgba_premultiplied(0, 0, 0, 72),
+            block_dag_parent_connect_color: Color32::from_rgba_premultiplied(0, 0, 0, 60),
         }
     }
 }

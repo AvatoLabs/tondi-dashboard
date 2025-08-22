@@ -5,7 +5,6 @@ members = [
     "core",
     "macros",
     "extensions/chrome",
-    "test_grpc",
 ]
 default-members = ["app"]
 

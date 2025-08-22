@@ -240,28 +240,38 @@ impl<'core> Status<'core> {
                                             rpc_url
                                         ));
                                     } else {
-                                        // 如果无法获取实际连接URL，则回退到配置文件中的URL
-                                        match TondiRpcClient::parse_url(
-                                            settings.node.wrpc_url.clone(),
-                                            settings.node.wrpc_encoding,
-                                            settings.node.network.into(),
-                                        ) {
-                                            Ok(url) => {
-                                                ui.label(format!(
-                                                    "{} {} ...",
-                                                    i18n("Connecting to"),
-                                                    url
-                                                ));
-                                            }
-                                            Err(err) => {
-                                                ui.label(
-                                                    RichText::new(format!(
-                                                        "{} {}: {err}",
-                                                        i18n("Error connecting to"),
-                                                        settings.node.wrpc_url
-                                                    ))
-                                                    .color(theme_color().warning_color),
-                                                );
+                                        // 对于devnet，直接使用配置的gRPC URL而不是wRPC URL
+                                        if settings.node.network == Network::Devnet {
+                                            let grpc_url = format!("grpc://{}", settings.node.grpc_network_interface);
+                                            ui.label(format!(
+                                                "{} {} ...",
+                                                i18n("Connecting to"),
+                                                grpc_url
+                                            ));
+                                        } else {
+                                            // 如果无法获取实际连接URL，则回退到配置文件中的URL
+                                            match TondiRpcClient::parse_url(
+                                                settings.node.wrpc_url.clone(),
+                                                settings.node.wrpc_encoding,
+                                                settings.node.network.into(),
+                                            ) {
+                                                Ok(url) => {
+                                                    ui.label(format!(
+                                                        "{} {} ...",
+                                                        i18n("Connecting to"),
+                                                        url
+                                                    ));
+                                                }
+                                                Err(err) => {
+                                                    ui.label(
+                                                        RichText::new(format!(
+                                                            "{} {}: {err}",
+                                                            i18n("Error connecting to"),
+                                                            settings.node.wrpc_url
+                                                        ))
+                                                        .color(theme_color().warning_color),
+                                                    );
+                                                }
                                             }
                                         }
                                     }

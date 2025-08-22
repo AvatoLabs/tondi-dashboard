@@ -16,11 +16,21 @@ pub fn bezier(
     let mut points = vec![];
 
     let offset = (x2 - x1) * offset_factor;
+    
+    // 根据距离调整控制点，使短距离的连接线更直，长距离的连接线更弯曲
+    let distance = ((x2 - x1).powi(2) + (y2 - y1).powi(2)).sqrt();
+    let adjusted_offset = if distance < 10.0 {
+        offset * 0.3 // 短距离减少弯曲
+    } else if distance > 50.0 {
+        offset * 1.2 // 长距离增加弯曲
+    } else {
+        offset
+    };
 
-    let control_point1_x = x1 + offset;
+    let control_point1_x = x1 + adjusted_offset;
     let control_point1_y = y1;
 
-    let control_point2_x = x2 - offset;
+    let control_point2_x = x2 - adjusted_offset;
     let control_point2_y = y2;
 
     for i in 0..=steps {

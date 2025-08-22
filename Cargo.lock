@@ -6458,15 +6458,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "test-grpc-connection"
-version = "0.1.0"
-dependencies = [
- "tokio",
- "tondi-grpc-client",
- "tondi-rpc-core",
-]
-
-[[package]]
 name = "textwrap"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6642,7 +6633,6 @@ dependencies = [
  "io-uring",
  "libc",
  "mio 1.0.4",
- "parking_lot",
  "pin-project-lite",
  "signal-hook-registry",
  "slab",

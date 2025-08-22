@@ -93,12 +93,9 @@ impl Overview {
             .default_open(true)
             .show(ui, |ui| {
 
-                println!("[OVERVIEW DEBUG] is_connected: {}", core.state().is_connected());
                 if core.state().is_connected() {
-                    println!("[OVERVIEW DEBUG] 渲染图表");
                     self.render_graphs(core,ui);
                 } else {
-                    println!("[OVERVIEW DEBUG] 显示未连接状态");
                     ui.label(i18n("Not connected"));
                 }
             });
@@ -457,28 +454,36 @@ impl Overview {
         let group = MetricGroup::from(metric);
         let graph_color = group.to_color();
 
-        let graph_data = {
-            let metrics_data = self.runtime.metrics_service().metrics_data();
-            let data = metrics_data.get(&metric).unwrap();
-            let mut duration = 2 * 60;
-            let available_samples = runtime().metrics_service().samples_since_connection();
-            if available_samples < duration {
-                duration = available_samples;
-            }
-            let len = data.len();
-            let samples = len.min(duration);
-            data[len-samples..].to_vec()
-            // let mut data = data[len-samples..].to_vec();
-            // if data.len() == 1{
-            //     let mut last_clone = data[0].clone();
-            //     if last_clone.y > 100000000000.0{
-            //         last_clone.x += 0.1;
-            //         last_clone.y += 100.0;
-            //         data.push(last_clone);
-            //     }
-            // }
-            // data
-        };
+                        let graph_data = {
+                    let metrics_data = self.runtime.metrics_service().metrics_data();
+                    let data = metrics_data.get(&metric).unwrap();
+                    let mut duration = 2 * 60;
+                    let available_samples = runtime().metrics_service().samples_since_connection();
+                    if available_samples < duration {
+                        duration = available_samples;
+                    }
+                    let len = data.len();
+                    let samples = len.min(duration);
+                    let data = data[len-samples..].to_vec();
+                    
+                    // 为图表数据添加平滑插值，使波形更美观
+                    if data.len() > 1 {
+                        let mut smoothed_data = Vec::new();
+                        for i in 0..data.len() - 1 {
+                            smoothed_data.push(data[i]);
+                            // 在两点之间添加插值点，使线条更平滑
+                            if i < data.len() - 2 {
+                                let mid_x = (data[i].x + data[i + 1].x) / 2.0;
+                                let mid_y = (data[i].y + data[i + 1].y) / 2.0;
+                                smoothed_data.push(PlotPoint::new(mid_x, mid_y));
+                            }
+                        }
+                        smoothed_data.push(data[data.len() - 1]);
+                        smoothed_data
+                    } else {
+                        data
+                    }
+                };
 
         //skip rendering
         if graph_data.len() < 2 {
@@ -489,13 +494,12 @@ impl Overview {
         ui.vertical(|ui|{
             let frame = 
             Frame::new()
-                // .fill(Color32::from_rgb(240,240,240))
-                .stroke(Stroke::new(1.0, theme_color().graph_frame_color))
-                // .inner_margin(4.)
-                .inner_margin(Margin { left: 3, right: 3, top: 4, bottom: 4 })
+                .stroke(Stroke::new(1.5, theme_color().graph_frame_color))
+                .inner_margin(Margin { left: 4, right: 4, top: 5, bottom: 5 })
                 .outer_margin(8.)
-                // .corner_radius(8.)
-                .corner_radius(6.);
+                .corner_radius(8.)
+                .fill(egui::Color32::from_rgba_premultiplied(0, 0, 0, 0))
+                ;
 
             frame.show(ui, |ui| {
 
@@ -512,6 +516,7 @@ impl Overview {
                     .show_background(false)
                     .show_x(false)
                     .show_y(false)
+                    .clamp_grid(true) // 确保网格线不会超出边界
                     ;
 
                 if [Metric::NodeCpuUsage].contains(&metric) {
@@ -519,14 +524,22 @@ impl Overview {
                 }
 
                 // let color = graph_color.gamma_multiply(0.5);
-                let line = Line::new("", PlotPoints::Owned(graph_data))
-                    // .color(color)
+                let line = Line::new("", PlotPoints::Owned(graph_data.clone()))
                     .color(graph_color)
                     .style(LineStyle::Solid)
+                    .width(2.0)
+                    .fill(0.0);
+                
+                // 添加渐变填充效果
+                let fill_line = Line::new("", PlotPoints::Owned(graph_data))
+                    .color(graph_color.linear_multiply(0.3)) // 半透明填充
+                    .style(LineStyle::Solid)
+                    .width(1.0)
                     .fill(0.0);
 
                 let plot_result = plot.show(ui, |plot_ui| {
-                    plot_ui.line(line);
+                    plot_ui.line(fill_line); // 先绘制填充
+                    plot_ui.line(line);      // 再绘制主线条
                 });
 
                 let text = format!("{} {}", i18n(metric.title().1).to_uppercase(), metric.format(value, true, true));

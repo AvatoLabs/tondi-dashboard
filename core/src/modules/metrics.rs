@@ -294,13 +294,28 @@ impl Metrics {
                             if end > data.len() {
                                 end = data.len();
                             }
-                            data[data.len()-start..data.len()-end].to_vec()
+                            let data = data[data.len()-start..data.len()-end].to_vec();
+                            
+                            // 为详细图表添加平滑插值，使波形更美观
+                            if data.len() > 1 {
+                                let mut smoothed_data = Vec::new();
+                                for i in 0..data.len() - 1 {
+                                    smoothed_data.push(data[i]);
+                                    // 在两点之间添加插值点，使线条更平滑
+                                    if i < data.len() - 2 {
+                                        let mid_x = (data[i].x + data[i + 1].x) / 2.0;
+                                        let mid_y = (data[i].y + data[i + 1].y) / 2.0;
+                                        smoothed_data.push(PlotPoint::new(mid_x, mid_y));
+                                    }
+                                }
+                                smoothed_data.push(data[data.len() - 1]);
+                                smoothed_data
+                            } else {
+                                data
+                            }
                         };
 
                         let mut plot = Plot::new(metric.as_str())
-                        // .link_axis(id, true, false)
-                        // .allow_boxed_zoom(true)
-                        // .allow_double_click_reset(true)
                             .legend(Legend::default())
                             .width(graph_width)
                             .height(graph_height)
@@ -309,9 +324,9 @@ impl Metrics {
                             .y_axis_min_width(4.0 * 12.0)
                             .show_axes(true)
                             .show_grid(true)
-                            // .allow_drag([true, false])
                             .allow_drag([false, false])
                             .allow_scroll(false)
+                            .clamp_grid(true) // 确保网格线不会超出边界
                             .y_axis_formatter(move |grid, _range|{
                                 match metric {
                                     Metric::NetworkPastMedianTime => {
@@ -366,13 +381,22 @@ impl Metrics {
                             plot = plot.include_y(100.);
                         }
                 
-                        let line = Line::new("", PlotPoints::Owned(graph_data))
+                        let line = Line::new("", PlotPoints::Owned(graph_data.clone()))
                             .color(graph_color)
                             .style(LineStyle::Solid)
+                            .width(2.5)
+                            .fill(0.0);
+                        
+                        // 添加渐变填充效果
+                        let fill_line = Line::new("", PlotPoints::Owned(graph_data))
+                            .color(graph_color.linear_multiply(0.2)) // 半透明填充
+                            .style(LineStyle::Solid)
+                            .width(1.5)
                             .fill(0.0);
                 
                         plot.show(ui, |plot_ui| {
-                            plot_ui.line(line);
+                            plot_ui.line(fill_line); // 先绘制填充
+                            plot_ui.line(line);      // 再绘制主线条
                         });
                     });
                 });
