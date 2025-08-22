@@ -122,14 +122,10 @@ impl<'core> Status<'core> {
 
         if !connection_selector {
             ui.label(i18n("CONNECTED")).on_hover_ui(|ui| {
-                println!("[STATUS DEBUG] 调用 rpc_url()");
                 if let Some(wrpc_url) = runtime().tondi_service().rpc_url() {
-                    println!("[STATUS DEBUG] rpc_url() 返回: {}", wrpc_url);
                     ui.horizontal(|ui| {
                         ui.label(wrpc_url);
                     });
-                } else {
-                    println!("[STATUS DEBUG] rpc_url() 返回 None");
                 }
             });
         } else {
@@ -140,14 +136,10 @@ impl<'core> Status<'core> {
 
             if !PopupPanel::is_open(ui, popup_id) {
                 response.on_hover_ui(|ui| {
-                    println!("[STATUS DEBUG 2] 调用 rpc_url()");
                     if let Some(wrpc_url) = runtime().tondi_service().rpc_url() {
-                        println!("[STATUS DEBUG 2] rpc_url() 返回: {}", wrpc_url);
                         ui.horizontal(|ui| {
                             ui.label(wrpc_url);
                         });
-                    } else {
-                        println!("[STATUS DEBUG 2] rpc_url() 返回 None");
                     }
                 });
             }
@@ -321,9 +313,7 @@ impl<'core> Status<'core> {
                                         }
                                     }
 
-                                    println!("[STATUS DEBUG 3] 在Disconnected状态中调用 rpc_url()");
                                     if let Some(rpc_url) = runtime().tondi_service().rpc_url() {
-                                        println!("[STATUS DEBUG 3] Disconnected状态 rpc_url() 返回: {}", rpc_url);
                                         ui.label(format!(
                                             "{} {} ...",
                                             i18n("Connecting to"),
@@ -332,7 +322,7 @@ impl<'core> Status<'core> {
 
                                         ui.ctx().request_repaint_after(Duration::from_millis(250));
                                     } else {
-                                        println!("[STATUS DEBUG 3] Disconnected状态 rpc_url() 返回 None");
+
                                     }
                                 }
                             },

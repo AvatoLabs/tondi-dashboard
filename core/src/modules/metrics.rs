@@ -301,12 +301,10 @@ impl Metrics {
                                 let mut smoothed_data = Vec::new();
                                 for i in 0..data.len() - 1 {
                                     smoothed_data.push(data[i]);
-                                    // 在两点之间添加插值点，使线条更平滑
-                                    if i < data.len() - 2 {
-                                        let mid_x = (data[i].x + data[i + 1].x) / 2.0;
-                                        let mid_y = (data[i].y + data[i + 1].y) / 2.0;
-                                        smoothed_data.push(PlotPoint::new(mid_x, mid_y));
-                                    }
+                                    // 在每两个点之间添加插值点，使线条更平滑
+                                    let mid_x = (data[i].x + data[i + 1].x) / 2.0;
+                                    let mid_y = (data[i].y + data[i + 1].y) / 2.0;
+                                    smoothed_data.push(PlotPoint::new(mid_x, mid_y));
                                 }
                                 smoothed_data.push(data[data.len() - 1]);
                                 smoothed_data
@@ -327,6 +325,7 @@ impl Metrics {
                             .allow_drag([false, false])
                             .allow_scroll(false)
                             .clamp_grid(true) // 确保网格线不会超出边界
+                            .include_y(0.0) // 确保包含0点，使填充区域可见
                             .y_axis_formatter(move |grid, _range|{
                                 match metric {
                                     Metric::NetworkPastMedianTime => {
@@ -354,7 +353,7 @@ impl Metrics {
                             .label_formatter(move |_name, point| {
                                 let PlotPoint { x, y } = point;
 
-                                format!("{} @ {}", metric.format(*y, true, true), DateTime::<chrono::Utc>::from_timestamp((*x / 1000.0) as i64, 0)
+                                format!("{} @ {}", metric.format(*y, true, true), DateTime::<chrono::Utc>::from_timestamp((x / 1000.0) as i64, 0)
                                     .expect("could not parse timestamp")
                                     .with_timezone(&chrono::Local)
                                     .format("%H:%M:%S")
@@ -381,17 +380,30 @@ impl Metrics {
                             plot = plot.include_y(100.);
                         }
                 
-                        let line = Line::new("", PlotPoints::Owned(graph_data.clone()))
+                        // 添加渐变填充效果 - 创建封闭的填充区域
+                        let mut fill_points = graph_data.clone();
+                        if fill_points.len() > 1 {
+                            // 添加底部点以形成封闭区域
+                            let first_x = fill_points[0].x;
+                            let last_x = fill_points[fill_points.len() - 1].x;
+                            let min_y = fill_points.iter().map(|p| p.y).fold(f64::INFINITY, f64::min);
+                            let bottom_y = min_y.min(0.0); // 确保底部至少到0或更低
+                            
+                            // 在末尾添加底部点，然后回到起点，形成封闭区域
+                            fill_points.push(PlotPoint::new(last_x, bottom_y));
+                            fill_points.push(PlotPoint::new(first_x, bottom_y));
+                        }
+                        
+                        let fill_line = Line::new("", PlotPoints::Owned(fill_points))
+                            .color(graph_color.linear_multiply(0.2)) // 半透明填充
+                            .style(LineStyle::Solid)
+                            .width(0.0) // 填充线不需要宽度
+                            .fill(0.0); // 填充到0基线
+
+                        let line = Line::new("", PlotPoints::Owned(graph_data))
                             .color(graph_color)
                             .style(LineStyle::Solid)
                             .width(2.5)
-                            .fill(0.0);
-                        
-                        // 添加渐变填充效果
-                        let fill_line = Line::new("", PlotPoints::Owned(graph_data))
-                            .color(graph_color.linear_multiply(0.2)) // 半透明填充
-                            .style(LineStyle::Solid)
-                            .width(1.5)
                             .fill(0.0);
                 
                         plot.show(ui, |plot_ui| {

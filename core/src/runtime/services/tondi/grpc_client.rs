@@ -3,9 +3,9 @@ use crate::network::Network;
 use async_trait::async_trait;
 
 use tondi_rpc_core::{
-    BandwidthMetrics, ConnectionMetrics, ConsensusMetrics, GetMetricsResponse,
+    GetMetricsResponse,
     GetServerInfoResponse, GetConnectedPeerInfoResponse, GetBlockCountResponse, GetBlockDagInfoResponse,
-    ProcessMetrics, RpcNetworkId, RpcResult, StorageMetrics, RpcHash,
+    RpcNetworkId, RpcResult,
 };
 use tondi_rpc_core::api::rpc::RpcApi;
 use tondi_consensus_core::api::BlockCount;
