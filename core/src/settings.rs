@@ -404,8 +404,7 @@ impl Default for NodeSettings {
             }
         };
         
-        println!("[NODESETTINGS DEBUG] NodeSettings::default() 被调用");
-        println!("[NODESETTINGS DEBUG] default_grpc_interface: {:?}", default_grpc_interface);
+
 
         let settings = Self {
             connection_config_kind: NodeConnectionConfigKind::Custom,  // 改为Custom以启用自定义RPC配置
@@ -430,9 +429,7 @@ impl Default for NodeSettings {
             devnet_custom_url: Some("https://8.210.45.192/".to_string()),  // 设置远程devnet地址
         };
         
-        println!("[NODESETTINGS DEBUG] 创建的settings.grpc_network_interface: {:?}", settings.grpc_network_interface);
-        println!("[NODESETTINGS DEBUG] 创建的settings.network: {:?}", settings.network);
-        println!("[NODESETTINGS DEBUG] 创建的settings.node_kind: {:?}", settings.node_kind);
+
         
         settings
     }
@@ -480,10 +477,8 @@ impl NodeSettings {
                 // Devnet: gRPC 16610, wRPC 17610
                 if self.network == Network::Devnet {
                     // 对于devnet，默认连接到远程节点
-                    println!("[UPDATE PORTS DEBUG] 处理Devnet配置");
                     self.grpc_network_interface.kind = NetworkInterfaceKind::Custom;
                     self.grpc_network_interface.custom = "8.210.45.192:16610".parse().unwrap();
-                    println!("[UPDATE PORTS DEBUG] 设置grpc_network_interface: {:?}", self.grpc_network_interface);
                     
                     if self.enable_wrpc_borsh {
                         self.wrpc_borsh_network_interface.kind = NetworkInterfaceKind::Custom;

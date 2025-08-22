@@ -25,17 +25,13 @@ pub struct TondiGrpcClient {
 
 impl TondiGrpcClient {
     pub async fn connect(network_interface: NetworkInterfaceConfig, network: Network) -> Result<Self> {
-        println!("[TONDI GRPC] TondiGrpcClient::connect 被调用");
-        println!("[TONDI GRPC] network_interface: {:?}", network_interface);
-        println!("[TONDI GRPC] network: {:?}", network);
-        
+
         let url = format!("grpc://{}", network_interface);
-        println!("[TONDI GRPC] 尝试连接到: {}", url);
         
         // 使用TONDI项目的真实gRPC客户端
         match GrpcClient::connect(url.clone()).await {
             Ok(grpc_client) => {
-                println!("[TONDI GRPC] 成功连接到TONDI gRPC节点: {}", url);
+
                 Ok(Self {
                     grpc_client: Some(Arc::new(grpc_client)),
                     url: url.clone(),
@@ -44,7 +40,7 @@ impl TondiGrpcClient {
                 })
             }
             Err(e) => {
-                println!("[TONDI GRPC] 连接失败: {}", e);
+
                 // 返回一个未连接的客户端，后续可以重试
                 Ok(Self {
                     grpc_client: None,
@@ -62,14 +58,14 @@ impl TondiGrpcClient {
             return Ok(());
         }
 
-        println!("[gRPC DEBUG] 尝试重新连接到节点: {}", self.url);
+
         match GrpcClient::connect(self.url.clone()).await {
             Ok(_grpc_client) => {
-                println!("[gRPC DEBUG] 重新连接成功");
+
                 Ok(())
             }
             Err(e) => {
-                println!("[gRPC DEBUG] 重新连接失败: {}", e);
+
                 Err(Error::custom(format!("Failed to reconnect: {}", e)))
             }
         }
