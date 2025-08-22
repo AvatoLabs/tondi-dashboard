@@ -60,13 +60,51 @@ impl MetricsService {
     pub fn ingest_metrics_snapshot(&self, snapshot: Box<MetricsSnapshot>) -> Result<()> {
         let timestamp = snapshot.unixtime_millis;
         let mut metrics_data = self.metrics_data.lock().unwrap();
+        
+        println!("[METRICS] 开始处理MetricsSnapshot，时间戳: {}", timestamp);
+        
+        // 直接使用我们自己的字段映射，而不是依赖MetricsSnapshot::get方法
+        let mut metric_values = HashMap::new();
+        
+        // 手动映射所有metrics到对应的值
+        metric_values.insert(Metric::NodeCpuUsage, snapshot.node_cpu_usage);
+        metric_values.insert(Metric::NodeResidentSetSizeBytes, snapshot.node_resident_set_size_bytes);
+        metric_values.insert(Metric::NodeFileHandlesCount, snapshot.node_file_handles);
+        metric_values.insert(Metric::NodeDiskIoReadBytes, snapshot.node_disk_io_read_bytes);
+        metric_values.insert(Metric::NodeDiskIoReadPerSec, snapshot.node_disk_io_read_per_sec);
+        metric_values.insert(Metric::NodeDiskIoWriteBytes, snapshot.node_disk_io_write_bytes);
+        metric_values.insert(Metric::NodeDiskIoWritePerSec, snapshot.node_disk_io_write_per_sec);
+        metric_values.insert(Metric::NodeTotalBytesRx, snapshot.node_total_bytes_rx);
+        metric_values.insert(Metric::NodeTotalBytesRxPerSecond, snapshot.node_total_bytes_rx_per_second);
+        metric_values.insert(Metric::NodeTotalBytesTx, snapshot.node_total_bytes_tx);
+        metric_values.insert(Metric::NodeTotalBytesTxPerSecond, snapshot.node_total_bytes_tx_per_second);
+        metric_values.insert(Metric::NodeActivePeers, snapshot.node_active_peers);
+        metric_values.insert(Metric::NodeBlocksSubmittedCount, snapshot.node_blocks_submitted_count);
+        metric_values.insert(Metric::NodeHeadersProcessedCount, snapshot.node_headers_processed_count);
+        metric_values.insert(Metric::NodeDependenciesProcessedCount, snapshot.node_dependencies_processed_count);
+        metric_values.insert(Metric::NodeBodiesProcessedCount, snapshot.node_bodies_processed_count);
+        metric_values.insert(Metric::NodeTransactionsProcessedCount, snapshot.node_transactions_processed_count);
+        metric_values.insert(Metric::NodeChainBlocksProcessedCount, snapshot.node_chain_blocks_processed_count);
+        metric_values.insert(Metric::NodeMassProcessedCount, snapshot.node_mass_processed_count);
+        metric_values.insert(Metric::NodeDatabaseBlocksCount, snapshot.node_database_blocks_count);
+        metric_values.insert(Metric::NodeDatabaseHeadersCount, snapshot.node_database_headers_count);
+        metric_values.insert(Metric::NetworkMempoolSize, snapshot.network_mempool_size);
+        metric_values.insert(Metric::NetworkTransactionsPerSecond, snapshot.network_transactions_per_second);
+        metric_values.insert(Metric::NetworkTipHashesCount, snapshot.network_tip_hashes_count);
+        metric_values.insert(Metric::NetworkDifficulty, snapshot.network_difficulty);
+        metric_values.insert(Metric::NetworkPastMedianTime, snapshot.network_past_median_time);
+        metric_values.insert(Metric::NetworkVirtualParentHashesCount, snapshot.network_virtual_parent_hashes_count);
+        metric_values.insert(Metric::NetworkVirtualDaaScore, snapshot.network_virtual_daa_score);
+        
         for metric in Metric::into_iter() {
             let dest = metrics_data.get_mut(&metric).unwrap();
+            let y = metric_values.get(&metric).copied().unwrap_or(0.0);
+            
             if dest.is_empty() {
                 if snapshot.duration_millis < 0.0 {
                     continue;
                 }
-                let y = snapshot.get(&metric);
+                println!("[METRICS] 填充历史数据 - {}: {}", metric.as_str(), y);
                 // 使用当前时间戳作为基准，向前填充历史数据
                 // 每个数据点间隔1秒
                 let mut fill_timestamp = timestamp - (MAX_METRICS_SAMPLES - 1) as f64;
@@ -79,7 +117,12 @@ impl MetricsService {
                 dest.drain(0..dest.len() - MAX_METRICS_SAMPLES);
             }
 
-            let y = snapshot.get(&metric);
+            println!("[METRICS] 处理metric - {}: {} (finite: {})", metric.as_str(), y, y.is_finite());
+            
+            // 特别关注磁盘读取指标
+            if metric == Metric::NodeDiskIoReadBytes || metric == Metric::NodeDiskIoReadPerSec {
+                println!("[METRICS] ⚠️  磁盘读取指标 {} 的值: {}", metric.as_str(), y);
+            }
             if y.is_finite() {
                 dest.push(PlotPoint { x: timestamp, y });
             } else {
@@ -130,11 +173,11 @@ impl MetricsService {
                 if let Some(rpc_api) = this.rpc_api() {
                     // Try to get metrics data
                     let request = GetMetricsRequest {
-                        bandwidth_metrics: false,
+                        bandwidth_metrics: true,
                         connection_metrics: true,
                         consensus_metrics: true,
-                        process_metrics: false,
-                        storage_metrics: false,
+                        process_metrics: true,
+                        storage_metrics: true,
                         custom_metrics: false,
                     };
                     
@@ -266,6 +309,42 @@ impl MetricsService {
         println!("  - MEMPOOL: {}", snapshot.network_mempool_size);
         println!("  - TPS: {}", snapshot.network_transactions_per_second);
         println!("  - TIP HASHES: {}", snapshot.network_tip_hashes_count);
+        
+        // 添加process metrics调试信息
+        if let Some(process_metrics) = &metrics_response.process_metrics {
+            println!("[METRICS] Process Metrics 详情:");
+            println!("  - CPU Usage: {}% (原始值: {}, 类型: {})", process_metrics.cpu_usage, process_metrics.cpu_usage, std::any::type_name::<f32>());
+            println!("  - Disk Read: {} bytes", process_metrics.disk_io_read_bytes);
+            println!("  - Disk Read/sec: {} bytes/sec", process_metrics.disk_io_read_per_sec);
+            println!("  - Memory: {} bytes", process_metrics.resident_set_size);
+            
+            // 检查具体的字段值
+            println!("[METRICS] 设置到snapshot的值:");
+            println!("  - snapshot.node_cpu_usage = {} (从 {} 转换)", process_metrics.cpu_usage as f64, process_metrics.cpu_usage);
+            println!("  - snapshot.node_disk_io_read_bytes = {}", process_metrics.disk_io_read_bytes as f64);
+            println!("  - snapshot.node_disk_io_read_per_sec = {}", process_metrics.disk_io_read_per_sec as f64);
+            
+            // 特别检查CPU值是否太小
+            if process_metrics.cpu_usage < 1.0 && process_metrics.cpu_usage > 0.0 {
+                println!("[METRICS] ⚠️  CPU使用率很小: {}% - 可能会被格式化为0", process_metrics.cpu_usage);
+                println!("[METRICS] 💡 建议: 运行一些程序来增加CPU使用率进行测试");
+            } else if process_metrics.cpu_usage == 0.0 {
+                println!("[METRICS] ⚠️  CPU使用率为完全的0 - 可能tondi节点确实没有任何CPU负载");
+            } else {
+                println!("[METRICS] ✅ CPU使用率正常: {}%", process_metrics.cpu_usage);
+            }
+        } else {
+            println!("[METRICS] 警告: 没有process_metrics数据!");
+        }
+        
+        // 添加consensus metrics调试信息
+        if let Some(consensus_metrics) = &metrics_response.consensus_metrics {
+            println!("[METRICS] Consensus Metrics 详情:");
+            println!("  - Blocks Submitted: {}", consensus_metrics.node_blocks_submitted_count);
+            println!("  - Transactions: {}", consensus_metrics.node_transactions_processed_count);
+        } else {
+            println!("[METRICS] 警告: 没有consensus_metrics数据!");
+        }
         
         snapshot
     }

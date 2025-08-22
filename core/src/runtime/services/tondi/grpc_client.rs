@@ -1,6 +1,7 @@
 use crate::imports::*;
 use crate::network::Network;
 use async_trait::async_trait;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use tondi_rpc_core::{
     GetMetricsResponse,
@@ -17,10 +18,10 @@ use tondi_grpc_client::GrpcClient;
 /// Tondi gRPC客户端，使用TONDI项目的真实gRPC客户端
 #[derive(Clone)]
 pub struct TondiGrpcClient {
-    grpc_client: Option<Arc<GrpcClient>>,
+    grpc_client: Arc<Mutex<Option<GrpcClient>>>,
     url: String,
     network: Network,
-    is_connected: bool,
+    is_connected: Arc<AtomicBool>,
 }
 
 impl TondiGrpcClient {
@@ -31,22 +32,20 @@ impl TondiGrpcClient {
         // 使用TONDI项目的真实gRPC客户端
         match GrpcClient::connect(url.clone()).await {
             Ok(grpc_client) => {
-
                 Ok(Self {
-                    grpc_client: Some(Arc::new(grpc_client)),
+                    grpc_client: Arc::new(Mutex::new(Some(grpc_client))),
                     url: url.clone(),
                     network,
-                    is_connected: true,
+                    is_connected: Arc::new(AtomicBool::new(true)),
                 })
             }
-            Err(e) => {
-
+            Err(_e) => {
                 // 返回一个未连接的客户端，后续可以重试
                 Ok(Self {
-                    grpc_client: None,
+                    grpc_client: Arc::new(Mutex::new(None)),
                     url: url.clone(),
                     network,
-                    is_connected: false,
+                    is_connected: Arc::new(AtomicBool::new(false)),
                 })
             }
         }
@@ -54,18 +53,23 @@ impl TondiGrpcClient {
 
     /// 检查连接状态，如果未连接则尝试重新连接
     async fn ensure_connected(&self) -> Result<()> {
-        if self.is_connected {
+        if self.is_connected.load(Ordering::Acquire) {
             return Ok(());
         }
 
-
         match GrpcClient::connect(self.url.clone()).await {
-            Ok(_grpc_client) => {
-
+            Ok(grpc_client) => {
+                // 更新连接状态和客户端
+                {
+                    let mut client_guard = self.grpc_client.lock().unwrap();
+                    *client_guard = Some(grpc_client);
+                }
+                self.is_connected.store(true, Ordering::Release);
+                println!("[TONDI GRPC] 重新连接成功");
                 Ok(())
             }
             Err(e) => {
-
+                println!("[TONDI GRPC] 重新连接失败: {}", e);
                 Err(Error::custom(format!("Failed to reconnect: {}", e)))
             }
         }
@@ -78,7 +82,7 @@ impl TondiGrpcClient {
 
     /// 检查客户端是否连接
     pub fn is_connected(&self) -> bool {
-        self.is_connected
+        self.is_connected.load(Ordering::Acquire)
     }
     
     /// 获取网络ID（如果可用）
@@ -97,14 +101,14 @@ impl TondiGrpcClient {
 impl RpcApi for TondiGrpcClient {
     async fn get_server_info(&self) -> RpcResult<GetServerInfoResponse> {
         // 尝试重新连接如果未连接
-        if !self.is_connected {
+        if !self.is_connected() {
             if let Err(e) = self.ensure_connected().await {
                 return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
             }
         }
 
         // 使用真实的gRPC客户端获取服务器信息
-        if let Some(_grpc_client) = &self.grpc_client {
+        if let Some(_grpc_client) = self.grpc_client.lock().unwrap().as_ref() {
             // 这里需要调用TONDI gRPC客户端的相应方法
             // 由于TONDI gRPC客户端没有直接实现RpcApi，我们需要适配
             // 暂时返回默认值，后续需要实现真正的调用
@@ -125,14 +129,14 @@ impl RpcApi for TondiGrpcClient {
 
     async fn get_connected_peer_info(&self) -> RpcResult<GetConnectedPeerInfoResponse> {
         // 尝试重新连接如果未连接
-        if !self.is_connected {
+        if !self.is_connected() {
             if let Err(e) = self.ensure_connected().await {
                 return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
             }
         }
 
         // 使用真实的gRPC客户端获取对等节点信息
-        if let Some(_grpc_client) = &self.grpc_client {
+        if let Some(_grpc_client) = self.grpc_client.lock().unwrap().as_ref() {
             // 暂时返回空列表，后续需要实现真正的调用
                 let response = GetConnectedPeerInfoResponse::new(vec![]);
                 Ok(response)
@@ -143,14 +147,19 @@ impl RpcApi for TondiGrpcClient {
 
     async fn get_block_count(&self) -> RpcResult<GetBlockCountResponse> {
         // 尝试重新连接如果未连接
-        if !self.is_connected {
+        if !self.is_connected() {
             if let Err(e) = self.ensure_connected().await {
                 return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
             }
         }
 
         // 使用真实的gRPC客户端获取区块数量
-        if let Some(grpc_client) = &self.grpc_client {
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
             println!("[TONDI GRPC] 使用真实的gRPC客户端获取block count");
             
             // 创建GetBlockCountRequest
@@ -174,14 +183,19 @@ impl RpcApi for TondiGrpcClient {
 
     async fn get_block_dag_info(&self) -> RpcResult<GetBlockDagInfoResponse> {
         // 尝试重新连接如果未连接
-        if !self.is_connected {
+        if !self.is_connected() {
             if let Err(e) = self.ensure_connected().await {
                 return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
             }
         }
 
         // 使用真实的gRPC客户端获取区块DAG信息
-        if let Some(grpc_client) = &self.grpc_client {
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
             println!("[TONDI GRPC] 使用真实的gRPC客户端获取block dag info");
             
             // 创建GetBlockDagInfoRequest
@@ -206,10 +220,10 @@ impl RpcApi for TondiGrpcClient {
     async fn get_metrics(&self, _include_process_metrics: bool, _include_connection_metrics: bool, _include_bandwidth_metrics: bool, _include_consensus_metrics: bool, _include_storage_metrics: bool, _include_custom_metrics: bool) -> RpcResult<GetMetricsResponse> {
         println!("[TONDI GRPC] get_metrics 被调用，参数: process={}, connection={}, bandwidth={}, consensus={}, storage={}, custom={}", 
             _include_process_metrics, _include_connection_metrics, _include_bandwidth_metrics, _include_consensus_metrics, _include_storage_metrics, _include_custom_metrics);
-        println!("[TONDI GRPC] 当前连接状态: is_connected={}", self.is_connected);
+        println!("[TONDI GRPC] 当前连接状态: is_connected={}", self.is_connected());
         println!("[TONDI GRPC] 当前URL: {}", self.url);
 
-        if !self.is_connected {
+        if !self.is_connected() {
             println!("[TONDI GRPC] 尝试重新连接...");
             if let Err(e) = self.ensure_connected().await {
                 println!("[TONDI GRPC] 重新连接失败: {}", e);
@@ -217,7 +231,12 @@ impl RpcApi for TondiGrpcClient {
             }
         }
 
-        if let Some(grpc_client) = &self.grpc_client {
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
             println!("[TONDI GRPC] 使用真实的gRPC客户端获取metrics");
             
             // 创建GetMetricsRequest

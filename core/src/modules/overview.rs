@@ -420,7 +420,7 @@ impl Overview {
 
         let mut metric_iter = METRICS.iter();
 
-        if let Some(snapshot) = core.metrics() {
+        if let Some(_snapshot) = core.metrics() {
             let view_width = ui.available_width();
 
             if view_width < 200. {
@@ -436,7 +436,32 @@ impl Overview {
                 ui.horizontal(|ui| {
                     for _ in 0..graph_columns {
                         if let Some(metric) = metric_iter.next() {
-                            let value = snapshot.get(metric);
+                            // 直接从metrics_data获取最新值，而不是从snapshot.get(metric)
+                            let value = {
+                                let metrics_data = self.runtime.metrics_service().metrics_data();
+                                if let Some(data) = metrics_data.get(metric) {
+                                    if let Some(latest) = data.last() {
+                                        let val = latest.y;
+                                        // 特别关注磁盘读取指标和CPU指标
+                                        if *metric == Metric::NodeDiskIoReadBytes || *metric == Metric::NodeDiskIoReadPerSec {
+                                            println!("[OVERVIEW] 磁盘读取指标 {} 的最新值: {} (数据点数: {})", metric.as_str(), val, data.len());
+                                        }
+                                        if *metric == Metric::NodeCpuUsage {
+                                            println!("[OVERVIEW] CPU指标 {} 的最新值: {}% (原始数据: {}, 数据点数: {})", metric.as_str(), val, val, data.len());
+                                            // 检查格式化后的显示
+                                            let formatted = metric.format(val, true, true);
+                                            println!("[OVERVIEW] CPU格式化后显示: '{}'", formatted);
+                                        }
+                                        val
+                                    } else {
+                                        println!("[OVERVIEW] 警告: metric {} 没有数据点", metric.as_str());
+                                        0.0
+                                    }
+                                } else {
+                                    println!("[OVERVIEW] 警告: metric {} 没有找到数据", metric.as_str());
+                                    0.0
+                                }
+                            };
                             self.render_graph(ui,  *metric, value);
                         } else {
                             draw = false;
@@ -584,8 +609,8 @@ const METRICS : &[Metric] = &[
     Metric::NodeResidentSetSizeBytes,
     // Metric::VirtualMemorySizeBytes,
     Metric::NodeFileHandlesCount,
-    Metric::NodeDiskIoReadBytes,
-    Metric::NodeDiskIoReadPerSec,
+    Metric::NodeDiskIoReadBytes,        // STOR READ (总字节数)
+    Metric::NodeDiskIoReadPerSec,      // STOR READ (每秒速度)
     Metric::NodeDiskIoWriteBytes,
     Metric::NodeDiskIoWritePerSec,
     // Metric::BorshLiveConnections,
