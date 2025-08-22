@@ -171,8 +171,8 @@ impl TondiService {
                 let resolver_or_none = match url {
                     Some(_) => None,
                     None => {
-                        if resolver_urls.is_none() {
-                            Some(Resolver::default())
+                        if resolver_urls.is_some() {
+                            Some(Resolver::new(Some(resolver_urls.clone().unwrap()), false))
                         } else {
                             Some(Resolver::new(resolver_urls.clone(), false))
                         }
@@ -428,17 +428,61 @@ impl TondiService {
 
             Ok(())
         } else {
-            self.wallet()
-                .connect_call(ConnectRequest {
-                    url: None,
-                    network_id: network.into(),
-                    retry_on_error: true,
-                    block_async_connect: false,
-                    require_sync: false,
-                })
-                .await?;
+            // 如果没有提供RPC，尝试使用gRPC配置创建客户端
+            cfg_if! {
+                if #[cfg(not(target_arch = "wasm32"))] {
+                    // 桌面版本：尝试使用gRPC配置
+                    let grpc_config = RpcConfig::Grpc {
+                        url: Some(NetworkInterfaceConfig::default()),
+                    };
+                                            match Self::create_rpc_client(&grpc_config, network).await {
+                            Ok(grpc_rpc) => {
+                                let rpc_api = grpc_rpc.rpc_api().clone();
+                                
+                                // 绑定gRPC客户端到钱包
+                                if let Some(wallet) = self.core_wallet() {
+                                    wallet.bind_rpc(Some(grpc_rpc)).await.unwrap();
+                                    wallet
+                                        .start()
+                                        .await
+                                        .expect("Unable to start wallet service");
+                                }
 
-            Ok(())
+                                // 为所有服务附加gRPC API
+                                for service in crate::runtime::runtime().services().into_iter() {
+                                    service.attach_rpc(&rpc_api).await?;
+                                }
+                                
+                                Ok(())
+                            }
+                        Err(_) => {
+                            // gRPC失败，回退到默认连接
+                            self.wallet()
+                                .connect_call(ConnectRequest {
+                                    url: None,
+                                    network_id: network.into(),
+                                    retry_on_error: true,
+                                    block_async_connect: false,
+                                    require_sync: false,
+                                })
+                                .await?;
+                            Ok(())
+                        }
+                    }
+                } else {
+                    // Web版本：使用默认连接
+                    self.wallet()
+                        .connect_call(ConnectRequest {
+                            url: None,
+                            network_id: network.into(),
+                            retry_on_error: true,
+                            block_async_connect: false,
+                            require_sync: false,
+                        })
+                        .await?;
+                    Ok(())
+                }
+            }
         }
     }
 
@@ -921,19 +965,21 @@ impl TondidServiceEvents {
     ) -> Result<Self> {
         cfg_if! {
             if #[cfg(not(target_arch = "wasm32"))] {
-
+                // 桌面版本：所有模式都使用gRPC配置
                 match &node_settings.node_kind {
                     TondidNodeKind::Disable => {
                         Ok(TondidServiceEvents::Disable { network : node_settings.network })
                     }
                     TondidNodeKind::IntegratedInProc => {
-                        // let config = ;
+                        // 对于集成模式，也使用gRPC配置
                         Ok(TondidServiceEvents::StartInternalInProc { config : Config::from(node_settings.clone()), network : node_settings.network })
                     }
                     TondidNodeKind::IntegratedAsDaemon => {
+                        // 对于集成守护进程模式，也使用gRPC配置
                         Ok(TondidServiceEvents::StartInternalAsDaemon { config : Config::from(node_settings.clone()), network : node_settings.network })
                     }
                     TondidNodeKind::IntegratedAsPassiveSync => {
+                        // 对于被动同步模式，也使用gRPC配置
                         Ok(TondidServiceEvents::StartInternalAsPassiveSync { config : Config::from(node_settings.clone()), network : node_settings.network })
                     }
                     TondidNodeKind::ExternalAsDaemon => {
@@ -941,18 +987,22 @@ impl TondidServiceEvents {
                         Ok(TondidServiceEvents::StartExternalAsDaemon { path : PathBuf::from(path), config : Config::from(node_settings.clone()), network : node_settings.network })
                     }
                     TondidNodeKind::Remote => {
+                        // 远程模式使用gRPC配置
                         Ok(TondidServiceEvents::StartRemoteConnection { rpc_config : RpcConfig::from_node_settings(node_settings,options), network : node_settings.network })
                     }
                 }
 
             } else {
-
+                // Web版本：只支持远程模式，使用wRPC配置
                 match &node_settings.node_kind {
                     TondidNodeKind::Disable => {
                         Ok(TondidServiceEvents::Disable { network : node_settings.network })
                     }
                     TondidNodeKind::Remote => {
-                        Ok(TondidServiceEvents::StartRemoteConnection { rpc_config : RpcConfig::from_node_settings(node_settings,options), network : node_settings.network })
+                        // Web版本强制使用wRPC
+                        let mut web_settings = node_settings.clone();
+                        web_settings.rpc_kind = RpcKind::Wrpc;
+                        Ok(TondidServiceEvents::StartRemoteConnection { rpc_config : RpcConfig::from_node_settings(&web_settings,options), network : node_settings.network })
                     }
                 }
             }

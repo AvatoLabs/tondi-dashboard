@@ -1022,19 +1022,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bp-tondi"
-version = "0.12.0-rc.3"
-dependencies = [
- "hex-literal",
- "log",
- "nill",
- "thiserror 2.0.16",
- "tokio",
- "tondi-grpc-client",
- "tondi-rpc-core",
-]
-
-[[package]]
 name = "bs58"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2871,12 +2858,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hex-literal"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcaaec4551594c969335c98c903c1397853d4198408ea609190f420500f6be71"
-
-[[package]]
 name = "hex_lit"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4144,12 +4125,6 @@ dependencies = [
  "serde",
  "syn 1.0.109",
 ]
-
-[[package]]
-name = "nill"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e3f812d8079eaf22bf04140165a0af9b4ad98af51328623a2056e07c83e0266"
 
 [[package]]
 name = "nix"
@@ -7181,7 +7156,6 @@ dependencies = [
  "ahash",
  "async-trait",
  "borsh",
- "bp-tondi",
  "cfg-if 1.0.3",
  "chrome-sys",
  "chrono",

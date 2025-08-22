@@ -409,7 +409,7 @@ impl Default for NodeSettings {
             enable_upnp: true,
             memory_scale: NodeMemoryScale::default(),
             network: Network::default(),
-            node_kind: TondidNodeKind::default(),
+            node_kind: TondidNodeKind::Remote,  // 改为Remote以使用我们的gRPC客户端
             tondid_daemon_binary: String::default(),
             tondid_daemon_args: String::default(),
             tondid_daemon_args_enable: false,

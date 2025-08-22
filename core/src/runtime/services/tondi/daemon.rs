@@ -74,7 +74,8 @@ impl super::Tondid for Daemon {
         let cmd = cmd
             .args(config)
             .env("TONDI_NG_DAEMON", "1")
-            .stdout(Stdio::piped());
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null()); // 重定向stderr到null，避免log4rs的broken pipe错误
 
         let is_running = self.inner().is_running.clone();
         is_running.store(true, Ordering::SeqCst);
@@ -124,9 +125,25 @@ impl super::Tondid for Daemon {
                     }
 
                     line = reader.next_line().fuse() => {
-                        if let Ok(Some(line)) = line {
-                            // println!("tondid: {}", line);
-                            stdout_relay_sender.send(TondidServiceEvents::Stdout { line }).await.unwrap();
+                        match line {
+                            Ok(Some(line)) => {
+                                // 过滤掉log4rs的Broken pipe错误，这些是正常的管道中断
+                                if !line.contains("log4rs: Broken pipe") {
+                                    // println!("tondid: {}", line);
+                                    if let Err(e) = stdout_relay_sender.send(TondidServiceEvents::Stdout { line }).await {
+                                        println!("Failed to send stdout event: {}", e);
+                                        break; // 如果无法发送事件，退出循环
+                                    }
+                                }
+                            }
+                            Ok(None) => {
+                                // stdout 已关闭
+                                break;
+                            }
+                            Err(e) => {
+                                println!("Error reading tondid stdout: {}", e);
+                                break;
+                            }
                         }
                     }
                 }

@@ -38,7 +38,6 @@ tondi-wallet-core.workspace = true
 tondi-wallet-keys.workspace = true
 tondi-wrpc-client.workspace = true
 tondi-txscript.workspace = true
-bp-tondi.workspace = true
 
 workflow-core.workspace = true
 workflow-i18n.workspace = true

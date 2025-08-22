@@ -62,8 +62,7 @@ tondi-wrpc-server =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs
 tondi-txscript =  { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
 tondid = { version = "0.17.0", git = "ssh://git@github.com/AvatoLabs/Tondi.git", branch = "taproot" }
 
-# bp-tondi-client dependency for gRPC support
-bp-tondi = { path = "/home/arthur/AvatoLabs/bp-tondi" }
+# bp-tondi dependency removed - using tondi-grpc-client instead
 
 # workflow dependencies
 workflow-core = "0.18.0"

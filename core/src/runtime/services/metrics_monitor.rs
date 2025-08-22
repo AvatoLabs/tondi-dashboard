@@ -67,11 +67,12 @@ impl MetricsService {
                     continue;
                 }
                 let y = snapshot.get(&metric);
-                let mut timestamp = timestamp - MAX_METRICS_SAMPLES as f64 * 1000.0;
+                // 使用当前时间戳作为基准，向前填充历史数据
+                // 每个数据点间隔1秒
+                let mut fill_timestamp = timestamp - (MAX_METRICS_SAMPLES - 1) as f64;
                 for _ in 0..(MAX_METRICS_SAMPLES - 1) {
-                    dest.push(PlotPoint { x: timestamp, y });
-
-                    timestamp += 1000.0;
+                    dest.push(PlotPoint { x: fill_timestamp, y });
+                    fill_timestamp += 1.0; // 1秒间隔
                 }
             }
             if dest.len() > MAX_METRICS_SAMPLES {
@@ -140,7 +141,7 @@ impl MetricsService {
                             // Convert RPC metrics to MetricsSnapshot
                             if let Some(consensus_metrics) = metrics_response.consensus_metrics {
                                 // Create simulated MetricsSnapshot
-                                let snapshot = this.create_metrics_snapshot_from_rpc(consensus_metrics);
+                                let snapshot = this.create_metrics_snapshot_from_rpc(consensus_metrics, metrics_response.connection_metrics);
                                 
                                 // Process metrics snapshot
                                 if let Err(err) = this.ingest_metrics_snapshot(Box::new(snapshot)) {
@@ -165,17 +166,17 @@ impl MetricsService {
     }
 
     /// Create MetricsSnapshot from RPC metrics
-    fn create_metrics_snapshot_from_rpc(&self, consensus_metrics: tondi_rpc_core::ConsensusMetrics) -> MetricsSnapshot {
+    fn create_metrics_snapshot_from_rpc(&self, consensus_metrics: tondi_rpc_core::ConsensusMetrics, connection_metrics: Option<tondi_rpc_core::ConnectionMetrics>) -> MetricsSnapshot {
         let now = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap_or_default()
-            .as_millis() as f64;
+            .as_secs() as f64; // 使用秒为单位，与egui_plot期望一致
         
         // Create complete MetricsSnapshot with all necessary fields
         let mut snapshot = MetricsSnapshot::default();
         
         // Basic time information
-        snapshot.unixtime_millis = now;
+        snapshot.unixtime_millis = now * 1000.0; // 转换为毫秒，保持与MetricsSnapshot的兼容性
         snapshot.duration_millis = 1000.0; // 1 second update interval
         
         // Network related metrics
@@ -195,8 +196,14 @@ impl MetricsService {
             0.0
         };
         
-        // Node activity metrics
-        snapshot.node_active_peers = consensus_metrics.network_mempool_size as f64;
+        // Node activity metrics - 使用connection_metrics中的active_peers来设置PEERS指标
+        if let Some(conn_metrics) = connection_metrics {
+            // PEERS指标：使用active_peers + borsh_live_connections + json_live_connections
+            snapshot.node_active_peers = (conn_metrics.active_peers + conn_metrics.borsh_live_connections + conn_metrics.json_live_connections) as f64;
+        } else {
+            // 如果没有connection_metrics，使用mempool_size作为fallback
+            snapshot.node_active_peers = consensus_metrics.network_mempool_size as f64;
+        }
         
         // Node processing statistics
         snapshot.node_blocks_submitted_count = consensus_metrics.node_blocks_submitted_count as f64;

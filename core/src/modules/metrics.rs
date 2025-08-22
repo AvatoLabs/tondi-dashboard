@@ -321,6 +321,7 @@ impl Metrics {
                                 }
                             })
                             .x_axis_formatter(move |grid, _range| {
+                                // 时间戳已经是毫秒，直接转换为秒
                                 DateTime::<chrono::Utc>::from_timestamp((grid.value / 1000.0) as i64, 0)
                                     .expect("could not parse timestamp")
                                     .with_timezone(&chrono::Local)
