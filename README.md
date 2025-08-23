@@ -1,174 +1,217 @@
 # Tondi Dashboard
 
-一个现代化的、功能丰富的Tondi区块链钱包和账户管理仪表板。使用Rust和WebAssembly构建，提供最佳性能和安全性。
+A modern, feature-rich Tondi blockchain wallet and account management dashboard. Built with Rust and WebAssembly for optimal performance and security.
 
-## 🚀 主要特性
+## 🚀 Key Features
 
-- **多平台支持**: Web应用、Chrome扩展和原生桌面应用
-- **钱包管理**: 创建、导入和管理Tondi钱包
-- **账户管理**: 支持BIP32派生的多账户系统
-- **交易工具**: 发送、接收和监控Tondi交易
-- **实时更新**: 实时区块链数据和钱包同步
-- **安全性**: 加密存储和安全密钥管理
-- **用户友好**: 基于egui框架构建的现代UI
-- **gRPC集成**: 与Tondi节点的gRPC通信支持
+- **Multi-platform Support**: Web application, Chrome extension, and native desktop app
+- **Wallet Management**: Create, import, and manage Tondi wallets
+- **Account Management**: Multi-account system with BIP32 derivation support
+- **Transaction Tools**: Send, receive, and monitor Tondi transactions
+- **Real-time Updates**: Live blockchain data and wallet synchronization
+- **Security**: Encrypted storage and secure key management
+- **User-friendly**: Modern UI built with egui framework
+- **gRPC Integration**: gRPC communication support with Tondi nodes
 
-## 🛠️ 技术栈
+## 🛠️ Technology Stack
 
-- **后端**: Rust 1.89+ with async/await
-- **前端**: WebAssembly (WASM) via egui 0.31.1
-- **区块链**: Tondi链集成 (v0.17.0)
-- **存储**: 本地加密存储
-- **网络**: gRPC客户端用于节点通信
-- **UI框架**: egui with eframe
-- **构建工具**: Trunk for WASM构建
+- **Backend**: Rust 1.89+ with async/await
+- **Frontend**: WebAssembly (WASM) via egui 0.31.1
+- **Blockchain**: Tondi chain integration (v0.17.0)
+- **Storage**: Local encrypted storage
+- **Network**: gRPC client for node communication
+- **UI Framework**: egui with eframe
+- **Build Tools**: Trunk for WASM builds
 
-## 📦 安装
+## 📦 Installation
 
-### 前置要求
+### Prerequisites
 
-- Rust 1.89+ 和 Cargo
-- Node.js 18+ (用于Web构建)
-- 本地或远程运行的Tondi节点
+- Rust 1.89+ and Cargo
+- Node.js 18+ (for web builds)
+- Local or remote Tondi node running
 
-### 从源码构建
+### Build from Source
 
 ```bash
-# 克隆仓库
+# Clone the repository
 git clone https://github.com/AvatoLabs/tondi-dashboard.git
 cd tondi-dashboard
 
-# 构建项目
+# Build the project
 cargo build --release
 
-# 构建Web应用
+# Build web application
 cd app
 trunk build
 
-# 构建Chrome扩展
+# Build Chrome extension
 cd ../extensions/chrome
 cargo build --target wasm32-unknown-unknown --release
 ```
 
-### 运行应用
+### Running the Application
 
 ```bash
-# 原生桌面应用
+# Native desktop application
 cargo run --bin tondi-dashboard
 
-# Web应用
+# Web application
 cd app
 trunk serve
 
-# Chrome扩展
-# 从 extensions/chrome/dist/ 目录加载扩展
+# Chrome extension
+# Load extension from extensions/chrome/dist/ directory
 ```
 
-## 🔧 配置
+## 🔧 Configuration
 
-仪表板通过gRPC连接到Tondi节点。在设置中配置您的节点连接：
+The dashboard connects to Tondi nodes via gRPC. Configure your node connection in settings:
 
-- **网络**: 主网或测试网
-- **节点URL**: 您的Tondi节点RPC端点
-- **连接类型**: 直接或代理连接
+- **Network**: Mainnet or testnet
+- **Node URL**: Your Tondi node RPC endpoint
+- **Connection Type**: Direct or proxy connection
 
-## 📱 使用方法
+## 📱 Usage
 
-### 创建钱包
+### Creating a Wallet
 
-1. 启动应用
-2. 点击"创建新钱包"
-3. 设置钱包名称和安全选项
-4. 生成或导入助记词短语
-5. 创建初始账户
+1. Launch the application
+2. Click "Create New Wallet"
+3. Set wallet name and security options
+4. Generate or import mnemonic phrase
+5. Create initial account
 
-### 管理账户
+### Managing Accounts
 
-- **创建账户**: 生成新的BIP32账户
-- **导入账户**: 通过助记词导入现有账户
-- **账户切换**: 在账户间无缝切换
-- **地址管理**: 根据需要生成新地址
+- **Create Account**: Generate new BIP32 accounts
+- **Import Account**: Import existing accounts via mnemonic
+- **Account Switching**: Seamlessly switch between accounts
+- **Address Management**: Generate new addresses as needed
 
-### 发送交易
+### Sending Transactions
 
-1. 选择源账户
-2. 输入接收方地址
-3. 指定金额和优先级费用
-4. 审查交易详情
-5. 确认并广播
+1. Select source account
+2. Enter recipient address
+3. Specify amount and priority fee
+4. Review transaction details
+5. Confirm and broadcast
 
-## 🏗️ 项目架构
+## 🏗️ Project Architecture
 
 ```
 tondi-dashboard/
-├── app/                    # Web应用
-├── core/                   # 核心框架
-│   ├── modules/           # 功能模块
-│   ├── runtime/           # 运行时服务
-│   └── utils/             # 工具函数
-├── extensions/            # 浏览器扩展
-│   └── chrome/           # Chrome扩展
-└── macros/               # 过程宏
+├── app/                    # Web application
+├── core/                   # Core framework
+│   ├── modules/           # Feature modules
+│   ├── runtime/           # Runtime services
+│   └── utils/             # Utility functions
+├── extensions/            # Browser extensions
+│   └── chrome/           # Chrome extension
+└── macros/               # Procedural macros
 ```
 
-## 🔒 安全特性
+## 🔒 Security Features
 
-- **加密存储**: 所有敏感数据在静态时加密
-- **安全密钥派生**: BIP32/BIP39兼容的密钥生成
-- **内存保护**: 安全的内存处理和零化
-- **网络安全**: 与节点的加密通信
+- **Encrypted Storage**: All sensitive data encrypted at rest
+- **Secure Key Derivation**: BIP32/BIP39 compatible key generation
+- **Memory Protection**: Secure memory handling and zeroing
+- **Network Security**: Encrypted communication with nodes
 
-## 🌐 网络支持
+## 🌐 Network Support
 
-- **主网**: 生产Tondi网络
-- **测试网**: 开发和测试网络
-- **自定义网络**: 支持自定义节点配置
+- **Mainnet**: Production Tondi network
+- **Testnet**: Development and testing network
+- **Custom Networks**: Support for custom node configurations
 
-## 📊 监控和分析
+## 📊 Monitoring and Analytics
 
-- **实时余额**: 实时账户余额更新
-- **交易历史**: 完整的交易记录
-- **网络状态**: 节点连接和同步状态
-- **性能指标**: 交易处理统计
+- **Real-time Balances**: Live account balance updates
+- **Transaction History**: Complete transaction records
+- **Network Status**: Node connection and sync status
+- **Performance Metrics**: Transaction processing statistics
 
-## 🧪 测试
+## 🧪 Testing
 
 ```bash
-# 运行测试
+# Run tests
 cargo test
 
-# 运行特定模块测试
+# Run specific module tests
 cargo test --package tondi-dashboard-core
 
-# 运行集成测试
+# Run integration tests
 cargo test --workspace
+
+# Run wallet endpoint tests
+cargo run --bin wallet_test_cli test
+
+# Run quick tests
+cargo run --bin wallet_test_cli quick
 ```
 
-## 🤝 贡献
+## 🔧 Wallet Endpoint Testing
 
-我们欢迎贡献！请查看我们的贡献指南了解详情。
+The project includes comprehensive wallet endpoint testing tools:
 
-### 开发设置
+### CLI Testing Tool
 
 ```bash
-# 安装开发依赖
+# Full wallet tests with custom configuration
+cargo run --bin wallet_test_cli test --wallet-name "my_test_wallet" --network testnet
+
+# Quick connectivity tests
+cargo run --bin wallet_test_cli quick
+
+# Help and options
+cargo run --bin wallet_test_cli --help
+```
+
+### Integration Tests
+
+The project includes a full suite of integration tests for wallet functionality:
+
+- **RPC Connection Tests**: Verify node connectivity
+- **Wallet Creation Tests**: Test wallet and account creation
+- **Balance Query Tests**: Verify balance retrieval
+- **Address Generation Tests**: Test address creation
+- **Transaction Estimation Tests**: Verify fee calculation
+- **Network Info Tests**: Test network data retrieval
+
+See `WALLET_ENDPOINT_TESTING_GUIDE.md` for detailed testing documentation.
+
+## 🤝 Contributing
+
+We welcome contributions! Please check our contribution guidelines for details.
+
+### Development Setup
+
+```bash
+# Install development dependencies
 cargo install trunk
 cargo install wasm-bindgen-cli
 
-# 运行测试
+# Run tests
 cargo test
 
-# 代码检查
+# Code checking
 cargo check
+
+# Fix warnings
+cargo clippy --fix
 ```
 
-## 📄 许可证
+## 📄 License
 
-本项目采用ISC许可证。详见 [LICENSE](LICENSE) 文件。
+This project is licensed under the ISC License. See the [LICENSE](LICENSE) file for details.
 
-## 🔗 相关链接
+## 🔗 Related Links
 
-- [Tondi项目](https://github.com/AvatoLabs/Tondi)
-- [egui框架](https://github.com/emilk/egui)
-- [Rust编程语言](https://www.rust-lang.org/)
+- [Tondi Project](https://github.com/AvatoLabs/Tondi)
+- [egui Framework](https://github.com/emilk/egui)
+- [Rust Programming Language](https://www.rust-lang.org/)
 
+## 📚 Documentation
+
+- [Wallet Endpoint Testing Guide](WALLET_ENDPOINT_TESTING_GUIDE.md)
+- [Tondi gRPC Implementation Summary](TONDI_GRPC_IMPLEMENTATION_SUMMARY.md)

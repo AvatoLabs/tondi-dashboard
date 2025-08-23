@@ -168,6 +168,7 @@ async fn run_wallet_tests(_config: TestConfig) -> Result<(), Box<dyn std::error:
     Ok(())
 }
 
+#[allow(dead_code)]
 async fn run_rpc_tests(_config: TestConfig) -> Result<(), Box<dyn std::error::Error>> {
     println!("Running RPC tests...");
     

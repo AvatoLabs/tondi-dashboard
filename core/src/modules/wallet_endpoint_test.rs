@@ -41,14 +41,17 @@ pub struct TestResult {
 
 #[derive(Clone)]
 pub struct WalletEndpointTest {
+    #[allow(dead_code)]
     runtime: Runtime,
     state: TestState,
+    #[allow(dead_code)]
     test_counter: Arc<AtomicU32>,
     test_results: Vec<TestResult>,
     
     // Test configurations
     test_wallet_name: String,
     test_password: String,
+    #[allow(dead_code)]
     test_mnemonic: Option<String>,
     test_address: String,
     test_amount: String,
@@ -75,6 +78,7 @@ impl WalletEndpointTest {
         }
     }
 
+    #[allow(dead_code)]
     fn get_next_test_id(&self) -> u32 {
         self.test_counter.fetch_add(1, Ordering::SeqCst)
     }
@@ -233,6 +237,7 @@ impl WalletEndpointTest {
     }
 
     // Test 6: Transaction Send (Dry Run)
+    #[allow(dead_code)]
     async fn test_transaction_send_dry_run(&self, account_id: AccountId) -> Result<String> {
         let wallet = runtime().wallet();
         let wallet_secret = Secret::new(self.test_password.as_bytes().to_vec());

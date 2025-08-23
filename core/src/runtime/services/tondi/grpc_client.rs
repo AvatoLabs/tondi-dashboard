@@ -6,7 +6,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use tondi_rpc_core::{
     GetMetricsResponse,
     GetServerInfoResponse, GetConnectedPeerInfoResponse, GetBlockCountResponse, GetBlockDagInfoResponse,
-    RpcNetworkId, RpcResult,
+    RpcResult,
 };
 use tondi_rpc_core::api::rpc::RpcApi;
 use tondi_consensus_core::api::BlockCount;
