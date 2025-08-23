@@ -32,10 +32,8 @@ pub mod storage;
 pub mod sync;
 pub mod utils;
 
-#[cfg(test)]
-mod tests;
-
 // Export tests module for integration testing
+#[cfg(test)]
 pub mod tests {
     pub mod wallet_endpoint_integration_tests;
 }

@@ -800,7 +800,7 @@ mod tests {
     #[tokio::test]
     async fn test_smart_repaint_merging() {
         let repaint_service = RepaintService::new(
-            ApplicationEventsChannel::new(),
+            ApplicationEventsChannel::unbounded(),
             &Settings::default(),
         );
 
@@ -822,7 +822,7 @@ mod tests {
     #[tokio::test]
     async fn test_batch_update() {
         let repaint_service = RepaintService::new(
-            ApplicationEventsChannel::new(),
+            ApplicationEventsChannel::unbounded(),
             &Settings::default(),
         );
 
@@ -839,7 +839,7 @@ mod tests {
     #[tokio::test]
     async fn test_priority_repaint() {
         let repaint_service = RepaintService::new(
-            ApplicationEventsChannel::new(),
+            ApplicationEventsChannel::unbounded(),
             &Settings::default(),
         );
 
@@ -859,7 +859,7 @@ mod tests {
     #[test]
     fn test_needs_repaint() {
         let repaint_service = RepaintService::new(
-            ApplicationEventsChannel::new(),
+            ApplicationEventsChannel::unbounded(),
             &Settings::default(),
         );
 
@@ -966,7 +966,7 @@ mod tests {
     #[test]
     fn test_repaint_stats() {
         let repaint_service = RepaintService::new(
-            ApplicationEventsChannel::new(),
+            ApplicationEventsChannel::unbounded(),
             &Settings::default(),
         );
         
@@ -987,7 +987,7 @@ mod tests {
     #[tokio::test]
     async fn test_integration_scenarios() {
         let repaint_service = RepaintService::new(
-            ApplicationEventsChannel::new(),
+            ApplicationEventsChannel::unbounded(),
             &Settings::default(),
         );
         

@@ -2,7 +2,8 @@
 // Command-line interface for testing wallet endpoints
 
 use clap::{Arg, Command};
-use tondi_dashboard_core::tests::wallet_endpoint_integration_tests::TestConfig;
+// TODO: Fix this import when tests module is properly exposed
+// use tondi_dashboard_core::tests::wallet_endpoint_integration_tests::TestConfig;
 use tondi_dashboard_core::network::Network;
 
 #[tokio::main]
@@ -84,53 +85,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     match matches.subcommand() {
         Some(("test", test_matches)) => {
-            let config = TestConfig {
-                wallet_name: test_matches.get_one::<String>("wallet-name")
-                    .unwrap_or(&"test_wallet".to_string())
-                    .clone(),
-                password: test_matches.get_one::<String>("password")
-                    .unwrap_or(&"test123456".to_string())
-                    .clone(),
-                test_address: test_matches.get_one::<String>("test-address")
-                    .unwrap_or(&"tondi:qzgyhexvcaasfdawmghcavhx0qxgpat7d2uxzx5k2k6dzalr2grs20j6hwrgtt".to_string())
-                    .clone(),
-                test_amount_tondi: test_matches.get_one::<String>("amount")
-                    .unwrap_or(&"0.01".to_string())
-                    .parse::<f64>()
-                    .unwrap_or(0.01),
-                network: parse_network(test_matches.get_one::<String>("network")
-                    .unwrap_or(&"testnet".to_string()))?,
-                timeout_seconds: test_matches.get_one::<String>("timeout")
-                    .unwrap_or(&"30".to_string())
-                    .parse::<u64>()
-                    .unwrap_or(30),
-            };
-
+            // TODO: Fix this when TestConfig is properly exposed
             println!("🚀 Starting Wallet Tests with configuration:");
-            println!("Wallet: {}", config.wallet_name);
-            println!("Network: {:?}", config.network);
-            println!("Test Address: {}", config.test_address);
-            println!("Test Amount: {} TONDI", config.test_amount_tondi);
-            println!("Timeout: {} seconds", config.timeout_seconds);
+            println!("Wallet: {}", test_matches.get_one::<String>("wallet-name").unwrap_or(&"test_wallet".to_string()));
+            println!("Network: testnet");
+            println!("Test Address: {}", test_matches.get_one::<String>("test-address").unwrap_or(&"tondi:qzgyhexvcaasfdawmghcavhx0qxgpat7d2uxzx5k2k6dzalr2grs20j6hwrgtt".to_string()));
+            println!("Test Amount: {} TONDI", test_matches.get_one::<String>("amount").unwrap_or(&"0.01".to_string()));
+            println!("Timeout: {} seconds", test_matches.get_one::<String>("timeout").unwrap_or(&"30".to_string()));
 
-            run_wallet_tests(config).await?;
+            run_wallet_tests().await?;
         }
         Some(("quick", quick_matches)) => {
-            let config = TestConfig {
-                wallet_name: quick_matches.get_one::<String>("wallet-name")
-                    .unwrap_or(&"quick_test_wallet".to_string())
-                    .clone(),
-                password: quick_matches.get_one::<String>("password")
-                    .unwrap_or(&"quick123456".to_string())
-                    .clone(),
-                test_address: "tondi:qzgyhexvcaasfdawmghcavhx0qxgpat7d2uxzx5k2k6dzalr2grs20j6hwrgtt".to_string(),
-                test_amount_tondi: 0.001,
-                network: Network::Testnet,
-                timeout_seconds: 10,
-            };
-
+            // TODO: Fix this when TestConfig is properly exposed
             println!("⚡ Starting Quick Tests");
-            run_quick_tests(config).await?;
+            println!("Wallet: {}", quick_matches.get_one::<String>("wallet-name").unwrap_or(&"quick_test_wallet".to_string()));
+            run_quick_tests().await?;
         }
         _ => {
             println!("Please specify a subcommand: 'test' or 'quick'");
@@ -150,7 +119,7 @@ fn parse_network(network_str: &str) -> Result<Network, Box<dyn std::error::Error
     }
 }
 
-async fn run_quick_tests(_config: TestConfig) -> Result<(), Box<dyn std::error::Error>> {
+async fn run_quick_tests() -> Result<(), Box<dyn std::error::Error>> {
     println!("Running quick tests...");
     
     // Quick tests implementation
@@ -159,7 +128,7 @@ async fn run_quick_tests(_config: TestConfig) -> Result<(), Box<dyn std::error::
     Ok(())
 }
 
-async fn run_wallet_tests(_config: TestConfig) -> Result<(), Box<dyn std::error::Error>> {
+async fn run_wallet_tests() -> Result<(), Box<dyn std::error::Error>> {
     println!("Running wallet tests...");
     
     // Wallet tests implementation
@@ -169,7 +138,7 @@ async fn run_wallet_tests(_config: TestConfig) -> Result<(), Box<dyn std::error:
 }
 
 #[allow(dead_code)]
-async fn run_rpc_tests(_config: TestConfig) -> Result<(), Box<dyn std::error::Error>> {
+async fn run_rpc_tests() -> Result<(), Box<dyn std::error::Error>> {
     println!("Running RPC tests...");
     
     // RPC tests implementation
