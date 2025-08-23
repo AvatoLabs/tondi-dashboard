@@ -17,6 +17,7 @@ tondi_dashboard_macros::register_modules!(
         settings,
         testing,
         wallet_create,
+        wallet_endpoint_test,
         wallet_open,
         wallet_secret,
         welcome,

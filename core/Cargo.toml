@@ -41,6 +41,10 @@ tondi-wallet-keys.workspace = true
 tondi-wrpc-client.workspace = true
 tondi-txscript.workspace = true
 
+# CLI testing dependencies
+clap = { version = "2.34", optional = true }
+tokio = { version = "1.0", features = ["full"], optional = true }
+
 workflow-core.workspace = true
 workflow-i18n.workspace = true
 workflow-dom.workspace = true

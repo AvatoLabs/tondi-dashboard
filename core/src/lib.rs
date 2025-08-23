@@ -34,3 +34,8 @@ pub mod utils;
 
 #[cfg(test)]
 mod tests;
+
+// Export tests module for integration testing
+pub mod tests {
+    pub mod wallet_endpoint_integration_tests;
+}

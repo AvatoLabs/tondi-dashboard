@@ -100,79 +100,96 @@ impl TondiGrpcClient {
 #[async_trait]
 impl RpcApi for TondiGrpcClient {
     async fn get_server_info(&self) -> RpcResult<GetServerInfoResponse> {
-        // 尝试重新连接如果未连接
+        // Ensure connection before making the call
         if !self.is_connected() {
             if let Err(e) = self.ensure_connected().await {
                 return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
             }
         }
 
-        // 使用真实的gRPC客户端获取服务器信息
-        if let Some(_grpc_client) = self.grpc_client.lock().unwrap().as_ref() {
-            // 这里需要调用TONDI gRPC客户端的相应方法
-            // 由于TONDI gRPC客户端没有直接实现RpcApi，我们需要适配
-            // 暂时返回默认值，后续需要实现真正的调用
-                        let response = GetServerInfoResponse {
-                            rpc_api_version: 1,
-                            rpc_api_revision: 1,
-                            server_version: "tondi-grpc-client".to_string(),
-                            network_id: RpcNetworkId::from(self.network),
-                            has_utxo_index: false,
-                            is_synced: false,
-                            virtual_daa_score: 0,
-                        };
-                        Ok(response)
-            } else {
-            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
-        }
-    }
-
-    async fn get_connected_peer_info(&self) -> RpcResult<GetConnectedPeerInfoResponse> {
-        // 尝试重新连接如果未连接
-        if !self.is_connected() {
-            if let Err(e) = self.ensure_connected().await {
-                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
-            }
-        }
-
-        // 使用真实的gRPC客户端获取对等节点信息
-        if let Some(_grpc_client) = self.grpc_client.lock().unwrap().as_ref() {
-            // 暂时返回空列表，后续需要实现真正的调用
-                let response = GetConnectedPeerInfoResponse::new(vec![]);
-                Ok(response)
-            } else {
-            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
-        }
-    }
-
-    async fn get_block_count(&self) -> RpcResult<GetBlockCountResponse> {
-        // 尝试重新连接如果未连接
-        if !self.is_connected() {
-            if let Err(e) = self.ensure_connected().await {
-                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
-            }
-        }
-
-        // 使用真实的gRPC客户端获取区块数量
         let grpc_client = {
             let client_guard = self.grpc_client.lock().unwrap();
             client_guard.clone()
         };
         
         if let Some(grpc_client) = grpc_client {
-            println!("[TONDI GRPC] 使用真实的gRPC客户端获取block count");
+            println!("[TONDI GRPC] Using real gRPC client to get server info");
             
-            // 创建GetBlockCountRequest
-            let request = tondi_rpc_core::GetBlockCountRequest {};
-            
-            // 调用真实的gRPC客户端
-            match grpc_client.get_block_count_call(None, request).await {
+            // Call the real gRPC client
+            match grpc_client.get_server_info_call(None, tondi_rpc_core::GetServerInfoRequest {}).await {
                 Ok(response) => {
-                    println!("[TONDI GRPC] 成功从远程节点获取block count: {:?}", response);
+                    println!("[TONDI GRPC] Successfully got server info from remote node: {:?}", response);
                     Ok(response)
                 }
                 Err(e) => {
-                    println!("[TONDI GRPC] 从远程节点获取block count失败: {}", e);
+                    println!("[TONDI GRPC] Failed to get server info from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get server info from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_connected_peer_info(&self) -> RpcResult<GetConnectedPeerInfoResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get connected peer info");
+            
+            // Call the real gRPC client
+            match grpc_client.get_connected_peer_info_call(None, tondi_rpc_core::GetConnectedPeerInfoRequest {}).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got connected peer info from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get connected peer info from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get connected peer info from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_block_count(&self) -> RpcResult<GetBlockCountResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get block count");
+            
+            // Create GetBlockCountRequest
+            let request = tondi_rpc_core::GetBlockCountRequest {};
+            
+            // Call the real gRPC client
+            match grpc_client.get_block_count_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got block count from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get block count from remote node: {}", e);
                     Err(tondi_rpc_core::RpcError::General(format!("Failed to get block count from remote node: {}", e)))
                 }
             }
@@ -182,34 +199,33 @@ impl RpcApi for TondiGrpcClient {
     }
 
     async fn get_block_dag_info(&self) -> RpcResult<GetBlockDagInfoResponse> {
-        // 尝试重新连接如果未连接
+        // Ensure connection before making the call
         if !self.is_connected() {
             if let Err(e) = self.ensure_connected().await {
                 return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
             }
         }
 
-        // 使用真实的gRPC客户端获取区块DAG信息
         let grpc_client = {
             let client_guard = self.grpc_client.lock().unwrap();
             client_guard.clone()
         };
         
         if let Some(grpc_client) = grpc_client {
-            println!("[TONDI GRPC] 使用真实的gRPC客户端获取block dag info");
+            println!("[TONDI GRPC] Using real gRPC client to get block DAG info");
             
-            // 创建GetBlockDagInfoRequest
+            // Create GetBlockDagInfoRequest
             let request = tondi_rpc_core::GetBlockDagInfoRequest {};
             
-            // 调用真实的gRPC客户端
+            // Call the real gRPC client
             match grpc_client.get_block_dag_info_call(None, request).await {
                 Ok(response) => {
-                    println!("[TONDI GRPC] 成功从远程节点获取block dag info: {:?}", response);
+                    println!("[TONDI GRPC] Successfully got block DAG info from remote node: {:?}", response);
                     Ok(response)
                 }
                 Err(e) => {
-                    println!("[TONDI GRPC] 从远程节点获取block dag info失败: {}", e);
-                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get block dag info from remote node: {}", e)))
+                    println!("[TONDI GRPC] Failed to get block DAG info from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get block DAG info from remote node: {}", e)))
                 }
             }
         } else {
@@ -218,15 +234,15 @@ impl RpcApi for TondiGrpcClient {
     }
 
     async fn get_metrics(&self, _include_process_metrics: bool, _include_connection_metrics: bool, _include_bandwidth_metrics: bool, _include_consensus_metrics: bool, _include_storage_metrics: bool, _include_custom_metrics: bool) -> RpcResult<GetMetricsResponse> {
-        println!("[TONDI GRPC] get_metrics 被调用，参数: process={}, connection={}, bandwidth={}, consensus={}, storage={}, custom={}", 
+        println!("[TONDI GRPC] get_metrics called with parameters: process={}, connection={}, bandwidth={}, consensus={}, storage={}, custom={}", 
             _include_process_metrics, _include_connection_metrics, _include_bandwidth_metrics, _include_consensus_metrics, _include_storage_metrics, _include_custom_metrics);
-        println!("[TONDI GRPC] 当前连接状态: is_connected={}", self.is_connected());
-        println!("[TONDI GRPC] 当前URL: {}", self.url);
+        println!("[TONDI GRPC] Current connection status: is_connected={}", self.is_connected());
+        println!("[TONDI GRPC] Current URL: {}", self.url);
 
         if !self.is_connected() {
-            println!("[TONDI GRPC] 尝试重新连接...");
+            println!("[TONDI GRPC] Attempting to reconnect...");
             if let Err(e) = self.ensure_connected().await {
-                println!("[TONDI GRPC] 重新连接失败: {}", e);
+                println!("[TONDI GRPC] Reconnection failed: {}", e);
                 return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
             }
         }
@@ -237,9 +253,9 @@ impl RpcApi for TondiGrpcClient {
         };
         
         if let Some(grpc_client) = grpc_client {
-            println!("[TONDI GRPC] 使用真实的gRPC客户端获取metrics");
+            println!("[TONDI GRPC] Using real gRPC client to get metrics");
             
-            // 创建GetMetricsRequest
+            // Create GetMetricsRequest
             let request = tondi_rpc_core::GetMetricsRequest {
                 process_metrics: _include_process_metrics,
                 connection_metrics: _include_connection_metrics,
@@ -249,20 +265,20 @@ impl RpcApi for TondiGrpcClient {
                 custom_metrics: _include_custom_metrics,
             };
             
-            // 调用真实的gRPC客户端
+            // Call the real gRPC client
             match grpc_client.get_metrics_call(None, request).await {
                 Ok(response) => {
-                    println!("[TONDI GRPC] 成功从远程节点获取metrics: {:?}", response);
+                    println!("[TONDI GRPC] Successfully got metrics from remote node: {:?}", response);
                     Ok(response)
                 }
                 Err(e) => {
-                    println!("[TONDI GRPC] 从远程节点获取metrics失败: {}", e);
-                    // 如果远程调用失败，返回错误而不是硬编码的0值
+                    println!("[TONDI GRPC] Failed to get metrics from remote node: {}", e);
+                    // Return error instead of hardcoded 0 values if remote call fails
                     Err(tondi_rpc_core::RpcError::General(format!("Failed to get metrics from remote node: {}", e)))
                 }
             }
         } else {
-            println!("[TONDI GRPC] 没有可用的gRPC客户端");
+            println!("[TONDI GRPC] No gRPC client available");
             Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
         }
     }
@@ -272,219 +288,1285 @@ impl RpcApi for TondiGrpcClient {
         Ok(tondi_rpc_core::PingResponse {})
     }
 
-    async fn get_system_info_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetSystemInfoRequest) -> RpcResult<tondi_rpc_core::GetSystemInfoResponse> {
-        let response = tondi_rpc_core::GetSystemInfoResponse {
-                    version: "tondi-grpc-client".to_string(),
-                    system_id: Some(b"tondi-grpc".to_vec()),
-                    git_hash: None,
-                    total_memory: 0,
-                    cpu_physical_cores: 0,
-                    fd_limit: 0,
-                    proxy_socket_limit_per_cpu_core: Some(0),
-                        };
-                        Ok(response)
+    async fn get_system_info_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetSystemInfoRequest) -> RpcResult<tondi_rpc_core::GetSystemInfoResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get system info");
+            
+            // Call the real gRPC client
+            match grpc_client.get_system_info_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got system info from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get system info from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get system info from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
     async fn get_connections_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetConnectionsRequest) -> RpcResult<tondi_rpc_core::GetConnectionsResponse> {
-        let response = tondi_rpc_core::GetConnectionsResponse {
-            clients: 0,
-            peers: 0,
-                    profile_data: if request.include_profile_data {
-                Some(tondi_rpc_core::ConnectionsProfileData {
-                            cpu_usage: 0.0,
-                            memory_usage: 0,
-                        })
-                    } else {
-                        None
-                    }
-                };
-                Ok(response)
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get connections");
+            
+            // Call the real gRPC client
+            match grpc_client.get_connections_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got connections from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get connections from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get connections from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
     // 其他方法返回默认值或错误
-    async fn get_metrics_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetMetricsRequest) -> RpcResult<GetMetricsResponse> {
-        self.get_metrics(true, true, true, true, true, true).await
-    }
+    async fn get_metrics_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetMetricsRequest) -> RpcResult<GetMetricsResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
 
-    async fn get_server_info_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetServerInfoRequest) -> RpcResult<GetServerInfoResponse> {
-        self.get_server_info().await
-    }
-
-    async fn get_sync_status_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetSyncStatusRequest) -> RpcResult<tondi_rpc_core::GetSyncStatusResponse> {
-        let response = tondi_rpc_core::GetSyncStatusResponse {
-            is_synced: false,
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
         };
-        Ok(response)
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get metrics");
+            
+            // Call the real gRPC client
+            match grpc_client.get_metrics_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got metrics from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get metrics from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get metrics from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
-    async fn get_current_network_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetCurrentNetworkRequest) -> RpcResult<tondi_rpc_core::GetCurrentNetworkResponse> {
-        let response = tondi_rpc_core::GetCurrentNetworkResponse {
-            network: tondi_rpc_core::RpcNetworkType::Mainnet,
-                };
-                Ok(response)
-    }
+    async fn get_server_info_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetServerInfoRequest) -> RpcResult<GetServerInfoResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
 
-    async fn submit_block_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::SubmitBlockRequest) -> RpcResult<tondi_rpc_core::SubmitBlockResponse> {
-        let response = tondi_rpc_core::SubmitBlockResponse {
-            report: tondi_rpc_core::SubmitBlockReport::Success,
-                };
-                Ok(response)
-    }
-
-    async fn get_block_template_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetBlockTemplateRequest) -> RpcResult<tondi_rpc_core::GetBlockTemplateResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_block_template_call尚未实现".to_string()))
-    }
-
-    async fn get_peer_addresses_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetPeerAddressesRequest) -> RpcResult<tondi_rpc_core::GetPeerAddressesResponse> {
-        let response = tondi_rpc_core::GetPeerAddressesResponse {
-                    known_addresses: vec![],
-                    banned_addresses: vec![],
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
         };
-        Ok(response)
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get server info");
+            
+            // Call the real gRPC client
+            match grpc_client.get_server_info_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got server info from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get server info from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get server info from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
-    async fn get_sink_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetSinkRequest) -> RpcResult<tondi_rpc_core::GetSinkResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_sink_call尚未实现".to_string()))
-    }
+    async fn get_sync_status_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetSyncStatusRequest) -> RpcResult<tondi_rpc_core::GetSyncStatusResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
 
-    async fn get_mempool_entry_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetMempoolEntryRequest) -> RpcResult<tondi_rpc_core::GetMempoolEntryResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_mempool_entry_call尚未实现".to_string()))
-    }
-
-    async fn get_mempool_entries_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetMempoolEntriesRequest) -> RpcResult<tondi_rpc_core::GetMempoolEntriesResponse> {
-        let response = tondi_rpc_core::GetMempoolEntriesResponse {
-                    mempool_entries: vec![],
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
         };
-        Ok(response)
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get sync status");
+            
+            // Call the real gRPC client
+            match grpc_client.get_sync_status_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got sync status from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get sync status from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get sync status from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
-    async fn get_connected_peer_info_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetConnectedPeerInfoRequest) -> RpcResult<GetConnectedPeerInfoResponse> {
-        self.get_connected_peer_info().await
-    }
+    async fn get_current_network_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetCurrentNetworkRequest) -> RpcResult<tondi_rpc_core::GetCurrentNetworkResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
 
-    async fn add_peer_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::AddPeerRequest) -> RpcResult<tondi_rpc_core::AddPeerResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC add_peer_call尚未实现".to_string()))
-    }
-
-    async fn submit_transaction_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::SubmitTransactionRequest) -> RpcResult<tondi_rpc_core::SubmitTransactionResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC submit_transaction_call尚未实现".to_string()))
-    }
-
-    async fn submit_transaction_replacement_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::SubmitTransactionReplacementRequest) -> RpcResult<tondi_rpc_core::SubmitTransactionReplacementResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC submit_transaction_replacement_call尚未实现".to_string()))
-    }
-
-    async fn get_block_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetBlockRequest) -> RpcResult<tondi_rpc_core::GetBlockResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_block_call尚未实现".to_string()))
-    }
-
-    async fn get_subnetwork_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetSubnetworkRequest) -> RpcResult<tondi_rpc_core::GetSubnetworkResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_subnetwork_call尚未实现".to_string()))
-    }
-
-    async fn get_virtual_chain_from_block_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetVirtualChainFromBlockRequest) -> RpcResult<tondi_rpc_core::GetVirtualChainFromBlockResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_virtual_chain_from_block_call尚未实现".to_string()))
-    }
-
-    async fn get_blocks_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetBlocksRequest) -> RpcResult<tondi_rpc_core::GetBlocksResponse> {
-        let response = tondi_rpc_core::GetBlocksResponse {
-            block_hashes: vec![],
-            blocks: vec![],
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
         };
-        Ok(response)
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get current network");
+            
+            // Call the real gRPC client
+            match grpc_client.get_current_network_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got current network from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get current network from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get current network from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
-    async fn get_block_count_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetBlockCountRequest) -> RpcResult<BlockCount> {
-        let response = BlockCount {
-            header_count: 0,
-            block_count: 0,
+    async fn submit_block_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::SubmitBlockRequest) -> RpcResult<tondi_rpc_core::SubmitBlockResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
         };
-        Ok(response)
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to submit block");
+            
+            // Call the real gRPC client
+            match grpc_client.submit_block_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully submitted block to remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to submit block to remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to submit block to remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
-    async fn get_block_dag_info_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetBlockDagInfoRequest) -> RpcResult<GetBlockDagInfoResponse> {
-        self.get_block_dag_info().await
-    }
+    async fn get_block_template_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetBlockTemplateRequest) -> RpcResult<tondi_rpc_core::GetBlockTemplateResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
 
-    async fn resolve_finality_conflict_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::ResolveFinalityConflictRequest) -> RpcResult<tondi_rpc_core::ResolveFinalityConflictResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC resolve_finality_conflict_call尚未实现".to_string()))
-    }
-
-    async fn shutdown_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::ShutdownRequest) -> RpcResult<tondi_rpc_core::ShutdownResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC shutdown_call尚未实现".to_string()))
-    }
-
-    async fn get_headers_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetHeadersRequest) -> RpcResult<tondi_rpc_core::GetHeadersResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_headers_call尚未实现".to_string()))
-    }
-
-    async fn get_balance_by_address_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetBalanceByAddressRequest) -> RpcResult<tondi_rpc_core::GetBalanceByAddressResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_balance_by_address_call尚未实现".to_string()))
-    }
-
-    async fn get_balances_by_addresses_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetBalancesByAddressesRequest) -> RpcResult<tondi_rpc_core::GetBalancesByAddressesResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_balances_by_addresses_call尚未实现".to_string()))
-    }
-
-    async fn get_utxos_by_addresses_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetUtxosByAddressesRequest) -> RpcResult<tondi_rpc_core::GetUtxosByAddressesResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_utxos_by_addresses_call尚未实现".to_string()))
-    }
-
-    async fn get_sink_blue_score_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetSinkBlueScoreRequest) -> RpcResult<tondi_rpc_core::GetSinkBlueScoreResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_sink_blue_score_call尚未实现".to_string()))
-    }
-
-    async fn ban_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::BanRequest) -> RpcResult<tondi_rpc_core::BanResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC ban_call尚未实现".to_string()))
-    }
-
-    async fn unban_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::UnbanRequest) -> RpcResult<tondi_rpc_core::UnbanResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC unban_call尚未实现".to_string()))
-    }
-
-    async fn get_info_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetInfoRequest) -> RpcResult<tondi_rpc_core::GetInfoResponse> {
-        let response = tondi_rpc_core::GetInfoResponse {
-            p2p_id: "tondi-grpc-client".to_string(),
-            mempool_size: 0,
-            server_version: "1.0.0".to_string(),
-            has_message_id: true,
-            has_notify_command: true,
-            is_synced: false,
-            is_utxo_indexed: false,
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
         };
-        Ok(response)
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get block template");
+            
+            // Call the real gRPC client
+            match grpc_client.get_block_template_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got block template from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get block template from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get block template from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
-    async fn estimate_network_hashes_per_second_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::EstimateNetworkHashesPerSecondRequest) -> RpcResult<tondi_rpc_core::EstimateNetworkHashesPerSecondResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC estimate_network_hashes_per_second_call尚未实现".to_string()))
+    async fn get_peer_addresses_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetPeerAddressesRequest) -> RpcResult<tondi_rpc_core::GetPeerAddressesResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get peer addresses");
+            
+            // Call the real gRPC client
+            match grpc_client.get_peer_addresses_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got peer addresses from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get peer addresses from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get peer addresses from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
-    async fn get_mempool_entries_by_addresses_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetMempoolEntriesByAddressesRequest) -> RpcResult<tondi_rpc_core::GetMempoolEntriesByAddressesResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_mempool_entries_by_addresses_call尚未实现".to_string()))
+    async fn get_sink_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetSinkRequest) -> RpcResult<tondi_rpc_core::GetSinkResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get sink");
+            
+            // Call the real gRPC client
+            match grpc_client.get_sink_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got sink from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get sink from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get sink from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
-    async fn get_coin_supply_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetCoinSupplyRequest) -> RpcResult<tondi_rpc_core::GetCoinSupplyResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_coin_supply_call尚未实现".to_string()))
+    async fn get_mempool_entry_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetMempoolEntryRequest) -> RpcResult<tondi_rpc_core::GetMempoolEntryResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get mempool entry");
+            
+            // Call the real gRPC client
+            match grpc_client.get_mempool_entry_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got mempool entry from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get mempool entry from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get mempool entry from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
-    async fn get_daa_score_timestamp_estimate_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetDaaScoreTimestampEstimateRequest) -> RpcResult<tondi_rpc_core::GetDaaScoreTimestampEstimateResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_daa_score_timestamp_estimate_call尚未实现".to_string()))
+    async fn get_mempool_entries_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetMempoolEntriesRequest) -> RpcResult<tondi_rpc_core::GetMempoolEntriesResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get mempool entries");
+            
+            // Call the real gRPC client
+            match grpc_client.get_mempool_entries_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got mempool entries from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get mempool entries from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get mempool entries from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
-    async fn get_utxo_return_address_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetUtxoReturnAddressRequest) -> RpcResult<tondi_rpc_core::GetUtxoReturnAddressResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_utxo_return_address_call尚未实现".to_string()))
+    async fn get_connected_peer_info_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetConnectedPeerInfoRequest) -> RpcResult<GetConnectedPeerInfoResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get connected peer info");
+            
+            // Call the real gRPC client
+            match grpc_client.get_connected_peer_info_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got connected peer info from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get connected peer info from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get connected peer info from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
-    async fn get_fee_estimate_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetFeeEstimateRequest) -> RpcResult<tondi_rpc_core::GetFeeEstimateResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_fee_estimate_call尚未实现".to_string()))
+    async fn add_peer_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::AddPeerRequest) -> RpcResult<tondi_rpc_core::AddPeerResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to add peer");
+            
+            // Call the real gRPC client
+            match grpc_client.add_peer_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully added peer to remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to add peer to remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to add peer to remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
-    async fn get_fee_estimate_experimental_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetFeeEstimateExperimentalRequest) -> RpcResult<tondi_rpc_core::GetFeeEstimateExperimentalResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_fee_estimate_experimental_call尚未实现".to_string()))
+    async fn submit_transaction_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::SubmitTransactionRequest) -> RpcResult<tondi_rpc_core::SubmitTransactionResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to submit transaction");
+            
+            // Call the real gRPC client
+            match grpc_client.submit_transaction_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully submitted transaction to remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to submit transaction to remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to submit transaction to remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
-    async fn get_current_block_color_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, _request: tondi_rpc_core::GetCurrentBlockColorRequest) -> RpcResult<tondi_rpc_core::GetCurrentBlockColorResponse> {
-        Err(tondi_rpc_core::RpcError::General("gRPC get_current_block_color_call尚未实现".to_string()))
+    async fn submit_transaction_replacement_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::SubmitTransactionReplacementRequest) -> RpcResult<tondi_rpc_core::SubmitTransactionReplacementResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to submit transaction replacement");
+            
+            // Call the real gRPC client
+            match grpc_client.submit_transaction_replacement_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully submitted transaction replacement to remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to submit transaction replacement to remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to submit transaction replacement to remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_block_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetBlockRequest) -> RpcResult<tondi_rpc_core::GetBlockResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get block");
+            
+            // Call the real gRPC client
+            match grpc_client.get_block_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got block from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get block from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get block from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_subnetwork_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetSubnetworkRequest) -> RpcResult<tondi_rpc_core::GetSubnetworkResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get subnetwork");
+            
+            // Call the real gRPC client
+            match grpc_client.get_subnetwork_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got subnetwork from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get subnetwork from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get subnetwork from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_virtual_chain_from_block_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetVirtualChainFromBlockRequest) -> RpcResult<tondi_rpc_core::GetVirtualChainFromBlockResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get virtual chain from block");
+            
+            // Call the real gRPC client
+            match grpc_client.get_virtual_chain_from_block_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got virtual chain from block from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get virtual chain from block from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get virtual chain from block from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_blocks_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetBlocksRequest) -> RpcResult<tondi_rpc_core::GetBlocksResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get blocks");
+            
+            // Call the real gRPC client
+            match grpc_client.get_blocks_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got blocks from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get blocks from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get blocks from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_block_count_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetBlockCountRequest) -> RpcResult<BlockCount> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get block count");
+            
+            // Call the real gRPC client
+            match grpc_client.get_block_count_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got block count from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get block count from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get block count from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_block_dag_info_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetBlockDagInfoRequest) -> RpcResult<GetBlockDagInfoResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get block DAG info");
+            
+            // Call the real gRPC client
+            match grpc_client.get_block_dag_info_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got block DAG info from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get block DAG info from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get block DAG info from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn resolve_finality_conflict_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::ResolveFinalityConflictRequest) -> RpcResult<tondi_rpc_core::ResolveFinalityConflictResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to resolve finality conflict");
+            
+            // Call the real gRPC client
+            match grpc_client.resolve_finality_conflict_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully resolved finality conflict on remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to resolve finality conflict on remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to resolve finality conflict on remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn shutdown_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::ShutdownRequest) -> RpcResult<tondi_rpc_core::ShutdownResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to shutdown");
+            
+            // Call the real gRPC client
+            match grpc_client.shutdown_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully initiated shutdown on remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to initiate shutdown on remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to initiate shutdown on remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_headers_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetHeadersRequest) -> RpcResult<tondi_rpc_core::GetHeadersResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get headers");
+            
+            // Call the real gRPC client
+            match grpc_client.get_headers_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got headers from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get headers from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get headers from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_balance_by_address_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetBalanceByAddressRequest) -> RpcResult<tondi_rpc_core::GetBalanceByAddressResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get balance by address");
+            
+            // Call the real gRPC client
+            match grpc_client.get_balance_by_address_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got balance from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get balance from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get balance from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_balances_by_addresses_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetBalancesByAddressesRequest) -> RpcResult<tondi_rpc_core::GetBalancesByAddressesResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get balances by addresses");
+            
+            // Call the real gRPC client
+            match grpc_client.get_balances_by_addresses_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got balances from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get balances from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get balances from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_utxos_by_addresses_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetUtxosByAddressesRequest) -> RpcResult<tondi_rpc_core::GetUtxosByAddressesResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get UTXOs by addresses");
+            
+            // Call the real gRPC client
+            match grpc_client.get_utxos_by_addresses_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got UTXOs from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get UTXOs from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get UTXOs from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_sink_blue_score_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetSinkBlueScoreRequest) -> RpcResult<tondi_rpc_core::GetSinkBlueScoreResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get sink blue score");
+            
+            // Call the real gRPC client
+            match grpc_client.get_sink_blue_score_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got sink blue score from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get sink blue score from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get sink blue score from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn ban_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::BanRequest) -> RpcResult<tondi_rpc_core::BanResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to ban peer");
+            
+            // Call the real gRPC client
+            match grpc_client.ban_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully banned peer on remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to ban peer on remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to ban peer on remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn unban_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::UnbanRequest) -> RpcResult<tondi_rpc_core::UnbanResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to unban peer");
+            
+            // Call the real gRPC client
+            match grpc_client.unban_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully unbanned peer on remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to unban peer on remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to unban peer on remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_info_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetInfoRequest) -> RpcResult<tondi_rpc_core::GetInfoResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get info");
+            
+            // Call the real gRPC client
+            match grpc_client.get_info_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got info from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get info from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get info from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn estimate_network_hashes_per_second_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::EstimateNetworkHashesPerSecondRequest) -> RpcResult<tondi_rpc_core::EstimateNetworkHashesPerSecondResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to estimate network hashes per second");
+            
+            // Call the real gRPC client
+            match grpc_client.estimate_network_hashes_per_second_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got network hashes per second estimate from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get network hashes per second estimate from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get network hashes per second estimate from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_mempool_entries_by_addresses_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetMempoolEntriesByAddressesRequest) -> RpcResult<tondi_rpc_core::GetMempoolEntriesByAddressesResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get mempool entries by addresses");
+            
+            // Call the real gRPC client
+            match grpc_client.get_mempool_entries_by_addresses_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got mempool entries from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get mempool entries from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get mempool entries from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_coin_supply_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetCoinSupplyRequest) -> RpcResult<tondi_rpc_core::GetCoinSupplyResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get coin supply");
+            
+            // Call the real gRPC client
+            match grpc_client.get_coin_supply_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got coin supply from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get coin supply from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get coin supply from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_daa_score_timestamp_estimate_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetDaaScoreTimestampEstimateRequest) -> RpcResult<tondi_rpc_core::GetDaaScoreTimestampEstimateResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get DAA score timestamp estimate");
+            
+            // Call the real gRPC client
+            match grpc_client.get_daa_score_timestamp_estimate_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got DAA score timestamp estimate from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get DAA score timestamp estimate from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get DAA score timestamp estimate from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_utxo_return_address_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetUtxoReturnAddressRequest) -> RpcResult<tondi_rpc_core::GetUtxoReturnAddressResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get UTXO return address");
+            
+            // Call the real gRPC client
+            match grpc_client.get_utxo_return_address_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got UTXO return address from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get UTXO return address from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get UTXO return address from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_fee_estimate_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetFeeEstimateRequest) -> RpcResult<tondi_rpc_core::GetFeeEstimateResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get fee estimate");
+            
+            // Call the real gRPC client
+            match grpc_client.get_fee_estimate_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got fee estimate from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get fee estimate from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get fee estimate from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_fee_estimate_experimental_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetFeeEstimateExperimentalRequest) -> RpcResult<tondi_rpc_core::GetFeeEstimateExperimentalResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get experimental fee estimate");
+            
+            // Call the real gRPC client
+            match grpc_client.get_fee_estimate_experimental_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got experimental fee estimate from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get experimental fee estimate from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get experimental fee estimate from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
+    }
+
+    async fn get_current_block_color_call(&self, _connection: Option<&tondi_rpc_core::api::connection::DynRpcConnection>, request: tondi_rpc_core::GetCurrentBlockColorRequest) -> RpcResult<tondi_rpc_core::GetCurrentBlockColorResponse> {
+        // Ensure connection before making the call
+        if !self.is_connected() {
+            if let Err(e) = self.ensure_connected().await {
+                return Err(tondi_rpc_core::RpcError::General(format!("Not connected: {}", e)));
+            }
+        }
+
+        let grpc_client = {
+            let client_guard = self.grpc_client.lock().unwrap();
+            client_guard.clone()
+        };
+        
+        if let Some(grpc_client) = grpc_client {
+            println!("[TONDI GRPC] Using real gRPC client to get current block color");
+            
+            // Call the real gRPC client
+            match grpc_client.get_current_block_color_call(None, request).await {
+                Ok(response) => {
+                    println!("[TONDI GRPC] Successfully got current block color from remote node: {:?}", response);
+                    Ok(response)
+                }
+                Err(e) => {
+                    println!("[TONDI GRPC] Failed to get current block color from remote node: {}", e);
+                    Err(tondi_rpc_core::RpcError::General(format!("Failed to get current block color from remote node: {}", e)))
+                }
+            }
+        } else {
+            Err(tondi_rpc_core::RpcError::General("No gRPC client available".to_string()))
+        }
     }
 
     fn register_new_listener(&self, _connection: tondi_rpc_core::notify::connection::ChannelConnection) -> u64 {
